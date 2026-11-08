@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -426,16 +426,19 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,v
 @media print{header,.bar,.kpis,.toast,nav,.btn,.skip{display:none!important}body{background:#fff!important;color:#000!important}.card,.col{box-shadow:none!important;break-inside:avoid}.stk{position:static;box-shadow:none}}
 /* ===== Menu lateral de medições ===== */
 .shell{flex:1;display:flex;min-width:0}
-.shell>main{flex:1;min-width:0}
-.msb{flex:0 0 240px;width:240px;align-self:flex-start;padding:10px 4px 24px 24px}
+.shell>main{flex:1;min-width:0;border-left:1px solid var(--line)}
+.msb{flex:0 0 240px;width:240px;align-self:flex-start;padding:10px 16px 24px 24px}
 .msh{margin:0 0 10px;font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
 .msh em{font-style:normal;font-size:12px;font-weight:600;background:var(--ov);border-radius:99px;padding:0 9px}
 .msl{display:flex;flex-direction:column;gap:10px}
 .mdc{display:flex;flex-direction:column;gap:4px;background:var(--s1);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:10px 12px}
 .mdn{font-weight:700;font-size:15px;line-height:1.3;overflow-wrap:anywhere}
+.mdh{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;min-height:28px;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.mdg{color:var(--mu);flex:none}
+.mdb{display:none;flex-direction:column;gap:4px;margin-top:6px}.mdc.open .mdb{display:flex}
 .mdr{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--mu)}.mdr b{color:var(--tx);font-weight:700}
 .mdp{border-top:1px dashed var(--line);padding-top:5px;margin-top:2px}
-.mdc.late{border-color:var(--bad);border-left-color:var(--bad)}.mdc.late .mdp,.mdc.late .mdp b{color:var(--bad)}
+.mdc.late{border-color:var(--bad);border-left-color:var(--c)}.mdc.late .mdp,.mdc.late .mdp b{color:var(--bad)}
 @media(min-width:761px){.msb{position:sticky;top:var(--hh,190px);max-height:calc(100vh/var(--z,1) - var(--hh,190px));overflow-y:auto}}
 @media(max-width:760px){.shell{flex-direction:column}.msb{flex:none;width:100%;padding:8px 14px 0}.msl{flex-direction:row;overflow-x:auto;padding-bottom:6px}.mdc{flex:0 0 210px}}
 @media print{.msb{display:none}}
@@ -464,7 +467,7 @@ const fmt=d=>d?d.split('-').reverse().join('/'):'—';
 const today=()=>new Date().toISOString().slice(0,10);
 const srt=a=>[...a].sort((x,y)=>(x.final||'9999').localeCompare(y.final||'9999'));
 /* ===== SUPABASE: preencha a URL e a chave (anon / publishable) do seu projeto. Vazio = modo local ===== */
-const SB={url:'https://pvpsmephuvjcenheecck.supabase.co',key:'sb_publishable_LmnDxCOjueSDpWo_4naLlg_6eoBFDLN',ok:false,busy:false,get on(){return !!(this.url&&this.key)}};
+const SB={url:'',key:'',ok:false,busy:false,get on(){return !!(this.url&&this.key)}};
 const TB=[['tasks','fx_tarefas'],['tipos','fx_tipos'],['campos','fx_campos'],['contatos','fx_contatos'],['medicoes','fx_medicoes']];
 let LAST={},ANIM=true;
 const sbH=()=>({apikey:SB.key,...(SB.key.startsWith('eyJ')?{Authorization:'Bearer '+SB.key}:{}),'Content-Type':'application/json'});
@@ -524,7 +527,7 @@ const titulo=()=>{const n=vez().length;document.title=(n?`(${n}) `:'')+'Fluxo ·
 const vis=t=>isAdm()||t.fluxo.some(mine);
 const NAV=[['painel','Todas as tarefas'],['tarefa','Por tarefa'],['equipe','Por funcionário'],['cap','Capacidade'],['admin','Administração'],['guia','Passo a passo']];
 const allowed=v=>isAdm()||v==='painel';
-let USR=null;
+let USR=null;const MX=new Set();
 async function rpc(fn,args){const r=await fetch(sbU('rpc/'+fn),{method:'POST',headers:sbH(),body:JSON.stringify(args)}),t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
   if(!r.ok)throw new Error((j&&j.message)||'Erro '+r.status);return j}
 async function loadUsr(){try{USR=await rpc('fx_usuarios_listar',{p_token:ME.tk})}catch(e){USR=[];toast('Não foi possível carregar os usuários: '+e.message)}if(view==='admin'&&adminSec==='usr')render()}
@@ -547,10 +550,10 @@ function loginScreen(){
 /* ---------- Menu lateral: medições ---------- */
 function medSide(){
   const T=S.tasks.filter(vis);
-  const L=(S.medicoes||[]).map(m=>{const X=T.filter(t=>tipoOf(t)&&tipoOf(t).med===m.id);return{m,n:X.length,d:X.filter(t=>t.status==='done').length,cor:(S.tipos.find(y=>y.med===m.id)||{}).cor||'var(--ac)'}})
+  const L=(S.medicoes||[]).map(m=>{const X=T.filter(t=>tipoOf(t)&&tipoOf(t).med===m.id);return{m,n:X.length,d:X.filter(t=>t.status==='done').length,cor:m.cor||(S.tipos.find(y=>y.med===m.id)||{}).cor||'var(--ac)'}})
     .filter(x=>isAdm()||x.n).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999')||a.m.nome.localeCompare(b.m.nome,'pt-BR'));
   return `<aside class="msb" aria-label="Medições cadastradas"><h2 class="msh">Medições <em>${L.length}</em></h2><div class="msl">${L.map(({m,n,d,cor})=>{const lt=!!m.prazo&&m.prazo<today()&&d<n;
-    return `<article class="mdc${lt?' late':''}" style="--c:${cor}"><div class="mdn">${esc(m.nome)}</div><div class="mdr"><span>Tarefas</span><b>${n}</b></div><div class="mdr"><span>Concluídas</span><b>${d}</b></div><div class="mdr mdp"><span>Prazo de entrega</span><b>${m.prazo?fmt(m.prazo)+(lt?' ⚠':''):'Sem prazo'}</b></div></article>`}).join('')||'<div class="empty">Nenhuma medição cadastrada.</div>'}</div></aside>`}
+    const o=MX.has(m.id);return `<article class="mdc${lt?' late':''}${o?' open':''}" style="--c:${cor}"><button type="button" class="mdh" data-mx="${esc(m.id)}" aria-expanded="${o}" title="${o?'Recolher':'Ver informações'}"><span class="mdn">${esc(m.nome)}${lt?' ⚠':''}</span><span class="mdg" aria-hidden="true">${o?'▴':'▾'}</span></button><div class="mdb"><div class="mdr"><span>Tarefas</span><b>${n}</b></div><div class="mdr"><span>Concluídas</span><b>${d}</b></div><div class="mdr mdp"><span>Prazo de entrega</span><b>${m.prazo?fmt(m.prazo)+(lt?' ⚠':''):'Sem prazo'}</b></div></div></article>`}).join('')||'<div class="empty">Nenhuma medição cadastrada.</div>'}</div></aside>`}
 /* ---------- Usuários (definidos no banco) ---------- */
 function usrPane(){
   const cn=id=>{const c=(S.contatos||[]).find(x=>x.id===id);return c?c.nome:''};
@@ -628,6 +631,7 @@ function setHH(){const e=$('.stk');if(e)document.documentElement.style.setProper
 addEventListener('resize',setHH);
 function bind(){
   if(ANIM){const a=$('#app');ANIM=false;a.querySelectorAll('.card,.pcap,.tcard,.col,.kpi,.person,.pk').forEach((e,i)=>e.style.setProperty('--i',Math.min(i,14)));a.classList.add('enter');setTimeout(()=>a.classList.remove('enter'),1000)}
+  document.querySelectorAll('[data-mx]').forEach(b=>b.onclick=()=>{const k=b.dataset.mx,c=b.closest('.mdc'),o=!MX.has(k);o?MX.add(k):MX.delete(k);c.classList.toggle('open',o);b.setAttribute('aria-expanded',o);b.querySelector('.mdg').textContent=o?'▴':'▾'});
   document.querySelectorAll('[data-cx]').forEach(b=>b.onclick=()=>{const k=b.dataset.cx;colOpen=colNow===k?null:k;ANIM=true;render()});
   document.querySelectorAll('.pcap[data-tp]').forEach(b=>b.onclick=()=>openTP(b.dataset.pk,b.dataset.tp));
   document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{view=b.dataset.v;ANIM=true;render()});
@@ -908,19 +912,20 @@ const axHead=(k,n,b='')=>{const o=AX.has(k);return `<div class="th"><h3>${esc(n)
 const ASEC=[['med','Medições'],['tipos','Tipos de fluxo'],['campos','Campos da tarefa'],['func','Funcionários'],['usr','Usuários']];
 function medPane(){
   return `<div class="admin"><div class="ahead"><div><h2>Medições</h2><p class="hint">Cadastre primeiro a medição, os itens (títulos das tarefas) e o diretório pai. O fluxo e as tarefas usam esses nomes.</p></div><button class="btn pri" id="nm">+ Nova medição</button></div>
-  <div class="tgrid">${(S.medicoes||[]).map(m=>`<article class="tcard${AX.has('m:'+m.id)?' open':''}" style="--c:var(--ac)">${axHead('m:'+m.id,m.nome,`<button class="btn" data-em="${m.id}" aria-label="Editar medição ${esc(m.nome)}">Editar</button>`)}<div class="tb"><dl><dt>Itens</dt><dd>${m.itens.map(i=>`<span class="tag">${esc(i)}</span>`).join('')||'<span class="hint">Sem itens</span>'}</dd><dt>Prazo de entrega</dt><dd>${m.prazo?fmt(m.prazo):'<span class="hint">Não informado</span>'}</dd><dt>Diretório pai</dt><dd>${esc(m.dir)||'<span class="hint">Não informado</span>'}</dd><dt>Fluxo</dt><dd>${S.tipos.some(y=>y.med===m.id)?'Cadastrado':'<span class="hint">Ainda sem fluxo</span>'}</dd></dl></div></article>`).join('')||'<div class="empty" style="grid-column:1/-1">Nenhuma medição cadastrada.</div>'}</div></div>`}
+  <div class="tgrid">${(S.medicoes||[]).map(m=>`<article class="tcard${AX.has('m:'+m.id)?' open':''}" style="--c:${m.cor||'var(--ac)'}">${axHead('m:'+m.id,m.nome,`<button class="btn" data-em="${m.id}" aria-label="Editar medição ${esc(m.nome)}">Editar</button>`)}<div class="tb"><dl><dt>Itens</dt><dd>${m.itens.map(i=>`<span class="tag">${esc(i)}</span>`).join('')||'<span class="hint">Sem itens</span>'}</dd><dt>Prazo de entrega</dt><dd>${m.prazo?fmt(m.prazo):'<span class="hint">Não informado</span>'}</dd><dt>Diretório pai</dt><dd>${esc(m.dir)||'<span class="hint">Não informado</span>'}</dd><dt>Fluxo</dt><dd>${S.tipos.some(y=>y.med===m.id)?'Cadastrado':'<span class="hint">Ainda sem fluxo</span>'}</dd></dl></div></article>`).join('')||'<div class="empty" style="grid-column:1/-1">Nenhuma medição cadastrada.</div>'}</div></div>`}
 function openMedicao(id){
   const m=(S.medicoes||[]).find(x=>x.id===id)||{nome:'',dir:'',itens:[]},isNew=!id;
   const [d,close]=dlg(`<form method="dialog"><div class="dh"><h2>${isNew?'Nova medição':'Editar medição'}</h2><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
   <div class="db"><div class="full"><label for="mn">Nome da medição *</label><input type="text" id="mn" required value="${esc(m.nome)}"><div class="hint">É o nome que o fluxo e as tarefas vão usar. Ex.: Calisto</div></div>
   <div class="full"><label for="mi">Itens (um por linha) *</label><textarea id="mi" rows="6" required placeholder="Engenho Novo&#10;Engenho de Dentro&#10;Cachambi">${esc(m.itens.join('\n'))}</textarea><div class="hint">Cada item vira uma opção de título ao criar a tarefa.</div></div>
   <div class="full"><label for="md">Diretório pai (caminho na rede)</label><input type="text" id="md" placeholder="\\\\servidor\\projetos\\Calisto" value="${esc(m.dir)}"><div class="hint">O botão “Copiar caminho na rede” da tarefa copia este caminho + o título do item (mesmo nome da pasta).</div></div>
+  <div class="full"><label id="mcl">Cor do card</label><div class="sw" role="radiogroup" aria-labelledby="mcl">${COLORS.map(c=>`<label><input type="radio" name="mc" value="${c}" ${c===(m.cor||COLORS[0])?'checked':''}><span style="--c:${c}"></span><span class="sr">Cor ${c}</span></label>`).join('')}</div></div>
   <div class="full"><label for="mp">Prazo de entrega</label><input type="date" id="mp" value="${esc(m.prazo||'')}"><div class="hint">Aparece sempre no card da medição, no menu lateral.</div></div></div>
   <div class="df"><button class="btn pri">Salvar medição</button>${isNew?'':'<span class="sp"></span><button type="button" class="btn dan" id="dl">Excluir</button>'}</div></form>`,'#f2c14e');
   d.querySelector('form').onsubmit=async e=>{e.preventDefault();const nm=d.querySelector('#mn').value.trim();
     if(S.medicoes.some(x=>x.id!==id&&nk(x.nome)===nk(nm))){toast('Já existe uma medição com este nome');return}
     const it=[...new Set(d.querySelector('#mi').value.split('\n').map(s=>s.trim()).filter(Boolean))];if(!it.length){toast('Informe ao menos um item');return}
-    const o=isNew?{id:'m'+Date.now()}:m;o.nome=nm;o.itens=it;o.dir=d.querySelector('#md').value.trim();o.prazo=d.querySelector('#mp').value;
+    const o=isNew?{id:'m'+Date.now()}:m;o.nome=nm;o.itens=it;o.dir=d.querySelector('#md').value.trim();o.prazo=d.querySelector('#mp').value;o.cor=d.querySelector('[name=mc]:checked').value;
     if(isNew)S.medicoes.push(o);S.tipos.filter(y=>y.med===o.id).forEach(y=>y.nome=o.nome);await save();close();render()};
   if(!isNew)d.querySelector('#dl').onclick=async()=>{if(S.tipos.some(y=>y.med===id)){toast('Exclua antes o fluxo desta medição');return}if(confirm('Excluir esta medição?')){S.medicoes=S.medicoes.filter(x=>x.id!==id);await save();close();render()}};
   d.querySelector('#mn').focus();
