@@ -494,7 +494,7 @@ async function sbPoll(){
     if(!same){const antes=new Set(vez());applyRemote(o);ensureTipos();if(ME&&!ME.adm&&!meC())ME=user=null;render();
       const nv=vez().filter(i=>!antes.has(i));if(nv.length)toast(nv.length>1?nv.length+' tarefas novas na sua vez':'Nova tarefa na sua vez: '+nome(S.tasks.find(x=>x.id===nv[0])))}}catch(e){}}
 let lastSave=null;
-const stText=()=>SB.on?(SB.ok?'● Supabase conectado'+(lastSave?' · '+lastSave.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''):'○ Sem conexão · dados locais'):'';
+const stText=()=>SB.on?(SB.ok?(SB.dirty?'⚠ Alterações pendentes de envio ao banco':'● Supabase conectado')+(lastSave?' · '+lastSave.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''):'○ Sem conexão · NÃO está salvando no banco'):'';
 const stUpd=()=>{const e=$('#fs');if(e)e.textContent=stText()};
 const late=t=>t.status!=='done'&&t.status!=='fixo'&&t.final&&t.final<today();
 let _tt;function toast(m){const t=$('#toast');clearTimeout(_tt);t.textContent=m;t.hidden=false;t.classList.remove('show');void t.offsetWidth;t.classList.add('show');_tt=setTimeout(()=>{t.classList.remove('show');_tt=setTimeout(()=>t.hidden=true,260)},m.length>60?4800:2600)}
@@ -508,7 +508,7 @@ async function save(){
   const txt=JSON.stringify(S,null,2);
   try{localStorage.setItem('fluxo-dados',txt)}catch(e){}
   lastSave=new Date();
-  if(SB.on&&SB.ok){SB.busy=true;try{await sbPush();SB.dirty=false}catch(e){console.error(e);SB.dirty=true;toast('Falha ao sincronizar — nova tentativa automática em instantes')}SB.busy=false}
+  if(SB.on&&SB.ok){SB.busy=true;try{await sbPush();SB.dirty=false}catch(e){console.error(e);SB.dirty=true;toast('NÃO salvou no banco: '+String(e.message||e).slice(0,140)+' — nova tentativa em instantes')}SB.busy=false}else if(SB.on){toast('Sem conexão com o banco: esta alteração ainda NÃO foi salva no servidor. Reconectando…')}
   stUpd();
 }
 async function load(){
@@ -1036,13 +1036,20 @@ function openContato(id,pre){
   <div class="hint">No fluxo da tarefa ele aparece como Primeiro + Último nome. Se houver dois iguais, aparece o nome completo.</div></div>
   <div class="full"><label for="cg">Função</label><input type="text" id="cg" placeholder="Opcional" value="${esc(c.cargo)}"></div>
   <div><label for="cw">WhatsApp (com DDD)</label><input type="text" inputmode="tel" id="cw" placeholder="(21) 99999-9999" value="${esc(c.whatsapp)}"></div>
-  <div><label for="ce">E-mail</label><input type="text" inputmode="email" id="ce" placeholder="nome@empresa.com" value="${esc(c.email)}"></div></div>
+  <div><label for="ce">E-mail</label><input type="text" inputmode="email" id="ce" placeholder="nome@empresa.com" value="${esc(c.email)}"></div>
+  ${isNew?`<div class="full chk"><label><input type="checkbox" id="ca" checked>Criar acesso ao sistema agora (usuário Normal)</label></div>
+  <div class="full row" id="cab"><div style="flex:1"><label for="cl">Usuário (login)</label><input type="text" id="cl" autocapitalize="none" autocomplete="off" value="${esc(first(c.nome))}"></div><div style="flex:1"><label for="cs">Senha de acesso</label><input type="password" id="cs" autocomplete="new-password" placeholder="Mínimo 6 caracteres"></div></div>`:''}</div>
   <div class="df"><button class="btn pri">Salvar funcionário</button>${isNew?'':'<span class="sp"></span><button type="button" class="btn dan" id="dl">Excluir</button>'}</div></form>`,'#5eead4');
   d.querySelector('form').onsubmit=async e=>{e.preventDefault();const w=d.querySelector('#cw').value,nm=d.querySelector('#cn').value;
     if(!first(nm)){toast('Informe o nome do funcionário');return}
+    const mk=isNew&&d.querySelector('#ca').checked,lg=mk?nk(d.querySelector('#cl').value).replace(/\s+/g,''):'',pw=mk?d.querySelector('#cs').value:'';
+    if(mk&&(!lg||pw.length<6)){toast('Para criar o acesso, informe o usuário e uma senha de pelo menos 6 caracteres');return}
     const o=isNew?{id:'c'+Date.now()}:c;o.nome=d.querySelector('#cn').value.trim();o.cargo=d.querySelector('#cg').value.trim();o.whatsapp=d.querySelector('#cw').value.trim();o.email=d.querySelector('#ce').value.trim();
-    if(isNew)S.contatos.push(o);await save();close();render()};
+    if(isNew)S.contatos.push(o);await save();
+    if(mk){try{await rpc('fx_usuario_salvar',{p_token:ME.tk,p_id:null,p_usuario:lg,p_nome:o.nome,p_perfil:'normal',p_contato_id:o.id,p_ativo:true,p_senha:pw});USR=null;toast('Funcionário e acesso salvos no banco')}catch(err){toast('Funcionário salvo, mas o acesso falhou: '+err.message)}}
+    close();render()};
   if(!isNew)d.querySelector('#dl').onclick=async()=>{if(confirm('Excluir este contato?')){S.contatos=S.contatos.filter(x=>x.id!==id);await save();close();render()}};
+  if(isNew){const ca=d.querySelector('#ca'),cab=d.querySelector('#cab'),cl=d.querySelector('#cl');let tc=!!cl.value;ca.onchange=()=>cab.style.display=ca.checked?'':'none';cl.oninput=()=>tc=true;d.querySelector('#cn').addEventListener('input',e=>{if(!tc)cl.value=first(e.target.value)})}
   d.querySelector('#cn').focus();
 }
 
@@ -1201,7 +1208,11 @@ document.addEventListener('keydown',e=>{
   if(k==='n'){if(isAdm()){e.preventDefault();openTask()}}else if(k==='/'){const q=$('#fq');if(q){e.preventDefault();q.focus();q.select()}}else if(k==='t'){cycTheme()}else if(/^[1-6]$/.test(k)){if(allowed(V[k-1])){view=V[k-1];render()}}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-fin]');if(b){e.stopPropagation();e.preventDefault();avancar(b.dataset.fin,1)}const g=e.target.closest('[data-dir]');if(g){e.stopPropagation();e.preventDefault();abrirDir(g.dataset.dir)}},true);
 load().then(()=>{ensureTipos();if(ME&&!ME.adm&&!meC())ME=user=null;render()});
-setInterval(sbPoll,10000);setInterval(sbRetry,12000);
+async function sbReconnect(){if(!SB.on||SB.ok||SB.busy)return;SB.busy=true;try{const o=await sbPull();
+  if(TB.every(([k])=>!o[k].length)){SB.ok=true;LAST={};await sbPush();toast('Conectado ao banco: dados enviados')}
+  else{applyRemote(o);ensureTipos();SB.ok=true;toast('Conectado ao banco')}
+  lastSave=new Date();stUpd();if(user)render()}catch(e){console.error(e)}SB.busy=false}
+setInterval(sbPoll,10000);setInterval(sbRetry,12000);setInterval(sbReconnect,8000);
 addEventListener('online',()=>{sbRetry();sbPoll()});addEventListener('offline',()=>toast('Sem internet — as alterações serão enviadas quando voltar'));
 addEventListener('error',e=>{if(/ResizeObserver/.test(e.message||''))return;console.error(e.error||e.message);toast('Ocorreu um erro inesperado. Recarregue a página se algo não responder.')});
 addEventListener('unhandledrejection',e=>{console.error(e.reason);toast('Falha na operação. Tente novamente.')});
