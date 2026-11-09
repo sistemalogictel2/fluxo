@@ -530,6 +530,10 @@ button.gs-row{cursor:pointer}button.gs-row:hover,.gs-row .gm:hover b{text-decora
 .vl>.mvd{margin:0 0 12px;padding:8px 10px;border-left:4px solid var(--ac2);background:var(--s2);border-radius:8px;font-size:13.5px;color:var(--tx)}
 .mvbar{margin:0 0 14px}
 .mvbar .btn{align-self:flex-start;min-height:34px;padding:4px 12px}
+/* Filtros: Buscar, Tipo e Funcionário com a mesma altura */
+.bar .fg input.cs,.bar .fg select.fsel{box-sizing:border-box;width:100%;height:42px;min-height:42px;padding:0 12px;line-height:1.2;font-size:15px}
+.bar .fg input.cs{-webkit-appearance:none;appearance:none}
+.gerr{border:1px solid var(--line);border-left:3px solid var(--bad);border-radius:10px;background:var(--s1);margin:6px 0;padding:0}.gerr summary{cursor:pointer;padding:9px 12px;font-weight:600;font-size:14px;line-height:1.35}.gerr[open] summary{border-bottom:1px solid var(--line)}.gerr p{margin:0;padding:8px 12px 0;font-size:14px;line-height:1.5}.gerr p:last-child{padding-bottom:10px}.geh{margin:16px 0 4px;font-size:13px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em}
 </style>
 </head>
 <body>
@@ -744,9 +748,9 @@ function focaAtividades(){
   const c=m.querySelector('.card');if(c)m.scrollLeft=Math.max(0,(c.closest('.col')||c).offsetLeft-12);
 }
 function kpiGo(k){
-  const naAba=ACT.includes(view);
+  const naAba=view==='painel';
   fKpi=(naAba&&fKpi===k)?'':k;
-  if(!naAba)view=lastAct;
+  view='painel';
   colOpen=undefined;focoKpi=true;ANIM=true;render();
 }
 function setHH(){const e=$('.stk');if(e)document.documentElement.style.setProperty('--hh',e.offsetHeight+'px')}
@@ -965,74 +969,136 @@ function openPerson(k){
 }
 /* ---------- Passo a passo ---------- */
 let gStep=0;
+const ERR={
+ login:{n:'Entrar no sistema',l:[
+  ['Usuário ou senha incorretos.','Usuário ou senha digitados errado, ou o usuário está inativo.','Confira os dois campos e tente de novo. Se continuar, o gestor abre Administração › Usuários, confere se “Usuário ativo” está marcado e define uma nova senha.'],
+  ['Muitas tentativas. Aguarde 30s.','Cinco erros seguidos de senha bloqueiam a tela por 30 segundos.','Espere a contagem acabar e digite com calma. Não precisa recarregar a página.'],
+  ['Este usuário não está vinculado a um funcionário. Fale com o gestor.','O usuário é do tipo Normal, mas não tem funcionário vinculado.','O gestor abre Administração › Usuários, edita o usuário e escolhe o Funcionário vinculado.'],
+  ['Sem conexão com o banco. Tente novamente.','Sem internet ou o banco online não respondeu.','Confira a internet e clique em Entrar de novo.'],
+  ['Banco não configurado…','A URL e a chave do Supabase estão vazias no arquivo index.html.','Só quem mantém o arquivo resolve: preencha SB.url e SB.key no começo do código.'],
+  ['Sessão encerrada por inatividade','Passaram 2 horas sem usar o sistema.','Entre de novo. O que você já salvou continua no banco.']]},
+ func:{n:'1. Funcionários',l:[
+  ['Informe o nome do funcionário','O campo Nome está vazio.','Digite o nome completo e salve.'],
+  ['Para criar o acesso, informe o usuário e uma senha de pelo menos 6 caracteres','“Criar acesso ao sistema agora” está marcado, mas faltou o login ou a senha tem menos de 6 caracteres.','Preencha usuário e senha (6 ou mais caracteres) ou desmarque a caixa e crie o acesso depois, em Usuários.'],
+  ['Funcionário salvo, mas o acesso falhou: …','O funcionário foi salvo, mas o login não foi criado (em geral já existe um usuário com esse login).','Não cadastre o funcionário de novo. Vá em Administração › Usuários, crie o acesso com outro login e escolha este funcionário em “Funcionário vinculado”.'],
+  ['Cadastre o contato de … para usar este botão','Você clicou em WhatsApp ou E-mail de alguém que está no fluxo mas não está cadastrado.','O sistema abre Funcionários. Clique em “+ Nome” e preencha WhatsApp e e-mail.']]},
+ usr:{n:'2. Usuários',l:[
+  ['Usuário Normal precisa de um funcionário vinculado','Acesso Normal sem funcionário escolhido.','Escolha o Funcionário vinculado. Se a pessoa deve ver tudo, troque o acesso para Gestor.'],
+  ['A senha precisa de no mínimo 6 caracteres','O navegador bloqueia senhas curtas.','Use 6 ou mais caracteres. Ao editar, deixe em branco para manter a senha atual.'],
+  ['Não foi possível carregar os usuários: …','Falha de conexão ou de permissão ao buscar os usuários.','Confira a internet, recarregue a página e entre de novo como Gestor.'],
+  ['Mensagem do banco ao salvar (ex.: usuário já existe)','O banco recusou o cadastro.','Leia a mensagem. Quase sempre basta usar outro login.']]},
+ med:{n:'3. Medições',l:[
+  ['Já existe uma medição com este nome','Duas medições não podem ter o mesmo nome.','Abra a que já existe e edite, ou use outro nome.'],
+  ['Informe ao menos um item','A caixa de itens está vazia.','Escreva um item por linha.'],
+  ['Exclua antes o fluxo desta medição','A medição tem um tipo de fluxo ligado a ela.','Vá em Tipos de fluxo, exclua o tipo dela (as tarefas continuam, sem tipo) e depois exclua a medição.'],
+  ['Preencha este campo','O nome ou os itens estão em branco.','Preencha os dois e salve.']]},
+ campos:{n:'4. Campos da tarefa',l:[
+  ['Não consigo excluir ou mudar o tipo de “Quantidade” e “Data de repasse”','São campos fixos, usados nos cálculos de meta.','Deixe como estão. Você só pode renomear.'],
+  ['Excluí um campo e os valores sumiram das tarefas','Os valores ficam guardados, mas deixam de aparecer.','Crie o campo de novo com o mesmo formato e marque-o nos tipos de fluxo.']]},
+ tipos:{n:'5. Tipos de fluxo',l:[
+  ['Cadastre uma medição primeiro','Você clicou em “+ Novo tipo” sem ter medição.','O sistema abre Medições. Cadastre uma e volte.'],
+  ['A medição que eu quero não aparece na lista','Só aparecem medições que ainda não têm fluxo.','Ela já tem um tipo: use “Editar” nele em vez de criar outro.'],
+  ['A lista de responsáveis está vazia ao montar o fluxo','Não há funcionários cadastrados.','Cadastre os funcionários (passo 1) e abra o formulário de novo.'],
+  ['Excluí um tipo e as tarefas ficaram “Sem tipo”','As tarefas continuam, mas perdem o tipo.','Recrie o tipo da medição e escolha-o ao editar cada tarefa.']]},
+ tarefa:{n:'Criar tarefa',l:[
+  ['Defina os passos e o responsável de cada um','A tarefa está sem passos, ou algum passo está com “— responsável —”.','Escolha o tipo de fluxo (os passos aparecem sozinhos) ou use “+ Passo”, e escolha o responsável em todos. Se a lista de responsáveis estiver vazia, cadastre os funcionários antes.'],
+  ['Escolha o tipo de fluxo desta tarefa','A medição ainda não tem tipo de fluxo (aparece ao dar dois cliques num item que falta, na aba Medições).','Crie o tipo em Administração › Tipos de fluxo para essa medição e escolha-o no formulário.'],
+  ['Escolha um tipo de fluxo ou adicione passos','Não há tipo selecionado e o fluxo está vazio.','Selecione o Tipo de fluxo no alto do formulário.'],
+  ['“— escolha o item —” / Preencha este campo','O Título é obrigatório e vem dos itens da medição.','Escolha o item. Se ele não está na lista, inclua em Administração › Medições › Editar itens.'],
+  ['A data estimada não é calculada','O tipo está sem meta, ou faltam Data de repasse / Quantidade.','Preencha esses campos ou digite a data final você mesmo.']]},
+ painel:{n:'Acompanhar',l:[
+  ['O painel mostra “Nenhuma tarefa” ou colunas vazias','Há filtro ativo: botão Em aberto, Atrasadas ou Concluídas, Tipo, Funcionário ou Buscar.','Clique em “Limpar filtros” ou desmarque o botão ativo.'],
+  ['Não consigo arrastar o card para outra coluna','Só o gestor muda o status arrastando.','Peça ao gestor, ou finalize o seu passo pelo card.'],
+  ['Uma tarefa Fixo nunca aparece como atrasada','Atividades contínuas não atrasam por regra.','Está certo. Use a data e as anotações para controlar.'],
+  ['Não encontro uma tarefa (usuário Normal)','Normal vê só tarefas em que tem passo no fluxo.','Peça ao gestor para conferir se seu nome está num passo.']]},
+ card:{n:'Finalizar e devolver',l:[
+  ['Este passo não é seu','Você tentou finalizar o passo de outra pessoa.','Só o responsável finaliza. O gestor pode finalizar ou avançar qualquer passo.'],
+  ['Preencha antes de finalizar o passo: …','Faltam campos obrigatórios daquele passo.','Preencha os campos citados no card, clique em “Salvar campos” e finalize de novo.'],
+  ['Esta tarefa foi atualizada por outra pessoa. Confira o passo atual e tente de novo.','Alguém mexeu na tarefa antes de você.','Feche o card, abra de novo, confira o passo atual e repita a ação.'],
+  ['Informe a observação da devolução negativa','Devolução Negativa exige observação.','Escreva o que houve ou escolha Administrativa, que não pede texto.'],
+  ['Escreva a anotação','A caixa de anotação está vazia.','Digite o texto antes de clicar em Salvar anotação.'],
+  ['Não foi possível copiar','O navegador bloqueou a cópia automática.','Selecione o e-mail ou o caminho na tela e copie com Ctrl+C.'],
+  ['Não aparece “← Voltar passo”','Só o gestor devolve, e só depois do primeiro passo.','Entre como Gestor ou peça a ele a devolução.']]},
+ banco:{n:'Conexão e dados',l:[
+  ['Sem conexão com o banco: esta alteração ainda NÃO foi salva no servidor. Reconectando…','A internet caiu ou o banco não respondeu.','Mantenha a página aberta. Quando a conexão voltar, o sistema reenvia sozinho. Não recarregue antes.'],
+  ['NÃO salvou no banco: … nova tentativa em instantes','O envio falhou, mas o sistema tenta de novo.','Aguarde. Se a faixa “Alterações pendentes” não sumir, avise quem mantém o sistema.'],
+  ['Ocorreu um erro inesperado / Falha na operação','Erro interno da página.','Recarregue (F5), entre de novo e refaça. O que já estava salvo permanece.']]}};
+const errHtml=l=>l.map(([m,c,s])=>`<details class="gerr"><summary>${m}</summary><p><b>Por que acontece:</b> ${c}</p><p><b>O que fazer:</b> ${s}</p></details>`).join('');
 const GUIA=[
  {f:'Início',t:'Como o Fluxo funciona',x:'Cada tarefa é um fluxo de passos e cada passo tem um funcionário responsável. A tarefa fica sempre com quem está no passo atual.',
-  m:'<span class="nd">1 Administração</span><span class="ar">→</span><span class="nd">2 Tarefas</span><span class="ar">→</span><span class="nd">3 Acompanhamento</span>',
-  l:['Primeiro você preenche Administração, na ordem das abas: Funcionários, Usuários, Medições, Campos da tarefa e Tipos de fluxo.','Depois cria as tarefas e monta o fluxo de cada uma.','Por fim acompanha no painel, finaliza os passos e confere a capacidade da equipe.'],
-  tip:'Cada cadastro usa o anterior. Seguindo a ordem, nada fica faltando. Você volta aqui quando quiser, pela aba Passo a passo.'},
+  m:'<span class="nd">1 Administração</span><span class="ar">→</span><span class="nd">2 Criar tarefas</span><span class="ar">→</span><span class="nd">3 Acompanhar</span>',
+  l:['Ordem de uso: Entrar → Funcionários → Usuários → Medições → Campos da tarefa → Tipos de fluxo → Criar tarefa → Acompanhar e finalizar passos.','Cada etapa usa a anterior. Pular uma gera os erros descritos no fim de cada passo.','Gestor vê todas as abas. Usuário Normal vê só “Minhas tarefas”, com os passos dele.','Este passo a passo é aberto pelo gestor. Cada passo traz “Possíveis erros” e o último reúne todos.'],
+  tip:'Siga a ordem na primeira vez. Depois, volte aqui sempre que tiver dúvida.'},
+ {f:'Início',t:'Entre no sistema',x:'Cada pessoa entra com o usuário e a senha definidos pelo gestor.',
+  m:'<span class="nd">Usuário</span><span class="ar">→</span><span class="nd">Senha</span><span class="ar">→</span><span class="nd">Entrar</span>',
+  l:['Digite o usuário e a senha e clique em Entrar.','Gestor abre na aba Gestão. Usuário Normal abre em Minhas tarefas.','Para sair, use o botão Sair no alto.','Depois de 2 horas sem uso, a sessão fecha sozinha.'],
+  tip:'Cinco senhas erradas seguidas bloqueiam a tela por 30 segundos.',e:'login'},
  {f:'Administração',t:'1. Cadastre os funcionários',x:'Quem aparece nos fluxos precisa estar cadastrado, para ter WhatsApp e e-mail à mão.',
   m:'<span class="nd">Ana Souza</span><span class="tag">Analista</span><span class="tag">(21) 99999-9999</span><span class="tag">ana@empresa.com</span>',
-  l:['Abra Administração › 1. Funcionários e clique em “+ Novo funcionário”.','Preencha o nome completo, a função, o WhatsApp e o e-mail.','No fluxo da tarefa ele aparece como Primeiro + Último nome; se houver dois iguais, aparece o nome completo.'],
-  tip:'Quem já aparece em algum fluxo sem cadastro surge como botão “+ Nome”: um clique e você cadastra.',go:['admin','func','Abrir Funcionários']},
- {f:'Administração',t:'2. Defina os acessos',x:'Cada pessoa entra com usuário e senha definidos no banco. O perfil decide o que ela vê.',
+  l:['Abra Administração › 1. Funcionários e clique em “+ Novo funcionário”.','Preencha o nome completo (obrigatório), a função, o WhatsApp com DDD e o e-mail.','Se quiser, deixe marcado “Criar acesso ao sistema agora”, confira o usuário e defina uma senha de 6 ou mais caracteres. O acesso nasce como Normal.','Clique em Salvar funcionário.','No fluxo da tarefa ele aparece como Primeiro + Último nome; se houver dois iguais, com o nome completo.'],
+  tip:'Quem já aparece em algum fluxo sem cadastro surge como botão “+ Nome”: um clique e você cadastra.',go:['admin','func','Abrir Funcionários'],e:'func'},
+ {f:'Administração',t:'2. Defina os acessos',x:'O perfil decide o que cada pessoa vê: Gestor vê e edita tudo; Normal vê só os passos dele.',
   m:'<span class="nd">Gestor<small>vê e edita tudo</small></span><span class="nd">Normal<small>só os seus passos</small></span>',
-  l:['Abra Administração › 2. Usuários e clique em “+ Novo usuário”.','Escolha o funcionário vinculado: nome e usuário são preenchidos sozinhos.','Defina a senha (mínimo 6 caracteres) e o acesso: Normal ou Gestor.','Para dar acesso a tudo a alguém, edite o usuário e troque para Gestor; vale no próximo login.'],
-  tip:'Usuário Normal precisa estar vinculado a um funcionário. Por isso este passo vem depois dos funcionários.',go:['admin','usr','Abrir Usuários']},
- {f:'Administração',t:'3. Cadastre a medição',x:'A medição vem antes do fluxo: nome, itens, diretório, prazo e cor. O fluxo e as tarefas usam esses dados.',
+  l:['Abra Administração › 2. Usuários e clique em “+ Novo usuário”.','Escolha o Funcionário vinculado: nome e login são preenchidos sozinhos.','Defina a senha (mínimo 6 caracteres) e o acesso: Normal ou Gestor.','Deixe “Usuário ativo” marcado e salve.','Para dar acesso a tudo a alguém, edite o usuário e troque para Gestor; vale no próximo login. Senha em branco ao editar mantém a atual.'],
+  tip:'Quem já recebeu acesso ao ser cadastrado em Funcionários não precisa de outro aqui.',go:['admin','usr','Abrir Usuários'],e:'usr'},
+ {f:'Administração',t:'3. Cadastre a medição',x:'A medição vem antes do fluxo: nome, itens, diretório, cor e prazo. O fluxo e as tarefas usam esses dados.',
   m:'<span class="nd">Calisto<small>prazo 30/12</small></span><span class="tag">Engenho Novo</span><span class="tag">Cachambi</span>',
-  l:['Abra Administração › 3. Medições e clique em “+ Nova medição”.','Escreva o nome (ex.: Calisto) e os itens, um por linha.','Informe o diretório pai, o caminho da pasta na rede.','Escolha a cor da medição (é a única cor que você escolhe: fluxo, tarefas e cards seguem ela) e defina o prazo de entrega.','Ela aparece no menu lateral, em todas as abas, com tarefas, concluídas e prazo.'],
-  tip:'Cada item vira o título de uma tarefa e o nome da subpasta dentro do diretório pai.',go:['admin','med','Abrir Medições']},
+  l:['Abra Administração › 3. Medições e clique em “+ Nova medição”.','Escreva o nome (ex.: Calisto) e os itens, um por linha.','Informe o diretório pai, o caminho da pasta na rede (opcional).','Escolha a cor: fluxo, tarefas e cards seguem ela.','Defina o prazo de entrega e salve.','Ela aparece no menu lateral, em todas as abas, com tarefas, concluídas e prazo.'],
+  tip:'Cada item vira o título de uma tarefa e o nome da subpasta dentro do diretório pai.',go:['admin','med','Abrir Medições'],e:'med'},
  {f:'Administração',t:'4. Cadastre os campos da tarefa',x:'Defina quais informações podem entrar numa tarefa e o formato de cada uma.',
   m:'<span class="tag">Texto</span><span class="tag">Texto longo</span><span class="tag">Número</span><span class="tag">Data</span><span class="tag">Valor (R$)</span>',
-  l:['Abra Administração › 4. Campos da tarefa e clique em “+ Novo campo”.','Dê um nome e escolha o formato: Texto, Texto longo, Número, Data ou Valor (R$).','A formatação é automática: Número só aceita dígitos e Valor vira R$ 0,00.'],
-  tip:'Quantidade e Data de repasse já existem e são usados nos cálculos de meta. Cadastre os campos antes dos tipos, para poder marcá-los lá.',go:['admin','campos','Abrir Campos da tarefa']},
- {f:'Administração',t:'5. Crie os tipos de fluxo',x:'O tipo de fluxo liga uma medição a seus passos, cor, campos e meta. Ex.: Calisto = Quantificar → Revisar → Entregar.',
+  l:['Abra Administração › 4. Campos da tarefa e clique em “+ Novo campo”.','Dê um nome e escolha o formato: Texto, Texto longo, Número, Data ou Valor (R$).','Salve. Número só aceita dígitos e Valor vira R$ 0,00 sozinho.'],
+  tip:'Cadastre os campos antes dos tipos de fluxo, para poder marcá-los lá. Quantidade e Data de repasse já existem.',go:['admin','campos','Abrir Campos da tarefa'],e:'campos'},
+ {f:'Administração',t:'5. Crie os tipos de fluxo',x:'O tipo de fluxo liga uma medição a seus passos, campos e meta. Ex.: Calisto = Quantificar → Revisar → Entregar.',
   m:'<span class="nd">1 Quantificar</span><span class="ar">→</span><span class="nd">2 Revisar</span><span class="ar">→</span><span class="nd">3 Entregar</span>',
-  l:['Abra Administração › 5. Tipos de fluxo e clique em “+ Novo tipo”.','Escolha a medição: só aparecem as que ainda não têm fluxo.','Escreva os passos, na ordem, e marque os campos que cada passo preenche.','Escolha os campos que aparecem ao criar a tarefa e a meta de entrega, e salve. A cor vem da medição.'],
-  tip:'Os passos do tipo são copiados para cada nova tarefa.',go:['admin','tipos','Abrir Tipos de fluxo']},
- {f:'Trabalhar',t:'Crie uma tarefa',x:'Escolha o tipo de fluxo, o item da medição e o funcionário de cada passo.',
+  l:['Abra Administração › 5. Tipos de fluxo e clique em “+ Novo tipo”. É preciso ter uma medição antes.','Escolha a medição: só aparecem as que ainda não têm fluxo.','Escreva os passos, na ordem, e marque os campos que cada passo preenche.','Marque os campos que aparecem ao criar a tarefa.','Defina a meta de entrega (horas, dias ou quantidade por dia; 0 = sem meta) e salve.'],
+  tip:'Os passos do tipo são copiados para cada nova tarefa. Mudar o tipo depois não altera tarefas já criadas.',go:['admin','tipos','Abrir Tipos de fluxo'],e:'tipos'},
+ {f:'Trabalhar',t:'6. Crie uma tarefa',x:'Escolha o tipo de fluxo, o item da medição e o funcionário de cada passo.',
   m:'<span class="nd cur">Calisto + Cachambi<small>1 · Ana</small></span><span class="ar">→</span><span class="nd">2 · Bruno</span><span class="ar">→</span><span class="nd">3 · Carla</span>',
-  l:['Clique em “+ Nova tarefa” (ou aperte N).','Escolha o tipo de fluxo: os passos aparecem sozinhos.','Escolha o item da medição como título e o responsável de cada passo.','Preencha os campos, confira a data estimada e o status, e salve.'],
-  tip:'Dentro de qualquer formulário, Ctrl+Enter salva.',go:['painel','','Ir para o painel']},
- {f:'Trabalhar',t:'Acompanhe no painel',x:'Em Todas as tarefas você vê o andamento de tudo, organizado por status.',
+  l:['Clique em “+ Nova tarefa” (ou aperte N).','Escolha o Tipo de fluxo: os passos aparecem sozinhos.','Escolha o item da medição em Título.','Em cada passo, escolha o responsável. Use ↑ ↓ para reordenar, ✕ para remover e “+ Passo” para incluir.','Preencha os campos e confira a data estimada final e o status.','Clique em Salvar (ou Ctrl+Enter). A tarefa vai para o primeiro responsável.','Atalho: na aba Medições, dois cliques em um item “que falta” abre o cadastro já preenchido.'],
+  tip:'O fluxo é obrigatório: sem passos e sem responsável em todos eles, a tarefa não salva.',go:['painel','','Ir para Todas as tarefas'],e:'tarefa'},
+ {f:'Trabalhar',t:'7. Acompanhe em Todas as tarefas',x:'Veja o andamento de tudo, organizado por status, e use os botões do topo para filtrar.',
   m:'<div class="mc" style="--k:#8ea4cf"><b>○ A iniciar</b><i></i></div><div class="mc" style="--k:var(--ac)"><b>◐ Em andamento</b><i></i><i></i></div><div class="mc" style="--k:#c4a5f5"><b>⏸ Aguardando</b><i></i></div><div class="mc" style="--k:var(--ac2)"><b>✔ Concluídas</b><i></i></div><div class="mc" style="--k:#f49ac1"><b>↻ Fixo</b><i></i></div>',
-  l:['As colunas são os status; arraste um card para mudar de coluna.','Dentro da coluna, as tarefas ficam em ordem de data de entrega.','Use ▾ no card para expandir os detalhes.','Os números do topo (em aberto, atrasadas, concluídas) filtram o painel; filtre também por Tipo e Funcionário.','Tarefas atrasadas ganham uma barra vermelha e o aviso ⚠.','A coluna Fixo é para atividades contínuas: nunca ficam atrasadas e, no último passo, o fluxo volta ao primeiro.'],
-  go:['painel','','Abrir Todas as tarefas']},
- {f:'Trabalhar',t:'Finalize o passo',x:'Quem está no passo atual clica em Finalizar e a tarefa vai para o próximo responsável.',
+  l:['Os botões Em aberto, Atrasadas e Concluídas, no topo de qualquer aba, levam sempre para Todas as tarefas já filtrando e rolando até as atividades.','Clique de novo no botão ativo para tirar o filtro; “Limpar filtros” tira todos.','Combine com Buscar, Tipo e Funcionário.','As colunas são os status; o gestor arrasta o card para mudar de coluna.','Dentro da coluna, as tarefas ficam por data de entrega; ▾ expande os detalhes.','Atrasadas têm barra vermelha e ⚠. Fixo é para atividades contínuas: nunca atrasa e, no último passo, volta ao primeiro.'],
+  go:['painel','','Abrir Todas as tarefas'],e:'painel'},
+ {f:'Trabalhar',t:'8. Finalize o passo',x:'Quem está no passo atual clica em Finalizar e a tarefa vai para o próximo responsável.',
   m:'<span class="sd on"></span><span class="sd on"></span><span class="sd cur"></span><span class="sd"></span><span class="hint">Passo 3 de 4 → Bruno</span>',
-  l:['No card, o botão “Finalizar meu passo” aparece quando é a sua vez.','Ao finalizar, a tarefa aparece para o próximo funcionário.','No último passo, a tarefa é concluída.','Gestores podem finalizar, avançar ou devolver qualquer passo, abrindo o card.','Na devolução, escolha o motivo: administrativa não altera a nota; negativa exige observação e reduz a nota.'],
-  tip:'Use as anotações do card para registrar o que aconteceu em cada passo.'},
- {f:'Acompanhar',t:'Veja as medições no menu lateral',x:'O menu à esquerda, em todas as abas, mostra o andamento de cada medição.',
+  l:['Clique no card para abrir a tarefa.','Preencha os campos do seu passo (salvam sozinhos ao sair do campo).','Clique em “✔ Finalizar meu passo”. A tarefa vai para o próximo; no último passo, fica concluída.','Registre ocorrências em Anotações.','Gestor também usa “Avançar passo →” e “← Voltar passo”. Na devolução, Administrativa não altera a nota; Negativa exige observação e reduz a nota.','No card, o gestor tem WhatsApp, Copiar e-mail e Copiar caminho na rede.'],
+  tip:'Quando uma tarefa chega na sua vez, o sistema avisa na tela.',e:'card'},
+ {f:'Acompanhar',t:'Gestão: o que cobrar hoje',x:'Tela inicial do gestor, com pendências, pauta por funcionário e medições que pedem atenção.',
+  m:'<span class="nd">Atrasadas</span><span class="nd">Vencem em até 2 dias</span><span class="nd">Paradas 3+ dias</span>',
+  l:['Abra a aba Gestão.','Em “Precisa de ação agora”: atrasadas, vencendo em até 2 dias, paradas há 3 dias ou mais e passos sem responsável.','Cobre pelo WhatsApp: a mensagem já vem pronta e a tarefa vira “Cobrado hoje”.','Em “Pauta por funcionário”, copie a pauta do dia de cada pessoa.','Para “Passo sem responsável”, abra a tarefa, clique em Editar e escolha quem faz.'],
+  go:['gestao','','Abrir Gestão']},
+ {f:'Acompanhar',t:'Veja as medições',x:'O menu lateral e a aba Medições mostram o andamento de cada medição.',
   m:'<span class="nd">Calisto<small>Tarefas 12 · Cadastradas 8 · Concluídas 5 · Prazo 30/12</small></span>',
-  l:['Cada medição aparece recolhida, só com o nome e a cor escolhida.','Clique no nome para ver: Tarefas (total de itens da medição), Cadastradas (já criadas no Fluxo), Concluídas e o prazo de entrega.','Se o prazo venceu e ainda há tarefa aberta, o nome ganha ⚠ e o card fica com borda vermelha.','Usuário Normal vê só as medições em que tem tarefa.']},
- {f:'Acompanhar',t:'Veja por tarefa',x:'Cada coluna é um tipo de fluxo, com os funcionários que estão nele agora.',
-  m:'<div class="mc" style="--k:var(--ac)"><b>Calisto</b><i></i><i></i><i></i></div><div class="mc" style="--k:var(--ac2)"><b>Projetos</b><i></i><i></i></div>',
-  l:['Abra a aba Por tarefa.','Cada coluna é um tipo de fluxo e lista os funcionários que têm tarefas dele; o número mostra quantas.','Clique no nome do funcionário para ver os cards das tarefas dele nesse tipo.','Clique em um card para abrir a tarefa.'],
+  l:['No menu à esquerda, clique no nome para ver Tarefas, Cadastradas, Concluídas e o prazo.','Na aba Medições, clique na medição para ver itens cadastrados e os que faltam.','Dois cliques em um item que falta abrem “Nova tarefa” já com ele.','Prazo vencido com tarefa aberta marca ⚠ e borda vermelha.'],
+  go:['med','','Abrir Medições']},
+ {f:'Acompanhar',t:'Por tarefa e por funcionário',x:'Duas formas de olhar a mesma carga de trabalho.',
+  m:'<div class="mc" style="--k:var(--ac)"><b>Calisto</b><i></i><i></i></div><span class="pi" style="background:#fde68a">Ana · 3</span><span class="pi" style="background:#bfdbfe">Bruno · 2</span>',
+  l:['Por tarefa: cada coluna é um tipo de fluxo e lista os funcionários que têm tarefas dele.','Clique no nome do funcionário para ver os cards dele naquele tipo.','Por funcionário: cada coluna tem os post-its de uma pessoa; ⇕ expande ou recolhe todos.','Clique em um card para abrir a tarefa.'],
   go:['tarefa','','Abrir Por tarefa']},
- {f:'Acompanhar',t:'Veja por funcionário',x:'Cada funcionário tem a sua coluna com as tarefas que estão com ele agora.',
-  m:'<span class="pi" style="background:#fde68a">Ana · 3</span><span class="pi" style="background:#bfdbfe">Bruno · 2</span><span class="pi" style="background:#bbf7d0">Carla · 1</span>',
-  l:['Abra a aba Por funcionário.','Cada coluna mostra os post-its do funcionário no passo dele.','Use ⇕ para expandir ou recolher todos os cards da coluna.'],
-  go:['equipe','','Abrir Por funcionário']},
  {f:'Acompanhar',t:'Acompanhe a capacidade',x:'Entenda a carga de trabalho de cada funcionário no dia.',
   m:'<div class="cb"><span>Carla</span><i style="--w:25%;--k:var(--ac2)"></i><b>25%</b></div><div class="cb"><span>Ana</span><i style="--w:60%;--k:var(--ac)"></i><b>60%</b></div><div class="cb"><span>Bruno</span><i style="--w:100%;--k:var(--bad)"></i><b>100%</b></div>',
-  l:['Abra a aba Capacidade. Ela soma a carga das tarefas em aberto de cada um, pela meta do tipo.','Visão por tarefa: colunas dos tipos que têm funcionários.','Visão por funcionário: todos, do menor para o maior percentual, com busca e filtros.','Filtre por faixa de carga (0%, 25%, 50%, 75%, 100%) e clique no funcionário para ver os cards dele.'],
+  l:['Abra a aba Capacidade: ela soma a carga das tarefas em aberto pela meta do tipo.','Visão por tarefa e visão por funcionário (do menor para o maior percentual).','Filtre por faixa de carga e clique no funcionário para ver os cards dele.','Tipo sem meta não entra na conta de carga.'],
   go:['cap','','Abrir Capacidade']},
  {f:'Cuidar',t:'Seus dados ficam no banco',x:'Tudo o que você cadastra é salvo online e todos veem a mesma informação.',
   m:'<span class="nd">Você salva</span><span class="ar">→</span><span class="nd">Banco online</span><span class="ar">→</span><span class="nd">Todos veem</span>',
-  l:['Cada alteração é enviada ao banco sozinha; o aviso “Supabase conectado” aparece na barra.','Sem internet, as alterações são enviadas quando a conexão voltar.','Quem está logado vê o que os outros salvaram em poucos segundos.','Por segurança, a sessão fecha depois de 2 horas sem uso.'],
-  tip:'Os acessos são definidos no banco, em Administração › Usuários.'},
- {f:'Cuidar',t:'Conforto visual e atalhos',x:'Ajuste a tela para cansar menos a vista e trabalhe mais rápido pelo teclado.',
-  m:'<span class="nd">◐ Tema</span><span class="nd">Aa Tamanho</span><span class="kb">N</span><span class="kb">T</span><span class="kb">/</span><span class="kb">1–6</span><span class="kb">Ctrl</span>+<span class="kb">Enter</span><span class="kb">Esc</span>',
-  l:['◐ alterna entre os temas Escuro, Claro e Quente (menos luz azul, bom para o fim do dia).','Aa aumenta o texto: 100%, 110% e 120%. A escolha fica salva.','Atalhos: N cria tarefa, T troca o tema, / busca, 1 a 6 abrem as abas, Ctrl+Enter salva e Esc fecha a janela.','Neste passo a passo, use as setas ← e → do teclado para navegar.'],
-  tip:'Os atalhos não funcionam enquanto você digita em um campo.'}];
+  l:['Cada alteração é enviada sozinha; a barra mostra “Supabase conectado”.','Sem internet, as alterações aguardam e são enviadas quando a conexão voltar.','Quem está logado vê o que os outros salvaram em poucos segundos.','Não feche a página enquanto aparecer “Alterações pendentes”.'],e:'banco'},
+ {f:'Cuidar',t:'Conforto visual e atalhos',x:'Ajuste a tela e trabalhe mais rápido pelo teclado.',
+  m:'<span class="nd">◐ Tema</span><span class="nd">Aa Tamanho</span><span class="kb">N</span><span class="kb">T</span><span class="kb">/</span><span class="kb">1–8</span><span class="kb">Ctrl</span>+<span class="kb">Enter</span><span class="kb">Esc</span>',
+  l:['◐ alterna entre Escuro, Claro e Quente. Aa aumenta o texto (100%, 110%, 120%).','N cria tarefa, T troca o tema, / busca.','1 a 8 abrem as abas: Gestão, Todas as tarefas, Por tarefa, Por funcionário, Medições, Capacidade, Administração e Passo a passo.','Ctrl+Enter salva, Esc fecha a janela e ← → navegam neste passo a passo.'],
+  tip:'Os atalhos não funcionam enquanto você digita em um campo.'},
+ {f:'Erros',t:'Possíveis erros e como resolver',x:'Todos os avisos que o sistema pode mostrar, o motivo e o que fazer. Toque em um erro para ver a solução.',all:1,
+  l:['Leia a mensagem do aviso: quase sempre ela diz o que falta.','Procure a mensagem no grupo da etapa e siga “O que fazer”.','Se o erro persistir depois de recarregar (F5), avise quem mantém o sistema com o texto exato do aviso.']}];
 function guiaView(){
   const n=GUIA.length,g=GUIA[gStep],last=gStep===n-1;let ph='';
   const menu=GUIA.map((x,i)=>{const h=x.f!==ph?`<div class="gph">${x.f}</div>`:'';ph=x.f;return h+`<button type="button" data-gs="${i}" ${i===gStep?'aria-current="step"':''}><b>${i<gStep?'✓':i+1}</b><span>${x.t}</span></button>`}).join('');
+  const errs=g.all?`<h3 class="gh">Erros por etapa</h3>${Object.values(ERR).map(o=>`<h4 class="geh">${o.n}</h4>${errHtml(o.l)}`).join('')}`:g.e?`<h3 class="gh">Possíveis erros neste passo</h3>${errHtml(ERR[g.e].l)}`:'';
   return `<div class="alay"><aside class="amenu gmenu" aria-label="Passos">${menu}</aside>
   <section class="gcard apane" aria-live="polite"><div class="gtop"><span class="gpill">${g.f}</span><span class="hint">Passo ${gStep+1} de ${n}</span></div><span class="mbar" style="--k:var(--act);--w:${Math.round((gStep+1)/n*100)}%"><i></i></span>
   <h2>${g.t}</h2><p class="gx">${g.x}</p>${g.m?`<div class="mk" aria-hidden="true">${g.m}</div>`:''}
   <h3 class="gh">Como fazer</h3><ol class="gl">${g.l.map(i=>`<li><span>${i}</span></li>`).join('')}</ol>
-  ${g.tip?`<div class="gtip"><b>Dica:</b> ${g.tip}</div>`:''}${g.go?`<button type="button" class="btn pri" data-go="${g.go[0]}|${g.go[1]}">${g.go[2]} →</button>`:''}
+  ${g.tip?`<div class="gtip"><b>Dica:</b> ${g.tip}</div>`:''}${errs}${g.go?`<button type="button" class="btn pri" data-go="${g.go[0]}|${g.go[1]}">${g.go[2]} →</button>`:''}
   <div class="gnav"><button type="button" class="btn" id="gp" ${gStep?'':'disabled'}>← Anterior</button><span class="sp"></span><button type="button" class="btn ${g.go?'':'pri'}" id="gn">${last?'Concluir ✔':'Avançar →'}</button></div></section></div>`}
 function bindGuia(){
   document.querySelectorAll('[data-gs]').forEach(b=>b.onclick=()=>{gStep=+b.dataset.gs;render()});
