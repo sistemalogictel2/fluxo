@@ -548,6 +548,7 @@ function cycTheme(){const i=THEMES.findIndex(x=>x[0]===themeOf());PREF.t=THEMES[
 function cycZoom(){PREF.z=((PREF.z||0)+1)%ZOOMS.length;applyPref();render()}
 const COLORS=['#fde68a','#fbcfe8','#bfdbfe','#bbf7d0','#ddd6fe','#fed7aa','#a5f3fc','#e5e7eb'];
 const COLS=[['todo','A iniciar'],['doing','Em andamento'],['wait','Aguardando'],['done','Concluídas'],['fixo','Fixo']];
+const ACT=['painel','tarefa','equipe'];let lastAct='painel',focoKpi=false;
 const EX=new Set();let colOpen,colNow,fQ='';let S={users:[],tasks:[]},view='gestao',fFunc='',fTipo='',fPessoa='',fKpi='',ME=(()=>{try{const m=JSON.parse(sessionStorage.getItem('me'));return m&&m.tk?m:null}catch(e){return null}})(),user=ME&&ME.n;
 const $=s=>document.querySelector(s);
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -701,6 +702,7 @@ function card(t,mode){
 function render(){
   if(!user){loginScreen();return}
   if(view==='func'){view='admin';adminSec='func'}if(!allowed(view))view='painel';
+  if(ACT.includes(view))lastAct=view;
   try{sessionStorage.setItem('ui',JSON.stringify({view,adminSec,capMode,fCap,gStep}))}catch(e){}
   if(fTipo&&!S.tipos.some(y=>y.id===fTipo))fTipo='';
   if(fPessoa&&!personOpts().some(o=>o[0]===fPessoa))fPessoa='';
@@ -732,6 +734,20 @@ function render(){
   <div class="kpis" role="group" aria-label="Segmentar por situação">${kp('open',open,'em aberto')}${kp('late',B.filter(late).length,'atrasadas')}${kp('done',B.filter(t=>t.status==='done').length,'concluídas')}</div></div>${['guia','med','gestao'].includes(view)?'':bar()}</div>
   <div class="shell${isAdm()?'':' nosb'}">${medSide()}<main id="main" tabindex="-1">${body}</main></div>`;
   bind();setHH();titulo();if(view==='guia')bindGuia();if(view==='cap')bindCap();if(view==='admin')bindAdmin();
+  if(focoKpi){focoKpi=false;focaAtividades()}
+}
+function focaAtividades(){
+  const m=$('#main'),h=$('.stk');if(!m)return;
+  const y=Math.max(0,m.getBoundingClientRect().top+window.scrollY-(h?h.offsetHeight:0));
+  try{m.focus({preventScroll:true})}catch(e){}
+  window.scrollTo({top:y,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});
+  const c=m.querySelector('.card');if(c)m.scrollLeft=Math.max(0,(c.closest('.col')||c).offsetLeft-12);
+}
+function kpiGo(k){
+  const naAba=ACT.includes(view);
+  fKpi=(naAba&&fKpi===k)?'':k;
+  if(!naAba)view=lastAct;
+  colOpen=undefined;focoKpi=true;ANIM=true;render();
 }
 function setHH(){const e=$('.stk');if(e)document.documentElement.style.setProperty('--hh',e.offsetHeight+'px')}
 addEventListener('resize',setHH);
@@ -748,7 +764,7 @@ function bind(){
   $('#bn').onclick=()=>openTask();$('#bt').onclick=cycTheme;$('#bz').onclick=cycZoom;[['fl-t',v=>fTipo=v],['fl-p',v=>fPessoa=v]].forEach(([id,fn])=>{const e=$('#'+id);if(e)e.onchange=()=>{fn(e.value);render()}});
   const fx=$('#fl-x');if(fx)fx.onclick=()=>{fTipo=fPessoa=fKpi=fCap=fQ='';render()};
   const fq=$('#fq');if(fq)fq.oninput=()=>{clearTimeout(fq._t);fq._t=setTimeout(()=>{fQ=fq.value;const p=fq.selectionStart;render();const n=$('#fq');if(n){n.focus();n.setSelectionRange(p,p)}},180)};
-  document.querySelectorAll('button.kpi').forEach(b=>b.onclick=()=>{fKpi=fKpi===b.dataset.k?'':b.dataset.k;render()});
+  document.querySelectorAll('button.kpi').forEach(b=>b.onclick=()=>kpiGo(b.dataset.k));
   $('#bo').onclick=()=>{sessionStorage.removeItem('me');ME=user=null;USR=null;view='gestao';render()};
   document.querySelectorAll('[data-fin]').forEach(b=>b.onclick=null);
   document.querySelectorAll('.xa').forEach(b=>b.onclick=()=>{const ids=[...b.closest('.col').querySelectorAll('.card')].map(c=>c.dataset.id),all=ids.every(i=>EX.has(i));ids.forEach(i=>all?EX.delete(i):EX.add(i));render()});
