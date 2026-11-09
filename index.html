@@ -551,10 +551,10 @@ function loginScreen(){
 /* ---------- Menu lateral: medições ---------- */
 function medSide(){
   const T=S.tasks.filter(vis);
-  const L=(S.medicoes||[]).map(m=>{const X=T.filter(t=>tipoOf(t)&&tipoOf(t).med===m.id);return{m,n:X.length,d:X.filter(t=>t.status==='done').length,cor:m.cor||(S.tipos.find(y=>y.med===m.id)||{}).cor||'var(--ac)'}})
+  const L=(S.medicoes||[]).map(m=>{const X=T.filter(t=>tipoOf(t)&&tipoOf(t).med===m.id);return{m,t:(m.itens||[]).length,n:X.length,d:X.filter(t=>t.status==='done').length,cor:m.cor||(S.tipos.find(y=>y.med===m.id)||{}).cor||'var(--ac)'}})
     .filter(x=>isAdm()||x.n).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999')||a.m.nome.localeCompare(b.m.nome,'pt-BR'));
-  return `<aside class="msb" aria-label="Medições cadastradas"><h2 class="msh">Medições <em>${L.length}</em></h2><div class="msl">${L.map(({m,n,d,cor})=>{const lt=!!m.prazo&&m.prazo<today()&&d<n;
-    const o=MX.has(m.id);return `<article class="mdc${lt?' late':''}${o?' open':''}" style="--c:${cor}"><button type="button" class="mdh" data-mx="${esc(m.id)}" aria-expanded="${o}" title="${o?'Recolher':'Ver informações'}"><span class="mdn">${esc(m.nome)}${lt?' ⚠':''}</span><span class="mdg" aria-hidden="true">${o?'▴':'▾'}</span></button><div class="mdb"><div class="mdr"><span>Tarefas</span><b>${n}</b></div><div class="mdr"><span>Concluídas</span><b>${d}</b></div><div class="mdr mdp"><span>Prazo de entrega</span><b>${m.prazo?fmt(m.prazo)+(lt?' ⚠':''):'Sem prazo'}</b></div></div></article>`}).join('')||'<div class="empty">Nenhuma medição cadastrada.</div>'}</div></aside>`}
+  return `<aside class="msb" aria-label="Medições cadastradas"><h2 class="msh">Medições <em>${L.length}</em></h2><div class="msl">${L.map(({m,t,n,d,cor})=>{const lt=!!m.prazo&&m.prazo<today()&&d<(t||n);
+    const o=MX.has(m.id);return `<article class="mdc${lt?' late':''}${o?' open':''}" style="--c:${cor}"><button type="button" class="mdh" data-mx="${esc(m.id)}" aria-expanded="${o}" title="${o?'Recolher':'Ver informações'}"><span class="mdn">${esc(m.nome)}${lt?' ⚠':''}</span><span class="mdg" aria-hidden="true">${o?'▴':'▾'}</span></button><div class="mdb"><div class="mdr"><span>Tarefas</span><b>${t}</b></div><div class="mdr"><span>Cadastradas</span><b>${n}</b></div><div class="mdr"><span>Concluídas</span><b>${d}</b></div><div class="mdr mdp"><span>Prazo de entrega</span><b>${m.prazo?fmt(m.prazo)+(lt?' ⚠':''):'Sem prazo'}</b></div></div></article>`}).join('')||'<div class="empty">Nenhuma medição cadastrada.</div>'}</div></aside>`}
 /* ---------- Usuários (definidos no banco) ---------- */
 function usrPane(){
   const cn=id=>{const c=(S.contatos||[]).find(x=>x.id===id);return c?c.nome:''};
@@ -874,8 +874,8 @@ const GUIA=[
   l:['No card, o botão “Finalizar meu passo” aparece quando é a sua vez.','Ao finalizar, a tarefa aparece para o próximo funcionário.','No último passo, a tarefa é concluída.','Gestores podem finalizar, avançar ou devolver qualquer passo, abrindo o card.','Na devolução, escolha o motivo: administrativa não altera a nota; negativa exige observação e reduz a nota.'],
   tip:'Use as anotações do card para registrar o que aconteceu em cada passo.'},
  {f:'Acompanhar',t:'Veja as medições no menu lateral',x:'O menu à esquerda, em todas as abas, mostra o andamento de cada medição.',
-  m:'<span class="nd">Calisto<small>Tarefas 12 · Concluídas 5 · Prazo 30/12</small></span>',
-  l:['Cada medição aparece recolhida, só com o nome e a cor escolhida.','Clique no nome para ver tarefas, concluídas e prazo de entrega.','Se o prazo venceu e ainda há tarefa aberta, o nome ganha ⚠ e o card fica com borda vermelha.','Usuário Normal vê só as medições em que tem tarefa.']},
+  m:'<span class="nd">Calisto<small>Tarefas 12 · Cadastradas 8 · Concluídas 5 · Prazo 30/12</small></span>',
+  l:['Cada medição aparece recolhida, só com o nome e a cor escolhida.','Clique no nome para ver: Tarefas (total de itens da medição), Cadastradas (já criadas no Fluxo), Concluídas e o prazo de entrega.','Se o prazo venceu e ainda há tarefa aberta, o nome ganha ⚠ e o card fica com borda vermelha.','Usuário Normal vê só as medições em que tem tarefa.']},
  {f:'Acompanhar',t:'Veja por tarefa',x:'Cada coluna é um tipo de fluxo, com os funcionários que estão nele agora.',
   m:'<div class="mc" style="--k:var(--ac)"><b>Calisto</b><i></i><i></i><i></i></div><div class="mc" style="--k:var(--ac2)"><b>Projetos</b><i></i><i></i></div>',
   l:['Abra a aba Por tarefa.','Cada coluna é um tipo de fluxo e lista os funcionários que têm tarefas dele; o número mostra quantas.','Clique no nome do funcionário para ver os cards das tarefas dele nesse tipo.','Clique em um card para abrir a tarefa.'],
@@ -921,7 +921,7 @@ function openMedicao(id){
   const m=(S.medicoes||[]).find(x=>x.id===id)||{nome:'',dir:'',itens:[]},isNew=!id;
   const [d,close]=dlg(`<form method="dialog"><div class="dh"><h2>${isNew?'Nova medição':'Editar medição'}</h2><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
   <div class="db"><div class="full"><label for="mn">Nome da medição *</label><input type="text" id="mn" required value="${esc(m.nome)}"><div class="hint">É o nome que o fluxo e as tarefas vão usar. Ex.: Calisto</div></div>
-  <div class="full"><label for="mi">Itens (um por linha) *</label><textarea id="mi" rows="6" required placeholder="Engenho Novo&#10;Engenho de Dentro&#10;Cachambi">${esc(m.itens.join('\n'))}</textarea><div class="hint">Cada item vira uma opção de título ao criar a tarefa.</div></div>
+  <div class="full"><label for="mi">Itens (um por linha) *</label><textarea id="mi" rows="6" required placeholder="Engenho Novo&#10;Engenho de Dentro&#10;Cachambi">${esc(m.itens.join('\n'))}</textarea><div class="hint">Cada item é uma tarefa da medição: o total de itens é o total de tarefas, e cada um vira uma opção de título ao criar a tarefa.</div></div>
   <div class="full"><label for="md">Diretório pai (caminho na rede)</label><input type="text" id="md" placeholder="\\\\servidor\\projetos\\Calisto" value="${esc(m.dir)}"><div class="hint">O botão “Copiar caminho na rede” da tarefa copia este caminho + o título do item (mesmo nome da pasta).</div></div>
   <div class="full"><label id="mcl">Cor do card</label><div class="sw" role="radiogroup" aria-labelledby="mcl">${COLORS.map(c=>`<label><input type="radio" name="mc" value="${c}" ${c===(m.cor||COLORS[0])?'checked':''}><span style="--c:${c}"></span><span class="sr">Cor ${c}</span></label>`).join('')}</div></div>
   <div class="full"><label for="mp">Prazo de entrega</label><input type="date" id="mp" value="${esc(m.prazo||'')}"><div class="hint">Aparece sempre no card da medição, no menu lateral.</div></div></div>
