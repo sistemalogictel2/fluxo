@@ -519,6 +519,17 @@ button.gs-row{cursor:pointer}button.gs-row:hover,.gs-row .gm:hover b{text-decora
 .btn.wa,:root[data-theme=light] .btn.wa{background:#fff;border-color:#25d366;color:#0b5a2b;font-weight:700}
 .btn.wa:hover{background:#eafff2}.btn.wa.off{background:#fff;color:#0b5a2b}
 .gs-row .tag.ok{background:color-mix(in srgb,var(--ac2) 22%,transparent);color:var(--ac2);font-weight:700}
+
+/* ===== Menu lateral só para gestor ===== */
+.shell.nosb>main{border-left:0}
+/* ===== Notificação: tarefa mudou de posto ===== */
+.tag.mv{background:color-mix(in srgb,var(--ac2) 22%,transparent);color:var(--ac2);font-weight:700;display:inline-block;max-width:100%;white-space:normal}
+.card:has(.tag.mv):not(:has(.tag.late)){box-shadow:inset 5px 0 0 var(--ac2),0 2px 8px var(--sh)}
+.postit .card .tag.mv{background:#0f766e26;color:#0b4f48}
+.mvd{font-size:12.5px;color:var(--mu);margin-top:4px;overflow-wrap:anywhere}
+.vl>.mvd{margin:0 0 12px;padding:8px 10px;border-left:4px solid var(--ac2);background:var(--s2);border-radius:8px;font-size:13.5px;color:var(--tx)}
+.mvbar{margin:0 0 14px}
+.mvbar .btn{align-self:flex-start;min-height:34px;padding:4px 12px}
 </style>
 </head>
 <body>
@@ -567,8 +578,8 @@ async function sbPoll(){
   if(!SB.ok||SB.busy||SB.dirty||!user||document.querySelector('dialog[open]')||document.activeElement?.matches?.('input,textarea,select'))return;
   try{const o=await sbPull();
     const same=TB.every(([k])=>{const a=mapOf(o[k]),b=LAST[k]||new Map();return a.size===b.size&&[...a].every(([i,s])=>b.get(i)===s)});
-    if(!same){const antes=new Set(vez());applyRemote(o);ensureTipos();if(ME&&!ME.adm&&!meC())ME=user=null;render();
-      const nv=vez().filter(i=>!antes.has(i));if(nv.length)toast(nv.length>1?nv.length+' tarefas novas na sua vez':'Nova tarefa na sua vez: '+nome(S.tasks.find(x=>x.id===nv[0])))}}catch(e){}}
+    if(!same){const antes=new Set(vez()),mv0=new Map(S.tasks.map(t=>[t.id,t.mov?t.mov.t:0]));applyRemote(o);ensureTipos();if(ME&&!ME.adm&&!meC())ME=user=null;render();
+      const nv=vez().filter(i=>!antes.has(i));if(nv.length)toast(nv.length>1?nv.length+' tarefas novas na sua vez':'Nova tarefa na sua vez: '+nome(S.tasks.find(x=>x.id===nv[0])));else if(isAdm()){const ch=S.tasks.filter(t=>t.mov&&t.mov.por!==user&&t.mov.t>(mv0.get(t.id)||0));if(ch.length)toast(ch.length>1?ch.length+' tarefas mudaram de posto':'Mudou de posto: '+nome(ch[0])+' → '+(ch[0].mov.pp||'concluída'))}}}catch(e){}}
 let lastSave=null;
 const stText=()=>SB.on?(SB.ok?(SB.dirty?'⚠ Alterações pendentes de envio ao banco':'● Supabase conectado')+(lastSave?' · '+lastSave.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''):'○ Sem conexão · NÃO está salvando no banco'):'';
 const stUpd=()=>{const e=$('#fs');if(e)e.textContent=stText()};
@@ -600,8 +611,23 @@ const isAdm=()=>!!(ME&&ME.adm);
 const meC=()=>ME?(S.contatos||[]).find(c=>ME.cid?c.id===ME.cid:first(c.nome)===first(ME.n)):null;
 const mine=f=>{const c=meC();return !!c&&!!f&&pkey(f.pessoa)==='c:'+c.id};
 const vez=()=>user?S.tasks.filter(t=>t.status!=='done'&&mine(cur(t))).map(t=>t.id):[];
-const titulo=()=>{const n=vez().length;document.title=(n?`(${n}) `:'')+'Fluxo · Organizador de Tarefas'};
+const titulo=()=>{const n=vez().length+(isAdm()?S.tasks.filter(movNew).length:0);document.title=(n?`(${n}) `:'')+'Fluxo · Organizador de Tarefas'};
 const vis=t=>isAdm()||t.fluxo.some(mine);
+/* ---------- Notificação: tarefa mudou de posto (para o gestor) ---------- */
+const MOV_DIAS=7;
+let _vc=null,_vk='';
+const vistos=()=>{const k='fluxo-vistos:'+nk(user);if(_vc&&_vk===k)return _vc;_vk=k;try{_vc=JSON.parse(localStorage.getItem(k)||'{}')||{}}catch(e){_vc={}}return _vc};
+function setVisto(ids){const v=vistos();ids.forEach(i=>{const t=S.tasks.find(x=>x.id===i);if(t&&t.mov)v[i]=t.mov.t});Object.keys(v).forEach(k=>{if(!S.tasks.some(x=>x.id===k))delete v[k]});try{localStorage.setItem(_vk,JSON.stringify(v))}catch(e){}}
+const movNew=t=>isAdm()&&!!t.mov&&t.mov.por!==user&&Date.now()-t.mov.t<MOV_DIAS*864e5&&t.mov.t>(vistos()[t.id]||0);
+const ago=ts=>{const m=Math.max(0,Math.floor((Date.now()-ts)/6e4));return m<1?'agora':m<60?m+' min':m<1440?Math.floor(m/60)+' h':Math.floor(m/1440)+' d'};
+const movLine=m=>m.tp==='d'?`↩ Devolvida: ${m.dp} (${m.de}) → ${m.pp} (${m.para})`:m.fim?`✔ ${m.dp} concluiu "${m.de}" · tarefa concluída`:`${m.dp} (${m.de}) → ${m.pp} (${m.para})`;
+const movTag=m=>m.tp==='d'?'Devolvida':m.fim?'Concluída':'Novo posto';
+const snap=t=>{const h=cur(t);return h?{i:t.passo,e:h.etapa,p:h.pessoa}:{i:-1,e:'',p:''}};
+const mvBadge=()=>{if(!isAdm())return'';const n=S.tasks.filter(movNew).length;return n?` <em class="nb" aria-label="${n} tarefa(s) mudaram de posto">${n}</em>`:''};
+const mvRows=(L,max)=>L.slice(0,max).map(t=>{const m=t.mov;return `<div class="gs-row" style="--c:${corOf(t)}"><button type="button" class="gm" data-gv="${t.id}"><b>${esc(nome(t))}</b><small>${esc(movLine(m))} · há ${ago(m.t)}${m.por?' · por '+esc(shortName(m.por)):''}</small></button><span class="tag mv">${movTag(m)}</span></div>`}).join('')+(L.length>max?`<p class="hint">+ ${L.length-max} na aba Todas as tarefas.</p>`:'');
+function mvSec(max){const L=S.tasks.filter(movNew).sort((a,b)=>b.mov.t-a.mov.t);if(!L.length)return'';
+  return `<section class="gs-sec mvbar" aria-label="Tarefas que mudaram de posto"><h3>🔔 Mudaram de posto <em>${L.length}</em></h3>${mvRows(L,max)}<button type="button" class="btn" data-mvall>✓ Marcar todas como vistas</button></section>`}
+document.addEventListener('click',e=>{if(e.target.closest('[data-mvall]')){setVisto(S.tasks.filter(movNew).map(t=>t.id));render()}});
 const NAV=[['gestao','Gestão'],['painel','Todas as tarefas'],['tarefa','Por tarefa'],['equipe','Por funcionário'],['med','Medições'],['cap','Capacidade'],['admin','Administração'],['guia','Passo a passo']];
 const allowed=v=>isAdm()||v==='painel';
 let USR=null;const MX=new Set();
@@ -626,6 +652,7 @@ function loginScreen(){
 }
 /* ---------- Menu lateral: medições ---------- */
 function medSide(){
+  if(!isAdm())return'';
   const T=S.tasks.filter(vis);
   const L=(S.medicoes||[]).map(m=>{const X=T.filter(t=>daMed(tipoOf(t),m));return{m,t:(m.itens||[]).length,n:X.length,d:X.filter(t=>t.status==='done').length,cor:corMed(m)}})
     .filter(x=>isAdm()||x.n).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999')||a.m.nome.localeCompare(b.m.nome,'pt-BR'));
@@ -667,7 +694,7 @@ function card(t,mode){
   const ex=EX.has(t.id);
   return `<div class="card${ex?'':' co'}" role="button" tabindex="0" style="--c:${corOf(t)}" draggable="${mode==='k'&&isAdm()}" data-id="${t.id}" aria-label="Abrir tarefa ${esc(nome(t))}. ${step}">
   <span class="tg" role="button" aria-label="${ex?'Recolher':'Expandir'}" aria-expanded="${ex}" title="${ex?'Recolher':'Expandir'}">${ex?'▴':'▾'}</span><h3>${esc(nome(t))}</h3>${t.sub?`<div class="sub">${esc(t.sub)}</div>`:''}
-  <div class="step">${step}${late(t)&&!ex?' <span class="tag late">⚠</span>':''}${mode==='k'&&c?` <span class="sub">→ ${esc(c.pessoa)}</span>`:''}${mine(c)?' <span class="tag vez">Sua vez</span>':''}</div><div class="dots" aria-hidden="true">${dots}</div>${mine(c)?`<button type="button" class="btn pri fin" data-fin="${t.id}">✔ Finalizar meu passo</button>`:''}
+  <div class="step">${step}${late(t)&&!ex?' <span class="tag late">⚠</span>':''}${movNew(t)?` <span class="tag mv" title="${esc(movLine(t.mov))}">🔔 ${t.mov.tp==='d'?'Devolvida':t.mov.fim?'Concluída':'Novo posto'}${t.mov.pp&&!t.mov.fim?': '+esc(shortName(t.mov.pp)):''}</span>`:''}${mode==='k'&&c?` <span class="sub">→ ${esc(c.pessoa)}</span>`:''}${mine(c)?' <span class="tag vez">Sua vez</span>':''}</div><div class="dots" aria-hidden="true">${dots}</div>${ex&&movNew(t)?`<div class="mvd">${esc(movLine(t.mov))} · há ${ago(t.mov.t)}</div>`:''}${mine(c)?`<button type="button" class="btn pri fin" data-fin="${t.id}">✔ Finalizar meu passo</button>`:''}
   <div class="meta">${tipoTag(t)}${t.protocolo?`<span class="tag">Prot. ${esc(t.protocolo)}</span>`:''}${t.portal?`<span class="tag">${esc(t.portal)}</span>`:''}
   ${t.final?`<span class="tag">Entrega ${fmt(t.final)}</span>`:''}${late(t)?'<span class="tag late">⚠ Atrasada</span>':''}</div></div>`;
 }
@@ -697,13 +724,13 @@ function render(){
       return `<section class="col" aria-label="${esc(p)}"><h2><span><span class="avatar" aria-hidden="true">${esc(p[0])}</span>${esc(p)}</span><span><button type="button" class="xa" data-xa title="Expandir/recolher todos" aria-label="Expandir ou recolher todos">⇕</button><em>${L.length}</em></span></h2><div class="list">${L.map((t,j)=>card(t,'p').replace('class="card"',`class="card" style="--rot:${(j%2?1:-1)*(0.6+j%3*0.4)}deg;--c:${corOf(t)}"`)).join('')||'<div class="empty">Sem atividades</div>'}</div></section>`}).join('')||'<div class="empty" style="width:100%">Crie uma tarefa com fluxo para ver os funcionários aqui.</div>'}</div>`;
   }
   $('#app').innerHTML=`<div class="stk"><header><div class="logo">Flu<b>xo</b></div>
-  <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" ${view===v?'aria-current="page"':''}>${v==='painel'&&!isAdm()?'Minhas tarefas':l}${v==='gestao'?gBadge():''}</button>`).join('')}</nav>
+  <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" ${view===v?'aria-current="page"':''}>${v==='painel'&&!isAdm()?'Minhas tarefas':l}${v==='gestao'?gBadge():''}${v==='tarefa'?mvBadge():''}</button>`).join('')}</nav>
   <div class="sp"></div><span class="status" id="fs" role="status">${esc(stText())}</span>
   <span class="ap" role="group" aria-label="Aparência"><button class="btn" id="bt" title="Trocar tema (tecla T)" aria-label="Tema ${THEMES.find(x=>x[0]===themeOf())[1]}. Trocar tema">◐</button><button class="btn" id="bz" title="Tamanho do texto" aria-label="Tamanho do texto ${Math.round(ZOOMS[PREF.z||0]*100)}%. Alterar">Aa</button></span>
   <button class="btn pri" id="bn" ${isAdm()?'':'hidden'} title="Nova tarefa (tecla N)">+ Nova tarefa</button><button class="btn" id="bo" aria-label="Sair de ${esc(user)}">Sair</button></header>
   <div class="top">${hero()}
   <div class="kpis" role="group" aria-label="Segmentar por situação">${kp('open',open,'em aberto')}${kp('late',B.filter(late).length,'atrasadas')}${kp('done',B.filter(t=>t.status==='done').length,'concluídas')}</div></div>${['guia','med','gestao'].includes(view)?'':bar()}</div>
-  <div class="shell">${medSide()}<main id="main" tabindex="-1">${body}</main></div>`;
+  <div class="shell${isAdm()?'':' nosb'}">${medSide()}<main id="main" tabindex="-1">${body}</main></div>`;
   bind();setHH();titulo();if(view==='guia')bindGuia();if(view==='cap')bindCap();if(view==='admin')bindAdmin();
 }
 function setHH(){const e=$('.stk');if(e)document.documentElement.style.setProperty('--hh',e.offsetHeight+'px')}
@@ -810,10 +837,10 @@ function tarefaView(TF){
   const cols=S.tipos.filter(y=>!fTipo||y.id===fTipo).map(y=>({id:y.id,nome:y.nome,cor:y.cor,sub:metaTxt(y)}));
   if(!fTipo)cols.push({id:'',nome:'Sem tipo',cor:'#9aa4b8',sub:'Sem meta'});
   const h=cols.map(c=>{const m=new Map();
-    L.filter(t=>tpTipo(t)===c.id).forEach(t=>{const w=holder(t);if(!w)return;const k=pkey(w.pessoa);if(!m.has(k))m.set(k,{k,n:nm.get(k)||w.pessoa,q:0});m.get(k).q++});
+    L.filter(t=>tpTipo(t)===c.id).forEach(t=>{const w=holder(t);if(!w)return;const k=pkey(w.pessoa);if(!m.has(k))m.set(k,{k,n:nm.get(k)||w.pessoa,q:0,mv:0});m.get(k).q++;if(movNew(t))m.get(k).mv++});
     const P=[...m.values()].sort((x,y)=>y.q-x.q||x.n.localeCompare(y.n,'pt-BR'));
-    return P.length?`<section class="col" aria-label="${esc(c.nome)}"><h2><span><i class="dotc" style="background:${c.cor}"></i>${esc(c.nome)}</span><span><em>${P.length}</em></span></h2><div class="hint" style="margin:-6px 6px 8px">${esc(c.sub)}</div><div class="list">${P.map(p=>`<button type="button" class="pcap" data-pk="${esc(p.k)}" data-tp="${esc(c.id)}" style="--k:${c.cor}" aria-label="${esc(p.n)}: ${p.q} tarefa(s) em ${esc(c.nome)}. Ver tarefas"><span class="pn"><span>${esc(p.n)}</span><span class="pct2">${p.q}</span></span><small>${p.q} tarefa(s) neste tipo</small></button>`).join('')}</div></section>`:''}).join('');
-  return h?`<div class="board">${h}</div>`:'<div class="empty">Nenhuma tarefa com funcionário neste filtro.</div>'}
+    return P.length?`<section class="col" aria-label="${esc(c.nome)}"><h2><span><i class="dotc" style="background:${c.cor}"></i>${esc(c.nome)}</span><span>${(mvc=>mvc?`<span class="tag mv" title="${mvc} tarefa(s) mudaram de posto">🔔 ${mvc}</span> `:'')(P.reduce((a,p)=>a+p.mv,0))}<em>${P.length}</em></span></h2><div class="hint" style="margin:-6px 6px 8px">${esc(c.sub)}</div><div class="list">${P.map(p=>`<button type="button" class="pcap" data-pk="${esc(p.k)}" data-tp="${esc(c.id)}" style="--k:${c.cor}" aria-label="${esc(p.n)}: ${p.q} tarefa(s) em ${esc(c.nome)}. Ver tarefas"><span class="pn"><span>${esc(p.n)}</span><span class="pct2">${p.q}</span></span><small>${p.q} tarefa(s) neste tipo</small>${p.mv?`<small><span class="tag mv">🔔 ${p.mv} mudou(aram) de posto</span></small>`:''}</button>`).join('')}</div></section>`:''}).join('');
+  return mvSec(5)+(h?`<div class="board">${h}</div>`:'<div class="empty">Nenhuma tarefa com funcionário neste filtro.</div>')}
 function openTP(pk,tid){
   const nm=new Map(flowPeople()),y=S.tipos.find(x=>x.id===tid);
   const L=srt(base().filter(kpiOk).filter(tpOpen).filter(t=>tpTipo(t)===tid&&holder(t)&&pkey(holder(t).pessoa)===pk));
@@ -1050,7 +1077,7 @@ function bindAdmin(){
   if(adminSec==='func')bindFunc();if(adminSec==='usr'){if(USR===null)loadUsr();const nu=$('#nu');if(nu)nu.onclick=()=>openUsuario();document.querySelectorAll('[data-eu]').forEach(b=>b.onclick=()=>openUsuario(b.dataset.eu))}}
 function dlg(html,color){
   const d=document.createElement('dialog');d.style.setProperty('--c',color);d.innerHTML=html;document.body.appendChild(d);d.showModal();d.querySelectorAll('.vb section>*,.db>*').forEach((e,i)=>e.style.setProperty('--j',Math.min(i,10)));
-  const close=()=>{if(d._c)return;d._c=1;d.classList.add('out');setTimeout(()=>{d.close();d.remove()},170)};d.addEventListener('cancel',e=>{e.preventDefault();close()});d.addEventListener('mousedown',e=>{if(e.target===d)d._bd=1;else d._bd=0});d.addEventListener('click',e=>{if(e.target===d&&d._bd)close()});d.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter'){const f=d.querySelector('form');if(f&&f.reportValidity())f.requestSubmit()}});d.querySelector('#x').onclick=close;return[d,close];
+  const close=()=>{if(d._c)return;d._c=1;if(d._oc){try{d._oc()}catch(e){console.error(e)}}d.classList.add('out');setTimeout(()=>{d.close();d.remove()},170)};d.addEventListener('cancel',e=>{e.preventDefault();close()});d.addEventListener('mousedown',e=>{if(e.target===d)d._bd=1;else d._bd=0});d.addEventListener('click',e=>{if(e.target===d&&d._bd)close()});d.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter'){const f=d.querySelector('form');if(f&&f.reportValidity())f.requestSubmit()}});d.querySelector('#x').onclick=close;return[d,close];
 }
 function openCampo(id){
   const c=campos().find(x=>x.id===id)||{nome:'',tipo:'texto'},isNew=!id;
@@ -1181,11 +1208,11 @@ async function avancar0(id,dir,x){
     if(dir===1){c.ok=Date.now();c.por=user;(t.ev=t.ev||[]).push({k:'f',i:t.passo,p:c.pessoa,t:Date.now()})}
     if(t.passo>=n-1){if(t.status==='fixo'){t.passo=0;t.fluxo.forEach(f=>{delete f.ok;delete f.por})}else t.status='done'}
     else{t.passo++;if(t.status==='todo')t.status='doing'}
-    const nx=cur(t);txt=(dir===1?`✔ ${c.etapa} finalizado`:`⏭ ${c.etapa} avançado por ${user}`)+(nx?` → próximo: ${nx.etapa} (${nx.pessoa})`:' · tarefa concluída');toast(nx?(dir===1?'Passo finalizado → ':'Passo avançado → ')+nx.pessoa:'Tarefa concluída ✔')
+    const nx=cur(t);t.mov={t:Date.now(),tp:dir===1?'f':'a',de:c.etapa,dp:c.pessoa,para:nx?nx.etapa:'',pp:nx?nx.pessoa:'',fim:nx?0:1,por:user};txt=(dir===1?`✔ ${c.etapa} finalizado`:`⏭ ${c.etapa} avançado por ${user}`)+(nx?` → próximo: ${nx.etapa} (${nx.pessoa})`:' · tarefa concluída');toast(nx?(dir===1?'Passo finalizado → ':'Passo avançado → ')+nx.pessoa:'Tarefa concluída ✔')
   }else{
     if(!isAdm())return;
-    if(t.status==='done')t.status='doing';else if(t.passo>0)t.passo--;else return;
-    const f=t.fluxo[t.passo],tp=(x&&x.tp)||'adm',ob=(x&&x.obs)||'';delete f.ok;delete f.por;(t.ev=t.ev||[]).push({k:'d',i:t.passo,p:f.pessoa,tp,obs:ob,por:user,t:Date.now()});txt=`Devolvido ao passo ${t.passo+1} (${f.etapa}) · ${f.pessoa} · ${tp==='neg'?'negativa':'administrativa'}`+(ob?': '+ob:'')
+    const antes=c||t.fluxo[n-1];if(t.status==='done')t.status='doing';else if(t.passo>0)t.passo--;else return;
+    const f=t.fluxo[t.passo],tp=(x&&x.tp)||'adm',ob=(x&&x.obs)||'';t.mov={t:Date.now(),tp:'d',de:antes.etapa,dp:antes.pessoa,para:f.etapa,pp:f.pessoa,neg:tp==='neg'?1:0,por:user};delete f.ok;delete f.por;(t.ev=t.ev||[]).push({k:'d',i:t.passo,p:f.pessoa,tp,obs:ob,por:user,t:Date.now()});txt=`Devolvido ao passo ${t.passo+1} (${f.etapa}) · ${f.pessoa} · ${tp==='neg'?'negativa':'administrativa'}`+(ob?': '+ob:'')
   }
   (t.notas=t.notas||[]).push({u:user,t:Date.now(),txt});await save();render();
 }
@@ -1227,7 +1254,7 @@ function openView(id){
   const ml=ct&&ct.email?`<div class="mailbox"><span class="ml"><small>✉ E-mail · ${esc(who.pessoa)}</small><b>${esc(ct.email)}</b></span><button type="button" class="btn mail" id="em" aria-label="Copiar e-mail de ${esc(who.pessoa)}">⧉ Copiar</button></div>`:`<button type="button" class="btn mail off" data-miss>✉ E-mail${who?' · '+esc(who.pessoa):''}</button>`;
   const [d,close]=dlg(`<div class="dh"><div><div class="vt">${tipoTag(t)}<span class="sb">${stepTxt}</span></div><h2 id="dt">${esc(nome(t))}</h2></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
   <div class="vb"><section class="vg"><ol class="stp">${steps||'<li>Sem passos</li>'}</ol>
-  <div class="vl"><div class="kv">${kv.map(([k,v])=>`<div><label>${k}</label><span>${esc(v)}</span></div>`).join('')}</div>
+  <div class="vl">${A&&t.mov?`<div class="mvd">Última mudança de posto: ${esc(movLine(t.mov))} · ${dt(t.mov.t)}${t.mov.por?' · por '+esc(t.mov.por):''}</div>`:''}<div class="kv">${kv.map(([k,v])=>`<div><label>${k}</label><span>${esc(v)}</span></div>`).join('')}</div>
   ${blocks}${blocks.includes('data-sf')?'<button type="button" class="btn" id="sv" style="margin-bottom:14px">Salvar campos</button>':''}
   ${campos().filter(c=>c.tipo==='longo'&&t[c.id]&&!SF.has(c.id)).map(c=>`<label>${esc(c.nome)}</label><p class="obs">${esc(t[c.id])}</p>`).join('')}</div>
   <aside class="vr" aria-label="Anotações e histórico"><label>Anotações</label><div class="notes">${anot||'<div class="hint">Nenhuma anotação.</div>'}</div>${noteBox}
@@ -1235,11 +1262,15 @@ function openView(id){
   <div class="df">${c&&(A||mine(c))?`<button type="button" class="btn pri" id="fin">✔ Finalizar ${mine(c)?'meu passo':'passo de '+esc(c.pessoa)}</button>`:''}${A&&(t.status==='done'||t.passo>0)?'<button type="button" class="btn" id="bk">← Voltar passo</button>':''}${A&&c?'<button type="button" class="btn" id="av">Avançar passo →</button>':''}${A?wa+ml:''}${dirOf(t)?`<button type="button" class="btn" data-dir="${t.id}">📋 Copiar caminho na rede</button>`:''}<span class="sp"></span>${A?'<button type="button" class="btn" id="ed">✎ Editar</button>':''}</div>`,corOf(t));
   d.classList.add('view');d.setAttribute('aria-labelledby','dt');
   const on=(s,f)=>{const e=d.querySelector(s);if(e)e.onclick=f};
+  const seenNow=movNew(t);if(seenNow)setVisto([id]);
   bindMasks(d);
-  const saveF=async()=>{let ch=0;d.querySelectorAll('[data-sf]').forEach(e=>{const c=campos().find(x=>x.id===e.dataset.sf);if(c){t[c.id]=readVal(c,e);ch=1}});if(ch)await save()};
+  const saveF=async(force)=>{let ch=0;d.querySelectorAll('[data-sf]').forEach(e=>{const c=campos().find(x=>x.id===e.dataset.sf);if(!c)return;const v=readVal(c,e);if((t[c.id]??'')!==v){t[c.id]=v;ch=1}});if(ch||force)await save();return ch};
+  /* Salva sozinho ao sair do campo e ao fechar a janela: nada digitado se perde */
+  d.querySelectorAll('[data-sf]').forEach(e=>e.addEventListener('change',async()=>{if(await saveF()&&SB.on&&SB.ok&&!SB.dirty)toast('Salvo no banco ✔')}));
+  d._oc=()=>{saveF();if(seenNow)render()};
   on('#nb',async()=>{const x=d.querySelector('#na').value.trim();if(!x){toast('Escreva a anotação');return}await saveF();const ns=d.querySelector('#ns');(t.anot=t.anot||[]).push({id:'a'+Date.now(),passo:ns?+ns.value:t.passo,u:user,t:Date.now(),txt:x});await save();close();render();openView(id)});
   d.querySelectorAll('[data-da]').forEach(b=>b.onclick=async()=>{if(!confirm('Excluir esta anotação?'))return;t.anot=(t.anot||[]).filter(a=>a.id!==b.dataset.da);await save();close();render();openView(id)});
-  on('#sv',async()=>{await saveF();toast('Campos salvos')});on('#av',async()=>{await saveF();close();await avancar(id,2)});
+  on('#sv',async()=>{await saveF(true);if(!SB.on)toast('Campos salvos');else if(SB.ok&&!SB.dirty)toast('Campos salvos no banco ✔')});on('#av',async()=>{await saveF();close();await avancar(id,2)});
   on('#ed',()=>{close();openTask(id)});on('#fin',async()=>{await saveF();const f=t.fluxo[t.passo],mis=((f&&f.campos)||[]).map(k=>campos().find(c=>c.id===k)).filter(c=>c&&(t[c.id]==null||String(t[c.id]).trim()===''));
     if(mis.length){toast('Preencha antes de finalizar o passo: '+mis.map(c=>c.nome).join(', '));const e=d.querySelector('[data-sf="'+mis[0].id+'"]');if(e)e.focus();return}close();await avancar(id,1)});on('#bk',()=>{close();pedirDevolucao(id)});
   const em=d.querySelector('#em');if(em)em.onclick=()=>copyText(ct.email).then(ok=>{if(ok){em.textContent='✔ Copiado';setTimeout(()=>em.textContent='⧉ Copiar',2000);toast('E-mail copiado')}else toast('Não foi possível copiar — selecione o e-mail e copie manualmente')});
@@ -1290,7 +1321,7 @@ function gestaoView(){
   const med=sec('Medições que pedem atenção',M.length,lst(M,({m,no,d,tot,dd})=>`<button type="button" class="gs-row" data-gm="${esc(m.id)}" style="--c:${corMed(m)}"><span><b>${esc(m.nome)}</b><small>${d} de ${tot} concluídos · ${no?no+' item(ns) sem tarefa':'todos cadastrados'}</small></span><span class="tag${dd!==null&&dd<0?' late':''}">${dd===null?'Sem prazo':dd<0?'Venceu há '+(-dd)+' d':dd===0?'Vence hoje':'Vence em '+dd+' d'}</span></button>`,10));
   const K=(n,l,hot)=>`<div class="gs-k${hot&&n?' hot':''}"><b>${n}</b><span>${l}</span></div>`;
   return `<div class="admin"><div class="gs-k4">${K(G.atr.length,'atrasadas',1)}${K(G.prox.length,'vencem em até 2 dias')}${K(G.par.length,'paradas há 3+ dias')}${K(M.reduce((a,x)=>a+x.no,0),'itens de medição sem tarefa',1)}</div>
-  <div class="gs-g"><div class="gs-col">${acao}</div><div class="gs-col">${pauta}${med}</div></div></div>`;
+  <div class="gs-g"><div class="gs-col">${mvSec(6)}${acao}</div><div class="gs-col">${pauta}${med}</div></div></div>`;
 }
 
 /* ---------- Aba Medições: itens cadastrados x faltando ---------- */
@@ -1365,7 +1396,9 @@ function openTask(id,pre,after){
     t.final=q('#f7').value;t.status=q('#f8').value;
     if(t.passo>=t.fluxo.length&&t.status!=='done')t.passo=Math.max(0,t.fluxo.length-1);
   };
-  q('#tf').onsubmit=async e=>{e.preventDefault();const r=ed.get();if(!r.fluxo.length||r.fluxo.some(f=>f.pessoa==='Sem responsável')){toast('Defina os passos e o responsável de cada um');return}collect();if(isNew){t.id='t'+Date.now();S.tasks.push(t)}await save();close();render();if(after)setTimeout(after,200)};
+  q('#tf').onsubmit=async e=>{e.preventDefault();const r=ed.get();if(!r.fluxo.length||r.fluxo.some(f=>f.pessoa==='Sem responsável')){toast('Defina os passos e o responsável de cada um');return}const a0=isNew?null:snap(t);collect();
+    if(a0){const a1=snap(t);if(a0.i!==a1.i||pkey(a0.p)!==pkey(a1.p))t.mov={t:Date.now(),tp:'e',de:a0.e||'—',dp:a0.p||'—',para:a1.e,pp:a1.p,fim:a1.i<0?1:0,por:user}}
+    if(isNew){t.id='t'+Date.now();S.tasks.push(t)}await save();close();render();if(after)setTimeout(after,200)};
   if(!isNew){
     
     q('#dl').onclick=async()=>{if(confirm('Excluir esta tarefa definitivamente?')){S.tasks=S.tasks.filter(x=>x.id!==id);await save();close();render()}};
