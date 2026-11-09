@@ -468,7 +468,7 @@ const fmt=d=>d?d.split('-').reverse().join('/'):'—';
 const today=()=>new Date().toISOString().slice(0,10);
 const srt=a=>[...a].sort((x,y)=>(x.final||'9999').localeCompare(y.final||'9999'));
 /* ===== SUPABASE: preencha a URL e a chave (anon / publishable) do seu projeto. Vazio = modo local ===== */
-const SB={url:'',key:'',ok:false,busy:false,get on(){return !!(this.url&&this.key)}};
+const SB={url:'https://pvpsmephuvjcenheecck.supabase.co',key:'sb_publishable_LmnDxCOjueSDpWo_4naLlg_6eoBFDLN',ok:false,busy:false,get on(){return !!(this.url&&this.key)}};
 const TB=[['tasks','fx_tarefas'],['tipos','fx_tipos'],['campos','fx_campos'],['contatos','fx_contatos'],['medicoes','fx_medicoes']];
 let LAST={},ANIM=true;
 const sbH=()=>({apikey:SB.key,...(SB.key.startsWith('eyJ')?{Authorization:'Bearer '+SB.key}:{}),'Content-Type':'application/json'});
