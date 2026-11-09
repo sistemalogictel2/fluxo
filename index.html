@@ -495,6 +495,26 @@ dialog.view{width:min(1320px,96vw)}
 }
 dialog:has(#tf){width:min(1200px,96vw)}
 @media(min-width:901px){dialog:has(#tf) .db{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* ===== Gestão ===== */
+.nb{font-style:normal;font-size:11px;font-weight:700;background:var(--bad);color:#fff;border-radius:99px;padding:0 7px;margin-left:6px}
+.gs-k4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.gs-k{background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:flex;align-items:baseline;gap:8px}.gs-k b{font-size:24px}.gs-k span{color:var(--mu);font-size:13px}.gs-k.hot b{color:var(--bad)}
+.gs-g{display:grid;gap:16px;align-items:start}.gs-col{display:flex;flex-direction:column;gap:16px;min-width:0}
+@media(min-width:1000px){.gs-g{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}}
+.gs-sec{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.gs-sec h3{margin:0;font-size:16px;display:flex;justify-content:space-between;align-items:center}.gs-sec h3 em{font-style:normal;font-size:12px;font-weight:700;background:var(--ov);border-radius:99px;padding:0 9px}
+.gs-sec h4{margin:8px 0 0;font-size:13px;color:var(--mu)}
+.gs-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--bg);border:1px solid var(--line);border-left:5px solid var(--c,var(--line2));border-radius:10px;padding:6px 8px 6px 10px;width:100%;text-align:left;color:inherit}
+.gs-row .gm{flex:1 1 200px;min-width:0;background:none;border:0;padding:0;cursor:pointer;text-align:left;display:flex;flex-direction:column}
+button.gs-row{cursor:pointer}button.gs-row:hover,.gs-row .gm:hover b{text-decoration:underline}
+.gs-row small,.gs-p small{color:var(--mu);font-size:12.5px}.gs-row .btn{min-height:34px;padding:4px 10px}.gs-row .tag{flex:none}.gs-row>b,.gs-row .gm b{overflow-wrap:anywhere}
+.gs-row>span:first-child{flex:1 1 200px;display:flex;flex-direction:column}
+.gs-p{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.gs-ph{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.gs-ph b{flex:1 1 auto}
+.gs-p ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}.gs-p li{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.gs-p li button{background:none;border:0;padding:2px 0;cursor:pointer;text-align:left;font-size:14px}.gs-p li button:hover{text-decoration:underline}
+.gs-pa{display:flex;flex-wrap:wrap;gap:8px}.gs-pa .btn{min-height:34px;padding:4px 10px}
 </style>
 </head>
 <body>
@@ -578,7 +598,7 @@ const mine=f=>{const c=meC();return !!c&&!!f&&pkey(f.pessoa)==='c:'+c.id};
 const vez=()=>user?S.tasks.filter(t=>t.status!=='done'&&mine(cur(t))).map(t=>t.id):[];
 const titulo=()=>{const n=vez().length;document.title=(n?`(${n}) `:'')+'Fluxo · Organizador de Tarefas'};
 const vis=t=>isAdm()||t.fluxo.some(mine);
-const NAV=[['painel','Todas as tarefas'],['tarefa','Por tarefa'],['equipe','Por funcionário'],['med','Medições'],['cap','Capacidade'],['admin','Administração'],['guia','Passo a passo']];
+const NAV=[['painel','Todas as tarefas'],['gestao','Gestão'],['tarefa','Por tarefa'],['equipe','Por funcionário'],['med','Medições'],['cap','Capacidade'],['admin','Administração'],['guia','Passo a passo']];
 const allowed=v=>isAdm()||v==='painel';
 let USR=null;const MX=new Set();
 async function rpc(fn,args){const r=await fetch(sbU('rpc/'+fn),{method:'POST',headers:sbH(),body:JSON.stringify(args)}),t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
@@ -665,6 +685,7 @@ function render(){
   }else if(view==='guia'){body=guiaView()
   }else if(view==='cap'){body=capView()
   }else if(view==='med'){body=medView()
+  }else if(view==='gestao'){body=gestaoView()
   }else if(view==='admin'){body=adminView()
   }else{
     const P=flowPeople().filter(([k])=>!fPessoa||k===fPessoa);
@@ -672,12 +693,12 @@ function render(){
       return `<section class="col" aria-label="${esc(p)}"><h2><span><span class="avatar" aria-hidden="true">${esc(p[0])}</span>${esc(p)}</span><span><button type="button" class="xa" data-xa title="Expandir/recolher todos" aria-label="Expandir ou recolher todos">⇕</button><em>${L.length}</em></span></h2><div class="list">${L.map((t,j)=>card(t,'p').replace('class="card"',`class="card" style="--rot:${(j%2?1:-1)*(0.6+j%3*0.4)}deg;--c:${corOf(t)}"`)).join('')||'<div class="empty">Sem atividades</div>'}</div></section>`}).join('')||'<div class="empty" style="width:100%">Crie uma tarefa com fluxo para ver os funcionários aqui.</div>'}</div>`;
   }
   $('#app').innerHTML=`<div class="stk"><header><div class="logo">Flu<b>xo</b></div>
-  <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" ${view===v?'aria-current="page"':''}>${v==='painel'&&!isAdm()?'Minhas tarefas':l}</button>`).join('')}</nav>
+  <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" ${view===v?'aria-current="page"':''}>${v==='painel'&&!isAdm()?'Minhas tarefas':l}${v==='gestao'?gBadge():''}</button>`).join('')}</nav>
   <div class="sp"></div><span class="status" id="fs" role="status">${esc(stText())}</span>
   <span class="ap" role="group" aria-label="Aparência"><button class="btn" id="bt" title="Trocar tema (tecla T)" aria-label="Tema ${THEMES.find(x=>x[0]===themeOf())[1]}. Trocar tema">◐</button><button class="btn" id="bz" title="Tamanho do texto" aria-label="Tamanho do texto ${Math.round(ZOOMS[PREF.z||0]*100)}%. Alterar">Aa</button></span>
   <button class="btn pri" id="bn" ${isAdm()?'':'hidden'} title="Nova tarefa (tecla N)">+ Nova tarefa</button><button class="btn" id="bo" aria-label="Sair de ${esc(user)}">Sair</button></header>
   <div class="top">${hero()}
-  <div class="kpis" role="group" aria-label="Segmentar por situação">${kp('open',open,'em aberto')}${kp('late',B.filter(late).length,'atrasadas')}${kp('done',B.filter(t=>t.status==='done').length,'concluídas')}</div></div>${view==='guia'||view==='med'?'':bar()}</div>
+  <div class="kpis" role="group" aria-label="Segmentar por situação">${kp('open',open,'em aberto')}${kp('late',B.filter(late).length,'atrasadas')}${kp('done',B.filter(t=>t.status==='done').length,'concluídas')}</div></div>${['guia','med','gestao'].includes(view)?'':bar()}</div>
   <div class="shell">${medSide()}<main id="main" tabindex="-1">${body}</main></div>`;
   bind();setHH();titulo();if(view==='guia')bindGuia();if(view==='cap')bindCap();if(view==='admin')bindAdmin();
 }
@@ -686,7 +707,9 @@ addEventListener('resize',setHH);
 function bind(){
   if(ANIM){const a=$('#app');ANIM=false;a.querySelectorAll('.card,.pcap,.tcard,.col,.kpi,.person,.pk').forEach((e,i)=>e.style.setProperty('--i',Math.min(i,14)));a.classList.add('enter');setTimeout(()=>a.classList.remove('enter'),1000)}
   document.querySelectorAll('[data-mx]').forEach(b=>b.onclick=()=>{const k=b.dataset.mx,c=b.closest('.mdc'),o=!MX.has(k);o?MX.add(k):MX.delete(k);c.classList.toggle('open',o);b.setAttribute('aria-expanded',o);b.querySelector('.mdg').textContent=o?'▴':'▾'});
-  document.querySelectorAll('[data-mo]').forEach(b=>b.onclick=()=>openMedItens(b.dataset.mo));
+  document.querySelectorAll('[data-mo],[data-gm]').forEach(b=>b.onclick=()=>openMedItens(b.dataset.mo||b.dataset.gm));
+  document.querySelectorAll('[data-gv]').forEach(b=>b.onclick=()=>openView(b.dataset.gv));
+  document.querySelectorAll('[data-gc]').forEach(b=>b.onclick=()=>copyText(GP.get(b.dataset.gc)||'').then(ok=>toast(ok?'Pauta copiada':'Não foi possível copiar')));
   if(isAdm())document.querySelectorAll('[data-mx]').forEach(b=>dbl(b,()=>{view='med';ANIM=true;render();openMedItens(b.dataset.mx)}));
   document.querySelectorAll('[data-cx]').forEach(b=>b.onclick=()=>{const k=b.dataset.cx;colOpen=colNow===k?null:k;ANIM=true;render()});
   document.querySelectorAll('.pcap[data-tp]').forEach(b=>b.onclick=()=>openTP(b.dataset.pk,b.dataset.tp));
@@ -807,6 +830,7 @@ function hero(){
   const h={painel:['A operação, <strong>de ponta a ponta</strong>',story()],
   tarefa:['Quem está em <strong>cada tipo de fluxo</strong>',story()],
   equipe:['Quem está com <strong>cada tarefa</strong>',story()],
+  gestao:['O que o <strong>gestor</strong> precisa cobrar','Atrasos, prazos próximos, tarefas paradas e itens sem tarefa, com a pauta de cada funcionário.'],
   med:['Os <strong>itens</strong> de cada medição','Veja quais itens já viraram tarefa e quais ainda faltam cadastrar.'],
   guia:['Aprenda a usar o <strong>Fluxo</strong>','Siga os passos na ordem: primeiro os cadastros, depois as tarefas e o acompanhamento.'],
   cap:['A <strong>capacidade</strong> da equipe','Carga diária de cada funcionário, calculada pelas metas dos tipos de fluxo em que ele está.'],
@@ -1209,13 +1233,54 @@ function openView(id){
   on('#nb',async()=>{const x=d.querySelector('#na').value.trim();if(!x){toast('Escreva a anotação');return}await saveF();const ns=d.querySelector('#ns');(t.anot=t.anot||[]).push({id:'a'+Date.now(),passo:ns?+ns.value:t.passo,u:user,t:Date.now(),txt:x});await save();close();render();openView(id)});
   d.querySelectorAll('[data-da]').forEach(b=>b.onclick=async()=>{if(!confirm('Excluir esta anotação?'))return;t.anot=(t.anot||[]).filter(a=>a.id!==b.dataset.da);await save();close();render();openView(id)});
   on('#sv',async()=>{await saveF();toast('Campos salvos')});on('#av',async()=>{await saveF();close();await avancar(id,2)});
-  on('#ed',()=>{close();openTask(id)});on('#fin',async()=>{await saveF();close();await avancar(id,1)});on('#bk',()=>{close();pedirDevolucao(id)});
+  on('#ed',()=>{close();openTask(id)});on('#fin',async()=>{await saveF();const f=t.fluxo[t.passo],mis=((f&&f.campos)||[]).map(k=>campos().find(c=>c.id===k)).filter(c=>c&&(t[c.id]==null||String(t[c.id]).trim()===''));
+    if(mis.length){toast('Preencha antes de finalizar o passo: '+mis.map(c=>c.nome).join(', '));const e=d.querySelector('[data-sf="'+mis[0].id+'"]');if(e)e.focus();return}close();await avancar(id,1)});on('#bk',()=>{close();pedirDevolucao(id)});
   const em=d.querySelector('#em');if(em)em.onclick=()=>copyText(ct.email).then(ok=>{if(ok){em.textContent='✔ Copiado';setTimeout(()=>em.textContent='⧉ Copiar',2000);toast('E-mail copiado')}else toast('Não foi possível copiar — selecione o e-mail e copie manualmente')});
   d.querySelectorAll('[data-miss]').forEach(b=>b.onclick=()=>{close();view='func';render();toast(`Cadastre o contato de ${who?.pessoa||'funcionário'} para usar este botão`)});
   (d.querySelector('#fin')||d.querySelector('#x')).focus();
 }
 
 /* ---------- Tarefa (criar / editar) ---------- */
+
+/* ---------- Gestão: o que o gestor precisa cobrar ---------- */
+let GP=new Map();
+const dias=(a,b)=>Math.round((new Date(a+'T12:00:00')-new Date(b+'T12:00:00'))/864e5);
+function lastMove(t){const ts=[...(t.fluxo||[]).map(f=>f.ok||0),...(t.ev||[]).map(e=>e.t||0),...(t.notas||[]).map(n=>n.t||0),...(t.anot||[]).map(n=>n.t||0)],c=+String(t.id).replace(/\D/g,'');if(c>1e12)ts.push(c);return Math.max(0,...ts)}
+const paradaDias=t=>{const l=lastMove(t);return l?Math.floor((Date.now()-l)/864e5):0};
+function gData(){
+  const R=S.tasks.filter(t=>t.status!=='done'&&t.status!=='fixo'&&t.fluxo.length).map(t=>({t,w:holder(t),d:t.final?dias(t.final,today()):null,p:paradaDias(t)}));
+  const atr=R.filter(r=>r.d!==null&&r.d<0).sort((a,b)=>a.d-b.d),prox=R.filter(r=>r.d!==null&&r.d>=0&&r.d<=2).sort((a,b)=>a.d-b.d),
+    par=R.filter(r=>r.p>=3&&!(r.d!==null&&r.d<0)).sort((a,b)=>b.p-a.p),sem=R.filter(r=>r.t.fluxo.some(f=>!f.pessoa||f.pessoa==='Sem responsável'));
+  return{R,atr,prox,par,sem,n:new Set([...atr,...prox,...par,...sem].map(r=>r.t.id)).size};
+}
+const gBadge=()=>{if(!isAdm())return'';const n=gData().n;return n?` <em class="nb" aria-label="${n} pendências">${n}</em>`:''};
+function gestaoView(){
+  const G=gData();GP=new Map();
+  const rowT=(r,tag,cls,txt)=>{const{t,w}=r,ct=w&&contactFor(w.pessoa),msg=`Olá ${w?fn1(w.pessoa):''}, sobre a tarefa "${nome(t)}" (passo ${w?w.etapa:''}): ${txt}. Consegue me dar uma posição?`;
+    return `<div class="gs-row" style="--c:${corOf(t)}"><button type="button" class="gm" data-gv="${t.id}"><b>${esc(nome(t))}</b><small>${w?esc(w.etapa)+' · '+esc(w.pessoa):'Sem passo'}${t.final?' · entrega '+fmt(t.final):''}</small></button><span class="tag${cls?' '+cls:''}">${tag}</span>${ct&&ct.whatsapp?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(ct.whatsapp,msg)}">💬 Cobrar</a>`:''}</div>`};
+  const lst=(L,fn,max=8)=>L.length?L.slice(0,max).map(fn).join('')+(L.length>max?`<p class="hint">+ ${L.length-max} na aba Todas as tarefas.</p>`:''):'<div class="empty">Nada por aqui ✔</div>';
+  const sec=(tt,n,b)=>`<section class="gs-sec"><h3>${tt} <em>${n}</em></h3>${b}</section>`;
+  const sub=(h,L,fn)=>L.length?`<h4>${h} (${L.length})</h4>${lst(L,fn)}`:'';
+  const acao=sec('Precisa de ação agora',G.n,(G.atr.length+G.prox.length+G.par.length+G.sem.length)?
+    sub('Atrasadas',G.atr,r=>rowT(r,`⚠ ${-r.d} dia(s) de atraso`,'late',`está atrasada há ${-r.d} dia(s)`))
+    +sub('Vencem em até 2 dias',G.prox,r=>rowT(r,r.d===0?'Vence hoje':r.d===1?'Vence amanhã':'Vence em 2 dias','',r.d===0?'vence hoje':r.d===1?'vence amanhã':'vence em 2 dias'))
+    +sub('Paradas há 3 dias ou mais',G.par,r=>rowT(r,`Parada há ${r.p} dias`,'',`está parada há ${r.p} dias`))
+    +sub('Passo sem responsável',G.sem,r=>`<div class="gs-row" style="--c:${corOf(r.t)}"><button type="button" class="gm" data-gv="${r.t.id}"><b>${esc(nome(r.t))}</b><small>Defina quem faz cada passo (Editar)</small></button><span class="tag late">Sem responsável</span></div>`)
+    :'<div class="empty">Tudo em dia: nenhuma tarefa atrasada, parada ou sem responsável ✔</div>');
+  const P=(S.contatos||[]).map(c=>({c,L:G.R.filter(r=>r.w&&pkey(r.w.pessoa)==='c:'+c.id).map(r=>r.t)}));
+  const com=P.filter(x=>x.L.length).sort((a,b)=>b.L.filter(late).length-a.L.filter(late).length||b.L.length-a.L.length),livres=P.filter(x=>!x.L.length).map(x=>chipName(x.c));
+  const pauta=sec('Pauta por funcionário',com.length,(com.map(({c,L})=>{const a=L.filter(late).length,S2=srt(L),
+      txt=`Olá ${fn1(c.nome)}, sua pauta de hoje (${L.length}):\n`+S2.map((t,i)=>`${i+1}. ${nome(t)} — ${holder(t).etapa}${t.final?' · entrega '+fmt(t.final):''}${late(t)?' (ATRASADA)':''}`).join('\n');GP.set(c.id,txt);
+    return `<article class="gs-p"><div class="gs-ph"><b>${esc(chipName(c))}</b><span class="tag">${L.length} em aberto</span>${a?`<span class="tag late">${a} atrasada(s)</span>`:''}</div><ul>${S2.slice(0,4).map(t=>`<li><button type="button" data-gv="${t.id}">${esc(nome(t))}</button><small>${esc(holder(t).etapa)}${t.final?' · '+fmt(t.final):''}</small></li>`).join('')}</ul>${L.length>4?`<small>+ ${L.length-4} tarefa(s)</small>`:''}<div class="gs-pa"><button type="button" class="btn" data-gc="${c.id}">⧉ Copiar pauta</button>${c.whatsapp?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(c.whatsapp,txt)}">💬 Enviar pauta</a>`:''}</div></article>`}).join('')||'<div class="empty">Nenhum funcionário com tarefa em aberto.</div>')
+    +(livres.length?`<p class="hint"><b>Sem tarefas em aberto:</b> ${esc(livres.join(', '))}</p>`:''));
+  const M=(S.medicoes||[]).map(m=>{const{no}=medItens(m),tot=(m.itens||[]).length,d=medItens(m).ok.filter(x=>x.t.every(t=>t.status==='done')).length;return{m,no:no.length,d,tot,dd:m.prazo?dias(m.prazo,today()):null}})
+    .filter(x=>x.tot&&x.d<x.tot&&(x.no||(x.dd!==null&&x.dd<=7))).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999'));
+  const med=sec('Medições que pedem atenção',M.length,lst(M,({m,no,d,tot,dd})=>`<button type="button" class="gs-row" data-gm="${esc(m.id)}" style="--c:${corMed(m)}"><span><b>${esc(m.nome)}</b><small>${d} de ${tot} concluídos · ${no?no+' item(ns) sem tarefa':'todos cadastrados'}</small></span><span class="tag${dd!==null&&dd<0?' late':''}">${dd===null?'Sem prazo':dd<0?'Venceu há '+(-dd)+' d':dd===0?'Vence hoje':'Vence em '+dd+' d'}</span></button>`,10));
+  const K=(n,l,hot)=>`<div class="gs-k${hot&&n?' hot':''}"><b>${n}</b><span>${l}</span></div>`;
+  return `<div class="admin"><div class="gs-k4">${K(G.atr.length,'atrasadas',1)}${K(G.prox.length,'vencem em até 2 dias')}${K(G.par.length,'paradas há 3+ dias')}${K(M.reduce((a,x)=>a+x.no,0),'itens de medição sem tarefa',1)}</div>
+  <div class="gs-g"><div class="gs-col">${acao}</div><div class="gs-col">${pauta}${med}</div></div></div>`;
+}
+
 /* ---------- Aba Medições: itens cadastrados x faltando ---------- */
 function dbl(el,fn){let t=0,l=0;const go=e=>{const n=Date.now();if(n-l<600)return;l=n;t=0;fn(e)};el.addEventListener('click',e=>{const n=Date.now();if(n-t<450)go(e);else t=n});el.addEventListener('dblclick',go)}
 const corMed=m=>m.cor||(tipoDe(m)||{}).cor||'var(--ac)';
@@ -1296,12 +1361,12 @@ function openTask(id,pre,after){
   q('#f1').focus();
 }
 
-try{const u=JSON.parse(sessionStorage.getItem('ui')||'{}');if(['painel','tarefa','equipe','med','cap','admin','guia'].includes(u.view))view=u.view;if(ASEC.some(a=>a[0]===u.adminSec))adminSec=u.adminSec;if(u.capMode==='func')capMode='func';if(Number.isInteger(u.gStep)&&u.gStep>=0&&u.gStep<GUIA.length)gStep=u.gStep;if(['','0','25','50','75','100'].includes(u.fCap))fCap=u.fCap}catch(e){}
+try{const u=JSON.parse(sessionStorage.getItem('ui')||'{}');if(['painel','gestao','tarefa','equipe','med','cap','admin','guia'].includes(u.view))view=u.view;if(ASEC.some(a=>a[0]===u.adminSec))adminSec=u.adminSec;if(u.capMode==='func')capMode='func';if(Number.isInteger(u.gStep)&&u.gStep>=0&&u.gStep<GUIA.length)gStep=u.gStep;if(['','0','25','50','75','100'].includes(u.fCap))fCap=u.fCap}catch(e){}
 document.addEventListener('keydown',e=>{
   if(!user||e.ctrlKey||e.metaKey||e.altKey||document.querySelector('dialog[open]')||e.target.closest('input,select,textarea,[contenteditable]'))return;
-  const k=e.key.toLowerCase(),V=['painel','tarefa','equipe','med','cap','admin','guia'];
+  const k=e.key.toLowerCase(),V=['painel','gestao','tarefa','equipe','med','cap','admin','guia'];
   if(view==='guia'&&(k==='arrowright'||k==='arrowleft')){const b=$(k==='arrowright'?'#gn':'#gp');if(b&&!b.disabled)b.click();return}
-  if(k==='n'){if(isAdm()){e.preventDefault();openTask()}}else if(k==='/'){const q=$('#fq');if(q){e.preventDefault();q.focus();q.select()}}else if(k==='t'){cycTheme()}else if(/^[1-7]$/.test(k)){if(allowed(V[k-1])){view=V[k-1];render()}}});
+  if(k==='n'){if(isAdm()){e.preventDefault();openTask()}}else if(k==='/'){const q=$('#fq');if(q){e.preventDefault();q.focus();q.select()}}else if(k==='t'){cycTheme()}else if(/^[1-8]$/.test(k)){if(allowed(V[k-1])){view=V[k-1];render()}}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-fin]');if(b){e.stopPropagation();e.preventDefault();avancar(b.dataset.fin,1)}const g=e.target.closest('[data-dir]');if(g){e.stopPropagation();e.preventDefault();abrirDir(g.dataset.dir)}},true);
 load().then(()=>{ensureTipos();if(ME&&!ME.adm&&!meC())ME=user=null;render()});
 async function sbReconnect(){if(!SB.on||SB.ok||SB.busy)return;SB.busy=true;try{const o=await sbPull();
