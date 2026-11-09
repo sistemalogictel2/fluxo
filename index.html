@@ -443,6 +443,31 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,v
 @media(max-width:760px){.shell{flex-direction:column}.msb{flex:none;width:100%;padding:8px 14px 0}.msl{flex-direction:row;overflow-x:auto;padding-bottom:6px}.mdc{flex:0 0 210px}}
 .login .by{margin:20px 0 0;text-align:center;font-size:13px;color:var(--mu)}
 @media print{.msb{display:none}}
+
+/* ===== Aba Medições ===== */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;align-items:start}
+.mcd{display:flex;flex-direction:column;gap:8px;text-align:left;width:100%;background:var(--s1);border:1px solid var(--line);border-left:8px solid var(--c);border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:border-color .15s,transform .15s}
+.mcd:hover{border-color:var(--mu);border-left-color:var(--c);transform:translateY(-2px)}
+.mcd.late{border-color:var(--bad);border-left-color:var(--c)}
+.mcd h3{margin:0;font-size:17px;line-height:1.3;overflow-wrap:anywhere}
+.mcd .mbar{--k:var(--c);margin-top:0}
+.mcd .mr{display:flex;flex-wrap:wrap;gap:6px}
+.mcd .hint{margin:0}
+dialog:has(.mi2){width:min(900px,96vw)}
+.dh .hint{margin:2px 0 0}
+.mi2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
+.mi2>section{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.mi2>section.ok{border-top:4px solid var(--ac2)}.mi2>section.no{border-top:4px solid var(--bad)}
+.mi2 h3{margin:0;font-size:15px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mi2 h3 em{font-style:normal;font-size:12px;font-weight:700;background:var(--ov);border-radius:99px;padding:0 9px}
+.mts{display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;max-height:min(52vh,420px);overflow-y:auto;padding:2px}
+.mt{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:6px 12px;border-radius:999px;cursor:pointer;font-weight:600;font-size:14px;touch-action:manipulation;user-select:none;-webkit-user-select:none;background:var(--s2);border:1px solid var(--line2);color:var(--tx);text-align:left}
+.mt.ok{border-color:var(--ac2);background:color-mix(in srgb,var(--ac2) 14%,transparent)}
+.mt.no{border-style:dashed;border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.mt:hover{filter:brightness(1.15)}.mt.no:focus{border-style:solid}
+.mt small{color:var(--mu);font-weight:600}
+.mi2+.hint{margin-top:12px}
+@media(max-width:640px){.mi2{grid-template-columns:1fr}.mts{max-height:34vh}}
 </style>
 </head>
 <body>
@@ -526,7 +551,7 @@ const mine=f=>{const c=meC();return !!c&&!!f&&pkey(f.pessoa)==='c:'+c.id};
 const vez=()=>user?S.tasks.filter(t=>t.status!=='done'&&mine(cur(t))).map(t=>t.id):[];
 const titulo=()=>{const n=vez().length;document.title=(n?`(${n}) `:'')+'Fluxo · Organizador de Tarefas'};
 const vis=t=>isAdm()||t.fluxo.some(mine);
-const NAV=[['painel','Todas as tarefas'],['tarefa','Por tarefa'],['equipe','Por funcionário'],['cap','Capacidade'],['admin','Administração'],['guia','Passo a passo']];
+const NAV=[['painel','Todas as tarefas'],['tarefa','Por tarefa'],['equipe','Por funcionário'],['med','Medições'],['cap','Capacidade'],['admin','Administração'],['guia','Passo a passo']];
 const allowed=v=>isAdm()||v==='painel';
 let USR=null;const MX=new Set();
 async function rpc(fn,args){const r=await fetch(sbU('rpc/'+fn),{method:'POST',headers:sbH(),body:JSON.stringify(args)}),t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
@@ -612,6 +637,7 @@ function render(){
   }else if(view==='tarefa'){body=tarefaView(TF)
   }else if(view==='guia'){body=guiaView()
   }else if(view==='cap'){body=capView()
+  }else if(view==='med'){body=medView()
   }else if(view==='admin'){body=adminView()
   }else{
     const P=flowPeople().filter(([k])=>!fPessoa||k===fPessoa);
@@ -624,7 +650,7 @@ function render(){
   <span class="ap" role="group" aria-label="Aparência"><button class="btn" id="bt" title="Trocar tema (tecla T)" aria-label="Tema ${THEMES.find(x=>x[0]===themeOf())[1]}. Trocar tema">◐</button><button class="btn" id="bz" title="Tamanho do texto" aria-label="Tamanho do texto ${Math.round(ZOOMS[PREF.z||0]*100)}%. Alterar">Aa</button></span>
   <button class="btn pri" id="bn" ${isAdm()?'':'hidden'} title="Nova tarefa (tecla N)">+ Nova tarefa</button><button class="btn" id="bo" aria-label="Sair de ${esc(user)}">Sair</button></header>
   <div class="top">${hero()}
-  <div class="kpis" role="group" aria-label="Segmentar por situação">${kp('open',open,'em aberto')}${kp('late',B.filter(late).length,'atrasadas')}${kp('done',B.filter(t=>t.status==='done').length,'concluídas')}</div></div>${view==='guia'?'':bar()}</div>
+  <div class="kpis" role="group" aria-label="Segmentar por situação">${kp('open',open,'em aberto')}${kp('late',B.filter(late).length,'atrasadas')}${kp('done',B.filter(t=>t.status==='done').length,'concluídas')}</div></div>${view==='guia'||view==='med'?'':bar()}</div>
   <div class="shell">${medSide()}<main id="main" tabindex="-1">${body}</main></div>`;
   bind();setHH();titulo();if(view==='guia')bindGuia();if(view==='cap')bindCap();if(view==='admin')bindAdmin();
 }
@@ -633,6 +659,8 @@ addEventListener('resize',setHH);
 function bind(){
   if(ANIM){const a=$('#app');ANIM=false;a.querySelectorAll('.card,.pcap,.tcard,.col,.kpi,.person,.pk').forEach((e,i)=>e.style.setProperty('--i',Math.min(i,14)));a.classList.add('enter');setTimeout(()=>a.classList.remove('enter'),1000)}
   document.querySelectorAll('[data-mx]').forEach(b=>b.onclick=()=>{const k=b.dataset.mx,c=b.closest('.mdc'),o=!MX.has(k);o?MX.add(k):MX.delete(k);c.classList.toggle('open',o);b.setAttribute('aria-expanded',o);b.querySelector('.mdg').textContent=o?'▴':'▾'});
+  document.querySelectorAll('[data-mo]').forEach(b=>b.onclick=()=>openMedItens(b.dataset.mo));
+  if(isAdm())document.querySelectorAll('[data-mx]').forEach(b=>dbl(b,()=>{view='med';ANIM=true;render();openMedItens(b.dataset.mx)}));
   document.querySelectorAll('[data-cx]').forEach(b=>b.onclick=()=>{const k=b.dataset.cx;colOpen=colNow===k?null:k;ANIM=true;render()});
   document.querySelectorAll('.pcap[data-tp]').forEach(b=>b.onclick=()=>openTP(b.dataset.pk,b.dataset.tp));
   document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{view=b.dataset.v;ANIM=true;render()});
@@ -752,6 +780,7 @@ function hero(){
   const h={painel:['A operação, <strong>de ponta a ponta</strong>',story()],
   tarefa:['Quem está em <strong>cada tipo de fluxo</strong>',story()],
   equipe:['Quem está com <strong>cada tarefa</strong>',story()],
+  med:['Os <strong>itens</strong> de cada medição','Veja quais itens já viraram tarefa e quais ainda faltam cadastrar.'],
   guia:['Aprenda a usar o <strong>Fluxo</strong>','Siga os passos na ordem: primeiro os cadastros, depois as tarefas e o acompanhamento.'],
   cap:['A <strong>capacidade</strong> da equipe','Carga diária de cada funcionário, calculada pelas metas dos tipos de fluxo em que ele está.'],
   func:['Quem faz <strong>a equipe</strong>','Cadastre os funcionários e os contatos usados nos botões de WhatsApp e e-mail.'],
@@ -1159,8 +1188,46 @@ function openView(id){
 }
 
 /* ---------- Tarefa (criar / editar) ---------- */
-function openTask(id){
-  const t=S.tasks.find(x=>x.id===id)||{tipo:S.tipos[0]?.id||'',tarefa:'',sub:'',protocolo:'',qtd:'',fluxo:[],passo:0,status:'todo',repasse:today(),final:'',portal:'',obs:'',notas:[]};
+/* ---------- Aba Medições: itens cadastrados x faltando ---------- */
+function dbl(el,fn){let t=0;el.addEventListener('click',e=>{const n=Date.now();if(n-t<450){t=0;fn(e)}else t=n})}
+const corMed=m=>m.cor||(S.tipos.find(y=>y.med===m.id)||{}).cor||'var(--ac)';
+function medItens(m){
+  const by=new Map();
+  S.tasks.forEach(t=>{const y=tipoOf(t);if(y&&y.med===m.id){const k=nk(t.tarefa);if(!by.has(k))by.set(k,[]);by.get(k).push(t)}});
+  const ok=[],no=[];
+  (m.itens||[]).forEach(i=>{const L=by.get(nk(i));L&&L.length?ok.push({i,t:L}):no.push(i)});
+  return{ok,no,y:S.tipos.find(x=>x.med===m.id)};
+}
+function medView(){
+  const M=[...(S.medicoes||[])].sort((a,b)=>(a.prazo||'9999').localeCompare(b.prazo||'9999')||a.nome.localeCompare(b.nome,'pt-BR'));
+  return `<div class="admin"><div class="ahead"><div><h2>Medições</h2><p class="hint">Clique em uma medição para ver os itens já cadastrados e os que faltam.</p></div></div>
+  <div class="mgrid">${M.map(m=>{const {ok,no}=medItens(m),tot=(m.itens||[]).length,d=ok.filter(x=>x.t.every(t=>t.status==='done')).length,lt=!!m.prazo&&m.prazo<today()&&d<tot,pct=tot?Math.round(ok.length/tot*100):0;
+    return `<button type="button" class="mcd${lt?' late':''}" data-mo="${esc(m.id)}" style="--c:${corMed(m)}" aria-label="Abrir medição ${esc(m.nome)}: ${ok.length} de ${tot} itens cadastrados"><h3>${esc(m.nome)}${lt?' ⚠':''}</h3><span class="mbar" aria-hidden="true"><i style="--w:${pct}%"></i></span><div class="mr"><span class="tag">${ok.length} de ${tot} cadastrados</span>${no.length?`<span class="tag late">Faltam ${no.length}</span>`:'<span class="tag">✔ Todos cadastrados</span>'}</div><p class="hint">${m.prazo?'Prazo de entrega '+fmt(m.prazo)+(lt?' ⚠':''):'Sem prazo de entrega'}</p></button>`}).join('')||'<div class="empty" style="grid-column:1/-1">Nenhuma medição cadastrada. Cadastre em Administração › Medições.</div>'}</div></div>`;
+}
+function openMedItens(id){
+  const m=(S.medicoes||[]).find(x=>x.id===id);if(!m)return;
+  const {ok,no}=medItens(m),tot=(m.itens||[]).length;
+  const ico=L=>L.every(t=>t.status==='done')?'✔ ':L.some(late)?'⚠ ':'';
+  const [d,close]=dlg(`<div class="dh"><div><h2>${esc(m.nome)}</h2><p class="hint">${ok.length} de ${tot} itens cadastrados${m.prazo?' · prazo '+fmt(m.prazo):''}</p></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
+  <div class="vb"><div class="mi2">
+    <section class="ok" aria-label="Itens cadastrados"><h3>Cadastrados <em>${ok.length}</em></h3><div class="mts">${ok.map(({i,t},k)=>`<button type="button" class="mt ok" data-ok="${k}" title="Abrir a tarefa">${ico(t)}${esc(i)}${t.length>1?` <small>×${t.length}</small>`:''}</button>`).join('')||'<div class="empty">Nenhum item cadastrado ainda.</div>'}</div></section>
+    <section class="no" aria-label="Itens que faltam cadastrar"><h3>Faltam cadastrar <em>${no.length}</em></h3><div class="mts">${no.map((i,k)=>`<button type="button" class="mt no" data-no="${k}" title="Dois cliques para cadastrar a tarefa">${esc(i)}</button>`).join('')||'<div class="empty">✔ Todos os itens já foram cadastrados.</div>'}</div></section>
+  </div><p class="hint">Dê <b>dois cliques</b> (ou Enter) em um item que falta para abrir o cadastro da tarefa já preenchido com ele. Clique em um item cadastrado para ver a tarefa.</p></div>
+  <div class="df"><button type="button" class="btn" id="me">Editar itens da medição</button><span class="sp"></span><button type="button" class="btn pri" id="mf">Fechar</button></div>`,corMed(m));
+  const then=fn=>{close();setTimeout(fn,190)};
+  d.querySelectorAll('[data-no]').forEach(b=>{const go=()=>novaTarefaItem(m,no[+b.dataset.no],then);dbl(b,go);b.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}}});
+  d.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>then(()=>openView(ok[+b.dataset.ok].t[0].id)));
+  d.querySelector('#mf').onclick=close;
+  d.querySelector('#me').onclick=()=>then(()=>openMedicao(m.id));
+}
+function novaTarefaItem(m,item,then){
+  const y=S.tipos.find(x=>x.med===m.id);
+  if(!y){then(()=>{toast('Cadastre antes o tipo de fluxo desta medição');view='admin';adminSec='tipos';ANIM=true;render()});return}
+  then(()=>openTask(null,{tipo:y.id,tarefa:item},()=>openMedItens(m.id)));
+}
+
+function openTask(id,pre,after){
+  const t=S.tasks.find(x=>x.id===id)||{tipo:S.tipos[0]?.id||'',tarefa:'',sub:'',protocolo:'',qtd:'',fluxo:[],passo:0,status:'todo',repasse:today(),final:'',portal:'',obs:'',notas:[],...(pre||{})};
   const isNew=!id;let dirty=!isNew;
   const [d,close]=dlg(`<form method="dialog" id="tf"><div class="dh"><h2 id="dt">${isNew?'Nova tarefa':esc(t.tarefa)}</h2><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
   <div class="db">
@@ -1192,7 +1259,7 @@ function openTask(id){
     t.final=q('#f7').value;t.status=q('#f8').value;
     if(t.passo>=t.fluxo.length&&t.status!=='done')t.passo=Math.max(0,t.fluxo.length-1);
   };
-  q('#tf').onsubmit=async e=>{e.preventDefault();const r=ed.get();if(!r.fluxo.length||r.fluxo.some(f=>f.pessoa==='Sem responsável')){toast('Defina os passos e o responsável de cada um');return}collect();if(isNew){t.id='t'+Date.now();S.tasks.push(t)}await save();close();render()};
+  q('#tf').onsubmit=async e=>{e.preventDefault();const r=ed.get();if(!r.fluxo.length||r.fluxo.some(f=>f.pessoa==='Sem responsável')){toast('Defina os passos e o responsável de cada um');return}collect();if(isNew){t.id='t'+Date.now();S.tasks.push(t)}await save();close();render();if(after)setTimeout(after,200)};
   if(!isNew){
     
     q('#dl').onclick=async()=>{if(confirm('Excluir esta tarefa definitivamente?')){S.tasks=S.tasks.filter(x=>x.id!==id);await save();close();render()}};
@@ -1200,12 +1267,12 @@ function openTask(id){
   q('#f1').focus();
 }
 
-try{const u=JSON.parse(sessionStorage.getItem('ui')||'{}');if(['painel','tarefa','equipe','cap','admin','guia'].includes(u.view))view=u.view;if(ASEC.some(a=>a[0]===u.adminSec))adminSec=u.adminSec;if(u.capMode==='func')capMode='func';if(Number.isInteger(u.gStep)&&u.gStep>=0&&u.gStep<GUIA.length)gStep=u.gStep;if(['','0','25','50','75','100'].includes(u.fCap))fCap=u.fCap}catch(e){}
+try{const u=JSON.parse(sessionStorage.getItem('ui')||'{}');if(['painel','tarefa','equipe','med','cap','admin','guia'].includes(u.view))view=u.view;if(ASEC.some(a=>a[0]===u.adminSec))adminSec=u.adminSec;if(u.capMode==='func')capMode='func';if(Number.isInteger(u.gStep)&&u.gStep>=0&&u.gStep<GUIA.length)gStep=u.gStep;if(['','0','25','50','75','100'].includes(u.fCap))fCap=u.fCap}catch(e){}
 document.addEventListener('keydown',e=>{
   if(!user||e.ctrlKey||e.metaKey||e.altKey||document.querySelector('dialog[open]')||e.target.closest('input,select,textarea,[contenteditable]'))return;
-  const k=e.key.toLowerCase(),V=['painel','tarefa','equipe','cap','admin','guia'];
+  const k=e.key.toLowerCase(),V=['painel','tarefa','equipe','med','cap','admin','guia'];
   if(view==='guia'&&(k==='arrowright'||k==='arrowleft')){const b=$(k==='arrowright'?'#gn':'#gp');if(b&&!b.disabled)b.click();return}
-  if(k==='n'){if(isAdm()){e.preventDefault();openTask()}}else if(k==='/'){const q=$('#fq');if(q){e.preventDefault();q.focus();q.select()}}else if(k==='t'){cycTheme()}else if(/^[1-6]$/.test(k)){if(allowed(V[k-1])){view=V[k-1];render()}}});
+  if(k==='n'){if(isAdm()){e.preventDefault();openTask()}}else if(k==='/'){const q=$('#fq');if(q){e.preventDefault();q.focus();q.select()}}else if(k==='t'){cycTheme()}else if(/^[1-7]$/.test(k)){if(allowed(V[k-1])){view=V[k-1];render()}}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-fin]');if(b){e.stopPropagation();e.preventDefault();avancar(b.dataset.fin,1)}const g=e.target.closest('[data-dir]');if(g){e.stopPropagation();e.preventDefault();abrirDir(g.dataset.dir)}},true);
 load().then(()=>{ensureTipos();if(ME&&!ME.adm&&!meC())ME=user=null;render()});
 async function sbReconnect(){if(!SB.on||SB.ok||SB.busy)return;SB.busy=true;try{const o=await sbPull();
