@@ -757,7 +757,9 @@ function readVal(c,e){if(c.tipo==='valor'){const g=e.value.replace(/\D/g,'');ret
 function ensureCampos(){if(!Array.isArray(S.campos))S.campos=[];
   DEF_CAMPOS.filter(d=>d.fixo&&!S.campos.some(c=>c.id===d.id)).forEach(d=>S.campos.push({...d}))}
 const DEF_TIPOS=[];const _SEED_ANTIGO=[{id:'ty1',nome:'Limpar',cor:COLORS[3],campos:['obs'],passos:['Arrumar lençóis','Tirar pó','Arrumar mesa do PC','Arrumar guarda-roupas','Passar pano','Perfumar'],meta:{v:0,u:'dias'}}];
-function ensureTipos(){ensureCampos();if(!S.contatos)S.contatos=[];if(!Array.isArray(S.medicoes))S.medicoes=[];if(!Array.isArray(S.tipos))S.tipos=[]}
+function ensureTipos(){ensureCampos();if(!S.contatos)S.contatos=[];if(!Array.isArray(S.medicoes))S.medicoes=[];if(!Array.isArray(S.tipos))S.tipos=[];syncCores()}
+/* A cor é escolhida só na medição; fluxo, tarefas e cards seguem essa cor */
+function syncCores(){S.tipos.forEach(y=>{const m=S.medicoes.find(x=>x.id===y.med)||(!y.med?S.medicoes.find(x=>nk(x.nome)===nk(y.nome)):null);if(!m)return;if(!m.cor&&y.cor)m.cor=y.cor;if(m.cor)y.cor=m.cor})}
 const tipoOf=t=>S.tipos.find(x=>x.id===t.tipo);
 const medOf=y=>y&&(S.medicoes||[]).find(m=>m.id===y.med);
 const dirOf=t=>{const m=medOf(tipoOf(t));if(!m||!m.dir||!t.tarefa)return'';const d=m.dir.trim().replace(/[\\/]+$/,'');return d+(d.includes('\\')?'\\':'/')+t.tarefa};
@@ -935,7 +937,7 @@ const GUIA=[
   tip:'Usuário Normal precisa estar vinculado a um funcionário. Por isso este passo vem depois dos funcionários.',go:['admin','usr','Abrir Usuários']},
  {f:'Administração',t:'3. Cadastre a medição',x:'A medição vem antes do fluxo: nome, itens, diretório, prazo e cor. O fluxo e as tarefas usam esses dados.',
   m:'<span class="nd">Calisto<small>prazo 30/12</small></span><span class="tag">Engenho Novo</span><span class="tag">Cachambi</span>',
-  l:['Abra Administração › 3. Medições e clique em “+ Nova medição”.','Escreva o nome (ex.: Calisto) e os itens, um por linha.','Informe o diretório pai, o caminho da pasta na rede.','Escolha a cor do card e defina o prazo de entrega.','Ela aparece no menu lateral, em todas as abas, com tarefas, concluídas e prazo.'],
+  l:['Abra Administração › 3. Medições e clique em “+ Nova medição”.','Escreva o nome (ex.: Calisto) e os itens, um por linha.','Informe o diretório pai, o caminho da pasta na rede.','Escolha a cor da medição (é a única cor que você escolhe: fluxo, tarefas e cards seguem ela) e defina o prazo de entrega.','Ela aparece no menu lateral, em todas as abas, com tarefas, concluídas e prazo.'],
   tip:'Cada item vira o título de uma tarefa e o nome da subpasta dentro do diretório pai.',go:['admin','med','Abrir Medições']},
  {f:'Administração',t:'4. Cadastre os campos da tarefa',x:'Defina quais informações podem entrar numa tarefa e o formato de cada uma.',
   m:'<span class="tag">Texto</span><span class="tag">Texto longo</span><span class="tag">Número</span><span class="tag">Data</span><span class="tag">Valor (R$)</span>',
@@ -943,7 +945,7 @@ const GUIA=[
   tip:'Quantidade e Data de repasse já existem e são usados nos cálculos de meta. Cadastre os campos antes dos tipos, para poder marcá-los lá.',go:['admin','campos','Abrir Campos da tarefa']},
  {f:'Administração',t:'5. Crie os tipos de fluxo',x:'O tipo de fluxo liga uma medição a seus passos, cor, campos e meta. Ex.: Calisto = Quantificar → Revisar → Entregar.',
   m:'<span class="nd">1 Quantificar</span><span class="ar">→</span><span class="nd">2 Revisar</span><span class="ar">→</span><span class="nd">3 Entregar</span>',
-  l:['Abra Administração › 5. Tipos de fluxo e clique em “+ Novo tipo”.','Escolha a medição: só aparecem as que ainda não têm fluxo.','Escreva os passos, na ordem, e marque os campos que cada passo preenche.','Escolha a cor, os campos que aparecem ao criar a tarefa e a meta de entrega, e salve.'],
+  l:['Abra Administração › 5. Tipos de fluxo e clique em “+ Novo tipo”.','Escolha a medição: só aparecem as que ainda não têm fluxo.','Escreva os passos, na ordem, e marque os campos que cada passo preenche.','Escolha os campos que aparecem ao criar a tarefa e a meta de entrega, e salve. A cor vem da medição.'],
   tip:'Os passos do tipo são copiados para cada nova tarefa.',go:['admin','tipos','Abrir Tipos de fluxo']},
  {f:'Trabalhar',t:'Crie uma tarefa',x:'Escolha o tipo de fluxo, o item da medição e o funcionário de cada passo.',
   m:'<span class="nd cur">Calisto + Cachambi<small>1 · Ana</small></span><span class="ar">→</span><span class="nd">2 · Bruno</span><span class="ar">→</span><span class="nd">3 · Carla</span>',
@@ -1007,14 +1009,15 @@ function openMedicao(id){
   <div class="db"><div class="full"><label for="mn">Nome da medição *</label><input type="text" id="mn" required value="${esc(m.nome)}"><div class="hint">É o nome que o fluxo e as tarefas vão usar. Ex.: Calisto</div></div>
   <div class="full"><label for="mi">Itens (um por linha) *</label><textarea id="mi" rows="6" required placeholder="Engenho Novo&#10;Engenho de Dentro&#10;Cachambi">${esc(m.itens.join('\n'))}</textarea><div class="hint">Cada item é uma tarefa da medição: o total de itens é o total de tarefas, e cada um vira uma opção de título ao criar a tarefa.</div></div>
   <div class="full"><label for="md">Diretório pai (caminho na rede)</label><input type="text" id="md" placeholder="\\\\servidor\\projetos\\Calisto" value="${esc(m.dir)}"><div class="hint">O botão “Copiar caminho na rede” da tarefa copia este caminho + o título do item (mesmo nome da pasta).</div></div>
-  <div class="full"><label id="mcl">Cor do card</label><div class="sw" role="radiogroup" aria-labelledby="mcl">${COLORS.map(c=>`<label><input type="radio" name="mc" value="${c}" ${c===(m.cor||COLORS[0])?'checked':''}><span style="--c:${c}"></span><span class="sr">Cor ${c}</span></label>`).join('')}</div></div>
+  <div class="full"><label id="mcl">Cor da medição</label><div class="hint">É a única cor que você escolhe: o fluxo, as tarefas e os cards seguem esta cor.</div><div class="sw" role="radiogroup" aria-labelledby="mcl">${COLORS.map(c=>`<label><input type="radio" name="mc" value="${c}" ${c===(m.cor||COLORS[0])?'checked':''}><span style="--c:${c}"></span><span class="sr">Cor ${c}</span></label>`).join('')}</div></div>
   <div class="full"><label for="mp">Prazo de entrega</label><input type="date" id="mp" value="${esc(m.prazo||'')}"><div class="hint">Aparece sempre no card da medição, no menu lateral.</div></div></div>
-  <div class="df"><button class="btn pri">Salvar medição</button>${isNew?'':'<span class="sp"></span><button type="button" class="btn dan" id="dl">Excluir</button>'}</div></form>`,'#f2c14e');
+  <div class="df"><button class="btn pri">Salvar medição</button>${isNew?'':'<span class="sp"></span><button type="button" class="btn dan" id="dl">Excluir</button>'}</div></form>`,m.cor||COLORS[0]);
+  d.querySelectorAll('[name=mc]').forEach(r=>r.onchange=()=>d.style.setProperty('--c',r.value));
   d.querySelector('form').onsubmit=async e=>{e.preventDefault();const nm=d.querySelector('#mn').value.trim();
     if(S.medicoes.some(x=>x.id!==id&&nk(x.nome)===nk(nm))){toast('Já existe uma medição com este nome');return}
     const it=[...new Set(d.querySelector('#mi').value.split('\n').map(s=>s.trim()).filter(Boolean))];if(!it.length){toast('Informe ao menos um item');return}
     const o=isNew?{id:'m'+Date.now()}:m;o.nome=nm;o.itens=it;o.dir=d.querySelector('#md').value.trim();o.prazo=d.querySelector('#mp').value;o.cor=d.querySelector('[name=mc]:checked').value;
-    if(isNew)S.medicoes.push(o);S.tipos.filter(y=>y.med===o.id).forEach(y=>y.nome=o.nome);await save();close();render()};
+    if(isNew)S.medicoes.push(o);S.tipos.filter(y=>y.med===o.id).forEach(y=>{y.nome=o.nome;y.cor=o.cor});await save();close();render()};
   if(!isNew)d.querySelector('#dl').onclick=async()=>{if(S.tipos.some(y=>y.med===id)){toast('Exclua antes o fluxo desta medição');return}if(confirm('Excluir esta medição?')){S.medicoes=S.medicoes.filter(x=>x.id!==id);await save();close();render()}};
   d.querySelector('#mn').focus();
 }
@@ -1065,10 +1068,9 @@ function openTipo(id){
   if(!id&&!(S.medicoes||[]).length){toast('Cadastre uma medição primeiro');adminSec='med';render();return}
   const y=S.tipos.find(x=>x.id===id)||{nome:'',cor:COLORS[0],campos:['protocolo','portal','repasse','obs'],passos:[],meta:{v:0,u:'dias'}};const isNew=!id;
   const [d,close]=dlg(`<form method="dialog"><div class="dh"><h2>${isNew?'Novo tipo de fluxo':'Editar tipo'}</h2><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
-  <div class="db"><div class="full"><label for="tn">Medição (nome do fluxo) *</label><select id="tn" required><option value="">— escolha a medição —</option>${S.medicoes.filter(m=>m.id===y.med||(!y.med&&nk(m.nome)===nk(y.nome))||!S.tipos.some(z=>z.med===m.id&&z.id!==y.id)).map(m=>`<option value="${m.id}" ${m.id===y.med||(!y.med&&nk(m.nome)===nk(y.nome))?'selected':''}>${esc(m.nome)}</option>`).join('')}</select><div class="hint">Só aparecem medições cadastradas que ainda não têm fluxo.</div></div>
+  <div class="db"><div class="full"><label for="tn">Medição (nome do fluxo) *</label><select id="tn" required><option value="">— escolha a medição —</option>${S.medicoes.filter(m=>m.id===y.med||(!y.med&&nk(m.nome)===nk(y.nome))||!S.tipos.some(z=>z.med===m.id&&z.id!==y.id)).map(m=>`<option value="${m.id}" ${m.id===y.med||(!y.med&&nk(m.nome)===nk(y.nome))?'selected':''}>${esc(m.nome)}</option>`).join('')}</select><div class="hint">Só aparecem medições cadastradas que ainda não têm fluxo. A cor do fluxo e das tarefas vem da medição.</div></div>
   <div class="full"><label>Passos do fluxo</label><div id="tpe"></div><div class="hint">Em cada passo, marque os campos que quem estiver nele poderá preencher ou editar.</div></div>
-  <div class="full"><label id="tcl">Cor</label><div class="sw" role="radiogroup" aria-labelledby="tcl">${COLORS.map(c=>`<label><input type="radio" name="tc" value="${c}" ${c===y.cor?'checked':''}><span style="--c:${c}"></span><span class="sr">Cor ${c}</span></label>`).join('')}</div></div>
-  <div class="full"><label>Campos que aparecem ao criar a tarefa</label><div class="chk">${campos().map(c=>`<label><input type="checkbox" value="${c.id}" ${y.campos.includes(c.id)?'checked':''}>${esc(c.nome)}<span class="ct">${CT[c.tipo]}</span></label>`).join('')}</div>
+    <div class="full"><label>Campos que aparecem ao criar a tarefa</label><div class="chk">${campos().map(c=>`<label><input type="checkbox" value="${c.id}" ${y.campos.includes(c.id)?'checked':''}>${esc(c.nome)}<span class="ct">${CT[c.tipo]}</span></label>`).join('')}</div>
   <div class="hint">Tarefa, fluxo, status e data estimada sempre aparecem.</div></div>
   <div><label for="mv">Meta de entrega</label><input type="number" min="0" step="any" id="mv" value="${y.meta.v}"></div>
   <div><label for="mu">Unidade</label><select id="mu"><option value="horas">Horas</option><option value="dias">Dias</option><option value="qtd">Quantidade por dia</option></select></div>
@@ -1083,9 +1085,9 @@ function openTipo(id){
     hp.querySelector('[data-add]').onclick=()=>{PS.push({e:'',c:[]});dp();hp.querySelectorAll('.fi')[PS.length-1].focus()}};
   dp();
   d.querySelector('#mu').value=y.meta.u;
-  d.querySelectorAll('[name=tc]').forEach(r=>r.onchange=()=>d.style.setProperty('--c',r.value));
+  {const tn=d.querySelector('#tn');tn.onchange=()=>{const m=S.medicoes.find(x=>x.id===tn.value);if(m&&m.cor)d.style.setProperty('--c',m.cor)}}
   d.querySelector('form').onsubmit=async()=>{
-    const o=isNew?{id:'ty'+Date.now()}:y;{const m=S.medicoes.find(x=>x.id===d.querySelector('#tn').value);o.med=m.id;o.nome=m.nome}o.cor=d.querySelector('[name=tc]:checked').value;{const K=PS.filter(p=>p.e.trim());o.passos=K.map(p=>p.e.trim());o.pc=K.map(p=>p.c)}
+    const o=isNew?{id:'ty'+Date.now()}:y;{const m=S.medicoes.find(x=>x.id===d.querySelector('#tn').value);o.med=m.id;o.nome=m.nome;o.cor=m.cor||o.cor||COLORS[0]}{const K=PS.filter(p=>p.e.trim());o.passos=K.map(p=>p.e.trim());o.pc=K.map(p=>p.c)}
     o.campos=[...d.querySelectorAll('.chk input:checked')].map(i=>i.value);o.meta={v:+d.querySelector('#mv').value||0,u:d.querySelector('#mu').value};
     if(isNew)S.tipos.push(o);await save();close();render()};
   if(!isNew)d.querySelector('#dl').onclick=async()=>{if(confirm('Excluir este tipo? As tarefas existentes continuam, sem tipo.')){S.tipos=S.tipos.filter(x=>x.id!==id);await save();close();render()}};
