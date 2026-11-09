@@ -576,7 +576,7 @@ function loginScreen(){
 /* ---------- Menu lateral: medições ---------- */
 function medSide(){
   const T=S.tasks.filter(vis);
-  const L=(S.medicoes||[]).map(m=>{const X=T.filter(t=>tipoOf(t)&&tipoOf(t).med===m.id);return{m,t:(m.itens||[]).length,n:X.length,d:X.filter(t=>t.status==='done').length,cor:m.cor||(S.tipos.find(y=>y.med===m.id)||{}).cor||'var(--ac)'}})
+  const L=(S.medicoes||[]).map(m=>{const X=T.filter(t=>daMed(tipoOf(t),m));return{m,t:(m.itens||[]).length,n:X.length,d:X.filter(t=>t.status==='done').length,cor:corMed(m)}})
     .filter(x=>isAdm()||x.n).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999')||a.m.nome.localeCompare(b.m.nome,'pt-BR'));
   return `<aside class="msb" aria-label="Medições cadastradas"><h2 class="msh">Medições <em>${L.length}</em></h2><div class="msl">${L.map(({m,t,n,d,cor})=>{const lt=!!m.prazo&&m.prazo<today()&&d<(t||n);
     const o=MX.has(m.id);return `<article class="mdc${lt?' late':''}${o?' open':''}" style="--c:${cor}"><button type="button" class="mdh" data-mx="${esc(m.id)}" aria-expanded="${o}" title="${o?'Recolher':'Ver informações'}"><span class="mdn">${esc(m.nome)}${lt?' ⚠':''}</span><span class="mdg" aria-hidden="true">${o?'▴':'▾'}</span></button><div class="mdb"><div class="mdr"><span>Tarefas</span><b>${t}</b></div><div class="mdr"><span>Cadastradas</span><b>${n}</b></div><div class="mdr"><span>Concluídas</span><b>${d}</b></div><div class="mdr mdp"><span>Prazo de entrega</span><b>${m.prazo?fmt(m.prazo)+(lt?' ⚠':''):'Sem prazo'}</b></div></div></article>`}).join('')||'<div class="empty">Nenhuma medição cadastrada.</div>'}</div></aside>`}
@@ -1189,14 +1189,16 @@ function openView(id){
 
 /* ---------- Tarefa (criar / editar) ---------- */
 /* ---------- Aba Medições: itens cadastrados x faltando ---------- */
-function dbl(el,fn){let t=0;el.addEventListener('click',e=>{const n=Date.now();if(n-t<450){t=0;fn(e)}else t=n})}
-const corMed=m=>m.cor||(S.tipos.find(y=>y.med===m.id)||{}).cor||'var(--ac)';
+function dbl(el,fn){let t=0,l=0;const go=e=>{const n=Date.now();if(n-l<600)return;l=n;t=0;fn(e)};el.addEventListener('click',e=>{const n=Date.now();if(n-t<450)go(e);else t=n});el.addEventListener('dblclick',go)}
+const corMed=m=>m.cor||(tipoDe(m)||{}).cor||'var(--ac)';
+const daMed=(y,m)=>!!y&&(y.med===m.id||(!y.med&&nk(y.nome)===nk(m.nome)));
+const tipoDe=m=>S.tipos.find(y=>y.med===m.id)||S.tipos.find(y=>daMed(y,m));
 function medItens(m){
   const by=new Map();
-  S.tasks.forEach(t=>{const y=tipoOf(t);if(y&&y.med===m.id){const k=nk(t.tarefa);if(!by.has(k))by.set(k,[]);by.get(k).push(t)}});
+  S.tasks.forEach(t=>{const y=tipoOf(t);if(daMed(y,m)){const k=nk(t.tarefa);if(!by.has(k))by.set(k,[]);by.get(k).push(t)}});
   const ok=[],no=[];
   (m.itens||[]).forEach(i=>{const L=by.get(nk(i));L&&L.length?ok.push({i,t:L}):no.push(i)});
-  return{ok,no,y:S.tipos.find(x=>x.med===m.id)};
+  return{ok,no,y:tipoDe(m)};
 }
 function medView(){
   const M=[...(S.medicoes||[])].sort((a,b)=>(a.prazo||'9999').localeCompare(b.prazo||'9999')||a.nome.localeCompare(b.nome,'pt-BR'));
@@ -1221,9 +1223,8 @@ function openMedItens(id){
   d.querySelector('#me').onclick=()=>then(()=>openMedicao(m.id));
 }
 function novaTarefaItem(m,item,then){
-  const y=S.tipos.find(x=>x.med===m.id);
-  if(!y){then(()=>{toast('Cadastre antes o tipo de fluxo desta medição');view='admin';adminSec='tipos';ANIM=true;render()});return}
-  then(()=>openTask(null,{tipo:y.id,tarefa:item},()=>openMedItens(m.id)));
+  const y=tipoDe(m);
+  then(()=>{if(!y)toast('Escolha o tipo de fluxo desta tarefa');openTask(null,{tipo:y?y.id:'',tarefa:item},()=>openMedItens(m.id))});
 }
 
 function openTask(id,pre,after){
