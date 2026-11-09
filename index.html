@@ -468,6 +468,33 @@ dialog:has(.mi2){width:min(900px,96vw)}
 .mt small{color:var(--mu);font-weight:600}
 .mi2+.hint{margin-top:12px}
 @media(max-width:640px){.mi2{grid-template-columns:1fr}.mts{max-height:34vh}}
+
+/* ===== Telas mais largas e organizadas ===== */
+dialog.view{width:min(1320px,96vw)}
+.vg{display:grid;grid-template-columns:minmax(0,1fr);gap:16px 22px;align-items:start}
+.vg>.stp{grid-column:1/-1;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.vl{display:flex;flex-direction:column;gap:12px;min-width:0}
+.vl>*{margin:0!important}.vl #sv{align-self:flex-start}
+.vl .sfb{margin:0}
+.view .kv{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin:0}
+.view .kv div{background:var(--s2);border:1px solid var(--line)}
+.view .sfg{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.vr{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0;display:flex;flex-direction:column;gap:6px}
+.vr>label:first-child{margin-top:0;font-size:15px}
+.vr .notes{max-height:34vh}
+@media(min-width:901px){
+ .vg{grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr)}
+ .vr{position:sticky;top:0}
+}
+@media(min-width:1101px){
+ dialog.view .df{flex-wrap:nowrap;align-items:center;gap:10px}
+ dialog.view .df>.btn,dialog.view .df>a.btn{white-space:nowrap;flex:none}
+ dialog.view .df .sp{flex:1 1 0;min-width:8px}
+ dialog.view .mailbox{flex:0 1 auto;min-width:0}
+ dialog.view .mailbox .ml b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+dialog:has(#tf){width:min(1200px,96vw)}
+@media(min-width:901px){dialog:has(#tf) .db{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -1168,11 +1195,12 @@ function openView(id){
   const wa=ct&&ct.whatsapp?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(ct.whatsapp,msg)}">💬 WhatsApp · ${esc(who.pessoa)}</a>`:`<button type="button" class="btn wa off" data-miss>💬 WhatsApp${who?' · '+esc(who.pessoa):''}</button>`;
   const ml=ct&&ct.email?`<div class="mailbox"><span class="ml"><small>✉ E-mail · ${esc(who.pessoa)}</small><b>${esc(ct.email)}</b></span><button type="button" class="btn mail" id="em" aria-label="Copiar e-mail de ${esc(who.pessoa)}">⧉ Copiar</button></div>`:`<button type="button" class="btn mail off" data-miss>✉ E-mail${who?' · '+esc(who.pessoa):''}</button>`;
   const [d,close]=dlg(`<div class="dh"><div><div class="vt">${tipoTag(t)}<span class="sb">${stepTxt}</span></div><h2 id="dt">${esc(nome(t))}</h2></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
-  <div class="vb"><section><ol class="stp">${steps||'<li>Sem passos</li>'}</ol>${blocks}${blocks.includes('data-sf')?'<button type="button" class="btn" id="sv" style="margin-bottom:14px">Salvar campos</button>':''}
-  <div class="kv">${kv.map(([k,v])=>`<div><label>${k}</label><span>${esc(v)}</span></div>`).join('')}</div>
-  ${campos().filter(c=>c.tipo==='longo'&&t[c.id]&&!SF.has(c.id)).map(c=>`<label>${esc(c.nome)}</label><p class="obs">${esc(t[c.id])}</p>`).join('')}
-  <label>Anotações</label><div class="notes">${anot||'<div class="hint">Nenhuma anotação.</div>'}</div>${noteBox}
-  ${hist?`<label>Histórico</label><div class="notes">${hist}</div>`:''}</section></div>
+  <div class="vb"><section class="vg"><ol class="stp">${steps||'<li>Sem passos</li>'}</ol>
+  <div class="vl"><div class="kv">${kv.map(([k,v])=>`<div><label>${k}</label><span>${esc(v)}</span></div>`).join('')}</div>
+  ${blocks}${blocks.includes('data-sf')?'<button type="button" class="btn" id="sv" style="margin-bottom:14px">Salvar campos</button>':''}
+  ${campos().filter(c=>c.tipo==='longo'&&t[c.id]&&!SF.has(c.id)).map(c=>`<label>${esc(c.nome)}</label><p class="obs">${esc(t[c.id])}</p>`).join('')}</div>
+  <aside class="vr" aria-label="Anotações e histórico"><label>Anotações</label><div class="notes">${anot||'<div class="hint">Nenhuma anotação.</div>'}</div>${noteBox}
+  ${hist?`<label>Histórico</label><div class="notes">${hist}</div>`:''}</aside></section></div>
   <div class="df">${c&&(A||mine(c))?`<button type="button" class="btn pri" id="fin">✔ Finalizar ${mine(c)?'meu passo':'passo de '+esc(c.pessoa)}</button>`:''}${A&&(t.status==='done'||t.passo>0)?'<button type="button" class="btn" id="bk">← Voltar passo</button>':''}${A&&c?'<button type="button" class="btn" id="av">Avançar passo →</button>':''}${A?wa+ml:''}${dirOf(t)?`<button type="button" class="btn" data-dir="${t.id}">📋 Copiar caminho na rede</button>`:''}<span class="sp"></span>${A?'<button type="button" class="btn" id="ed">✎ Editar</button>':''}</div>`,corOf(t));
   d.classList.add('view');d.setAttribute('aria-labelledby','dt');
   const on=(s,f)=>{const e=d.querySelector(s);if(e)e.onclick=f};
