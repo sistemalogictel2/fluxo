@@ -574,6 +574,24 @@ dialog.view{width:min(1040px,96vw)}
 .col[data-p].over{border-color:var(--ac)}
 @media(max-width:760px){.tabs{padding:0 8px}}
 .sfw{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}.sfw .sfb{margin:0}.sfb textarea{min-height:64px}
+
+/* ===== Ajustes: card em tela quase cheia, zoom no diagrama, barra superior no Por funcionário ===== */
+@media(min-width:761px){
+  dialog.view[open]{width:calc(98vw/var(--z,1));max-width:none;height:calc(96vh/var(--z,1));max-height:calc(96vh/var(--z,1))}
+  @supports (height:1dvh){dialog.view[open]{height:calc(96dvh/var(--z,1));max-height:calc(96dvh/var(--z,1))}}
+}
+.view .vb:has(>.tp:not([hidden]) .fdz),.view .vb:has(>.fdz){display:flex;flex-direction:column}
+.view .vb>.tp:not([hidden]):has(.fdz){flex:1 1 auto;min-height:0}
+.fdw.fdz{position:relative;overflow:hidden;padding:0;flex:1 1 auto;min-height:300px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;outline-offset:2px}
+.fdw.fdz.pan{cursor:grabbing}
+.fdz .fdt{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.fdc{position:absolute;top:10px;right:10px;display:flex;gap:6px;z-index:2;cursor:default}
+.fdc .btn{min-height:34px;padding:2px 11px;font-weight:700;background:var(--s1)}
+.fdc .fdp{display:inline-block;min-width:3.2em;text-align:center;font-variant-numeric:tabular-nums}
+.hsb{overflow-x:scroll;overflow-y:hidden;height:16px;margin:0 0 8px;scrollbar-width:auto}
+.hsb[hidden]{display:none}
+.hsb>div{height:1px}
+.board.postit{overflow-x:auto;max-width:100%;padding-top:6px}
 </style>
 </head>
 <body>
@@ -706,7 +724,7 @@ function medSide(){
   const cardM=({m,t,n,d,cor})=>{const lt=!!m.prazo&&m.prazo<today()&&d<(t||n),o=MX.has(m.id);
     return `<article class="mdc${lt?' late':''}${o?' open':''}" style="--c:${cor}"><button type="button" class="mdh" data-mx="${esc(m.id)}" aria-expanded="${o}" title="${o?'Recolher':'Ver informações'}"><span class="mdn">${esc(m.nome)}${lt?' ⚠':''}</span><span class="mdg" aria-hidden="true">${o?'▴':'▾'}</span></button><div class="mdb"><div class="mdr"><span>Classe</span><b>${esc(clsNm(m.classe))||'—'}</b></div><div class="mdr"><span>Tarefas</span><b>${t}</b></div><div class="mdr"><span>Cadastradas</span><b>${n}</b></div><div class="mdr"><span>Concluídas</span><b>${d}</b></div><div class="mdr mdp"><span>Prazo de entrega</span><b>${m.prazo?fmt(m.prazo)+(lt?' ⚠':''):'Sem prazo'}</b></div></div></article>`};
   const G=byClasse(L).filter(g=>g.L.length||g.c.id);
-  return `<aside class="msb" aria-label="Classes e medições cadastradas"><h2 class="msh">Classes <em>${(S.classes||[]).length}</em></h2>${G.map(g=>{const cl=CC.has(g.c.id||'_');return `<section class="mcg"><button type="button" class="mch" data-cc="${esc(g.c.id||'_')}" aria-expanded="${!cl}" title="${cl?'Expandir':'Recolher'} ${esc(g.c.nome)}"><span class="mcn">${esc(g.c.nome)}</span><em>${g.L.length}</em><span class="mdg" aria-hidden="true">${cl?'▸':'▾'}</span></button>${cl?'':`<div class="msl">${g.L.map(cardM).join('')||'<div class="empty">Nenhuma medição.</div>'}</div>`}</section>`}).join('')||'<div class="empty">Nenhuma classe cadastrada.</div>'}</aside>`}
+  return `<aside class="msb" aria-label="Classes e medições cadastradas"><h2 class="msh">Classes <em>${(S.classes||[]).length}</em></h2>${G.map(g=>{const cl=!CC.has(g.c.id||'_');return `<section class="mcg"><button type="button" class="mch" data-cc="${esc(g.c.id||'_')}" aria-expanded="${!cl}" title="${cl?'Expandir':'Recolher'} ${esc(g.c.nome)}"><span class="mcn">${esc(g.c.nome)}</span><em>${g.L.length}</em><span class="mdg" aria-hidden="true">${cl?'▸':'▾'}</span></button>${cl?'':`<div class="msl">${g.L.map(cardM).join('')||'<div class="empty">Nenhuma medição.</div>'}</div>`}</section>`}).join('')||'<div class="empty">Nenhuma classe cadastrada.</div>'}</aside>`}
 /* ---------- Usuários (definidos no banco) ---------- */
 function usrPane(){
   const cn=id=>{const c=(S.contatos||[]).find(x=>x.id===id);return c?c.nome:''};
@@ -799,7 +817,7 @@ function render(){
   }else if(view==='admin'){body=adminView()
   }else{
     const P=flowPeople().filter(([k])=>!fPessoa||k===fPessoa);
-    body=(isAdm()?'<p class="hint" style="margin:0 0 8px">Arraste um card para a coluna de outro funcionário para passar a ele o passo liberado.</p>':'')+`<div class="board postit">${P.map(([pk,p],i)=>{const L=srt(TF.filter(t=>holders(t).some(h=>pkey(h.pessoa)===pk)&&(t.status!=='done'||fKpi==='done')));
+    body=(isAdm()?'<p class="hint" style="margin:0 0 8px">Arraste um card para a coluna de outro funcionário para passar a ele o passo liberado.</p>':'')+`<div class="hsb" id="hsb" hidden aria-hidden="true"><div></div></div><div class="board postit" id="bdp">${P.map(([pk,p],i)=>{const L=srt(TF.filter(t=>holders(t).some(h=>pkey(h.pessoa)===pk)&&(t.status!=='done'||fKpi==='done')));
       return `<section class="col" data-p="${esc(pk)}" data-pn="${esc(p)}" aria-label="${esc(p)}"><h2><span><span class="avatar" aria-hidden="true">${esc(p[0])}</span>${esc(p)}</span><span><button type="button" class="xa" data-xa title="Expandir/recolher todos" aria-label="Expandir ou recolher todos">⇕</button><em>${L.length}</em></span></h2><div class="list">${L.map((t,j)=>card(t,'p').replace('class="card"',`class="card" style="--rot:${(j%2?1:-1)*(0.6+j%3*0.4)}deg;--c:${corOf(t)}"`)).join('')||'<div class="empty">Sem atividades</div>'}</div></section>`}).join('')||'<div class="empty" style="width:100%">Crie uma tarefa com fluxo para ver os funcionários aqui.</div>'}</div>`;
   }
   $('#app').innerHTML=`<div class="stk"><header><div class="logo">Flu<b>xo</b></div>
@@ -829,6 +847,9 @@ function kpiGo(k){
 function setHH(){const e=$('.stk');if(e)document.documentElement.style.setProperty('--hh',e.offsetHeight+'px')}
 addEventListener('resize',setHH);
 function bind(){
+  {const hb=document.getElementById('hsb'),bd=document.getElementById('bdp');if(hb&&bd){const iw=hb.firstElementChild,upd=()=>{iw.style.width=bd.scrollWidth+'px';hb.hidden=bd.scrollWidth<=bd.clientWidth+2};
+    hb.addEventListener('scroll',()=>{if(Math.abs(bd.scrollLeft-hb.scrollLeft)>1)bd.scrollLeft=hb.scrollLeft});bd.addEventListener('scroll',()=>{if(Math.abs(hb.scrollLeft-bd.scrollLeft)>1)hb.scrollLeft=bd.scrollLeft});
+    upd();new ResizeObserver(upd).observe(bd);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(upd)}}
   if(ANIM){const a=$('#app');ANIM=false;a.querySelectorAll('.card,.pcap,.tcard,.col,.kpi,.person,.pk').forEach((e,i)=>e.style.setProperty('--i',Math.min(i,14)));a.classList.add('enter');setTimeout(()=>a.classList.remove('enter'),1000)}
   document.querySelectorAll('[data-mx]').forEach(b=>b.onclick=()=>{const k=b.dataset.mx,c=b.closest('.mdc'),o=!MX.has(k);o?MX.add(k):MX.delete(k);c.classList.toggle('open',o);b.setAttribute('aria-expanded',o);b.querySelector('.mdg').textContent=o?'▴':'▾'});
   document.querySelectorAll('[data-mo],[data-gm]').forEach(b=>b.onclick=()=>openMedItens(b.dataset.mo||b.dataset.gm));
@@ -1161,7 +1182,7 @@ function openMedicao(id){
   d.querySelector('#mn').focus();
 }
 function openFluxoTipo(id){const y=S.tipos.find(x=>x.id===id);if(!y)return;const F=stepsOf(y),G=grp(F),by=byId(F);
-  const [d,close]=dlg(`<div class="dh"><div><h2>${esc(tipoLbl(y))}</h2><div class="hint">Diagrama do fluxo</div></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div><div class="vb"><div class="fdw">${flowSvg(F,{sub:f=>{const n=needOf(F,G,f,by);return n.length?'após '+n.map(i=>F.findIndex(z=>z.id===i)+1).join(', '):'livre'}})}</div><div class="fleg">Cada seta liga um passo ao que depende dele. Caixa tracejada = passos concomitantes.</div></div>`,y.cor);d.classList.add('view')}
+  const [d,close]=dlg(`<div class="dh"><div><h2>${esc(tipoLbl(y))}</h2><div class="hint">Diagrama do fluxo</div></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div><div class="vb"><div class="fdw">${flowSvg(F,{sub:f=>{const n=needOf(F,G,f,by);return n.length?'após '+n.map(i=>F.findIndex(z=>z.id===i)+1).join(', '):'livre'}})}</div><div class="fleg">Cada seta liga um passo ao que depende dele. Caixa tracejada = passos concomitantes.</div></div>`,y.cor);d.classList.add('view');fdZoom(d)}
 function tiposPane(){
   const TF=base().filter(kpiOk),filt=!!(fPessoa||fKpi);
   const uso=y=>TF.filter(t=>t.tipo===y.id).length;
@@ -1288,6 +1309,37 @@ function rank(tid){const P=perf(tid);return(S.contatos||[]).map(c=>{const k='c:'
 const pl=r=>r.pct>0?'▲ +'+r.pct+'%':r.pct<0?'▼ '+String(r.pct).replace('-','−')+'%':'● 0%';
 const stepsOf=y=>(y.steps||[]).map(e=>({id:e.id,etapa:e.etapa,campos:[...(e.campos||[])],dep:[...(e.dep||[])],con:[...(e.con||[])]}));
 /* ---------- Diagrama do fluxo (SVG) ---------- */
+/* Zoom e arraste dentro do próprio diagrama (roda do mouse, pinça, botões, teclado) */
+function fdZoom(root){
+  root.querySelectorAll('.fdw').forEach(w=>{
+    const svg=w.querySelector('svg.fdg');if(!svg||w.classList.contains('fdz'))return;
+    const vb=svg.viewBox.baseVal,W=(vb&&vb.width)||+svg.getAttribute('width')||600,H=(vb&&vb.height)||+svg.getAttribute('height')||400;
+    const t=document.createElement('div');t.className='fdt';t.style.width=W+'px';t.style.height=H+'px';
+    svg.replaceWith(t);t.appendChild(svg);svg.style.cssText=`width:${W}px;height:${H}px;min-width:0;max-width:none;margin:0`;
+    const c=document.createElement('div');c.className='fdc';
+    c.innerHTML='<button type="button" class="btn" data-z="out" aria-label="Diminuir zoom" title="Diminuir (−)">−</button><button type="button" class="btn" data-z="one" aria-label="Zoom 100%" title="Tamanho real (1)"><span class="fdp">100%</span></button><button type="button" class="btn" data-z="in" aria-label="Aumentar zoom" title="Aumentar (+)">+</button><button type="button" class="btn" data-z="fit" aria-label="Ajustar à tela" title="Ajustar à tela (0)">⤢ Ajustar</button>';
+    w.classList.add('fdz');w.tabIndex=0;w.appendChild(c);
+    const lab=c.querySelector('.fdp');let s=1,x=0,y=0,touched=false;
+    const ap=()=>{t.style.transform=`translate(${x}px,${y}px) scale(${s})`;lab.textContent=Math.round(s*100)+'%'};
+    const fit=()=>{const cw=w.clientWidth,ch=w.clientHeight;if(!cw||!ch)return;s=Math.max(.2,Math.min((cw-24)/W,(ch-24)/H,1.6));x=(cw-W*s)/2;y=Math.max(12,(ch-H*s)/2);touched=false;ap()};
+    const zoomAt=(f,px,py)=>{const n=Math.min(5,Math.max(.2,s*f));f=n/s;x=px-(px-x)*f;y=py-(py-y)*f;s=n;touched=true;ap()};
+    const k=()=>(w.getBoundingClientRect().width/w.offsetWidth)||1;
+    const mid=()=>[w.clientWidth/2,w.clientHeight/2];
+    const act=a=>{if(a==='fit')fit();else if(a==='in')zoomAt(1.25,...mid());else if(a==='out')zoomAt(.8,...mid());else if(a==='one'){const[px,py]=mid();zoomAt(1/s,px,py)}};
+    c.addEventListener('click',e=>{const b=e.target.closest('[data-z]');if(b)act(b.dataset.z)});
+    w.addEventListener('wheel',e=>{e.preventDefault();const r=w.getBoundingClientRect(),q=k();zoomAt(Math.exp(-e.deltaY*(e.deltaMode===1?.05:.0015)),(e.clientX-r.left)/q,(e.clientY-r.top)/q)},{passive:false});
+    const P=new Map();let d0=0;
+    w.addEventListener('pointerdown',e=>{if(e.target.closest('.fdc'))return;P.set(e.pointerId,[e.clientX,e.clientY]);try{w.setPointerCapture(e.pointerId)}catch(_){}w.classList.add('pan');d0=0});
+    w.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;const o=P.get(e.pointerId),q=k();P.set(e.pointerId,[e.clientX,e.clientY]);
+      if(P.size===1){x+=(e.clientX-o[0])/q;y+=(e.clientY-o[1])/q;touched=true;ap()}
+      else if(P.size===2){const[a,b]=[...P.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(d0){const r=w.getBoundingClientRect();zoomAt(d/d0,((a[0]+b[0])/2-r.left)/q,((a[1]+b[1])/2-r.top)/q)}d0=d}});
+    const up=e=>{P.delete(e.pointerId);d0=0;if(!P.size)w.classList.remove('pan')};
+    w.addEventListener('pointerup',up);w.addEventListener('pointercancel',up);
+    w.addEventListener('dblclick',e=>{if(!e.target.closest('.fdc'))fit()});
+    w.addEventListener('keydown',e=>{const m={'+':'in','=':'in','-':'out','_':'out','0':'fit','1':'one'}[e.key];if(m){e.preventDefault();act(m)}});
+    new ResizeObserver(()=>{if(!touched)fit()}).observe(w);fit();
+  });
+}
 let _fdn=0;
 function flowSvg(F,o={}){
   if(!F.length)return'<div class="empty">Nenhum passo ainda.</div>';
@@ -1434,7 +1486,7 @@ function openView(id,tab0){
   const agRow=f=>{const can=A||mine(f);return `<div class="agr"><span class="agn"><b>${num(f)}. ${esc(f.etapa)}</b><small>${esc(f.pessoa)}${cc(f)}</small></span>${can?`<button type="button" class="btn pri" data-fs="${f.id}">✔ Finalizar${mine(f)?'':' (gestor)'}</button>`:''}${A?`<button type="button" class="btn" data-sk="${f.id}" title="Conclui o passo sem creditar o funcionário">Avançar ⏭</button>`:''}</div>`};
   const wRow=f=>`<div class="agr"><span class="agn"><b>🔒 ${num(f)}. ${esc(f.etapa)}</b><small>${esc(f.pessoa)} · aguarda: ${waitOf(t.fluxo,f).map(z=>num(z)+'. '+esc(z.etapa)).join(', ')}</small></span></div>`;
   const panel=n?`<section class="agp" aria-label="Passos liberados agora"><h3>${t.status==='done'?'Tarefa concluída':'Liberados agora'} <em>${AC.length}</em></h3>${AC.map(agRow).join('')||`<div class="hint">${t.status==='done'?'Todos os passos foram concluídos.':'Nenhum passo liberado no momento.'}</div>`}</section>${wait.length?`<section class="agp wt" aria-label="Passos aguardando liberação"><h3>Aguardando liberação <em>${wait.length}</em></h3>${wait.map(wRow).join('')}</section>`:''}`:'<div class="empty">Esta tarefa não tem passos.</div>';
-  const diag=n?`<div class="fdw">${flowSvg(t.fluxo,{st,sub:(f,i)=>shortName(f.pessoa)+(f.ok>1e11?' · '+dt(f.ok):'')})}</div><div class="fleg">Verde = concluído · amarelo = liberado agora · tracejado = aguardando · caixa tracejada verde = passos concomitantes.</div>`:'<div class="empty">Sem passos</div>';
+  const diag=n?`<div class="fdw">${flowSvg(t.fluxo,{st,sub:(f,i)=>shortName(f.pessoa)+(f.ok>1e11?' · '+dt(f.ok):'')})}</div><div class="fleg">Verde = concluído · amarelo = liberado agora · tracejado = aguardando · caixa tracejada verde = concomitantes. Roda do mouse = zoom · arraste = mover · duplo clique = ajustar.</div>`:'<div class="empty">Sem passos</div>';
   const hist=(t.notas||[]).slice(-30).reverse().map(x=>`<div class="note">${esc(x.txt)}<small>${esc(x.u)} · ${dt(x.t)}</small></div>`).join('');
   const lbl=p=>p<0||!t.fluxo[p]?'Geral':`Passo ${p+1} · ${esc(t.fluxo[p].etapa)}`;
   const anot=(t.anot||[]).slice().reverse().map(a=>`<div class="note"><b>${lbl(a.passo)}</b><div style="white-space:pre-wrap">${esc(a.txt)}</div><small>${esc(a.u)} · ${dt(a.t)}</small>${A?`<button type="button" class="btn dan" data-da="${a.id}" style="min-height:30px;padding:2px 10px;margin-top:6px">Excluir</button>`:''}</div>`).join('');
@@ -1453,6 +1505,8 @@ function openView(id,tab0){
     const wa=ct&&ct.whatsapp?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(ct.whatsapp,msg)}" data-cob="${t.id}">${WA_IMG} WhatsApp</a>`:`<button type="button" class="btn wa off" data-miss="${esc(w.pessoa)}">${WA_IMG} WhatsApp</button>`;
     const ml=ct&&ct.email?`<div class="mailbox"><span class="ml"><small>✉ E-mail</small><b>${esc(ct.email)}</b></span><button type="button" class="btn mail" data-em="${esc(ct.email)}" aria-label="Copiar e-mail de ${esc(w.pessoa)}">⧉ Copiar</button></div>`:`<button type="button" class="btn mail off" data-miss="${esc(w.pessoa)}">✉ E-mail</button>`;
     return `<div class="ctp"><b>${esc(w.pessoa)}${on?' <span class="tag vez">passo liberado</span>':''}</b>${wa}${ml}</div>`}).join('')}</div>`:'';
+  const waSeen=new Set(),waF=A?AC.filter(w=>{const k=pkey(w.pessoa);if(waSeen.has(k))return false;waSeen.add(k);return true}).map(w=>{const ct=contactFor(w.pessoa),msg=`Olá ${fn1(w.pessoa)}, sobre a tarefa "${nome(t)}"${t.protocolo?' (protocolo '+t.protocolo+')':''}${t.final?', entrega prevista '+fmt(t.final):''}. `,tt=`WhatsApp: ${w.pessoa} (${w.etapa})`;
+    return ct&&ct.whatsapp?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(ct.whatsapp,msg)}" data-cob="${t.id}" title="${esc(tt)}" aria-label="${esc(tt)}">${WA_IMG} ${esc(fn1(w.pessoa))}</a>`:`<button type="button" class="btn wa off" data-miss="${esc(w.pessoa)}" title="${esc(tt+' — sem contato cadastrado')}" aria-label="${esc(tt+' — sem contato cadastrado')}">${WA_IMG} ${esc(fn1(w.pessoa))}</button>`}).join(''):'';
   const T=[['res','Resumo',AC.length],['dia','Diagrama',0],['ano','Anotações',(t.anot||[]).length],['his','Histórico',(t.notas||[]).length],...(A?[['con','Contatos',0]]:[])],tb=T.some(x=>x[0]===tab0)?tab0:'res';
   const tp=(k,h)=>`<div class="tp" role="tabpanel" id="tp-${k}" data-tp="${k}" aria-labelledby="tb-${k}" ${k===tb?'':'hidden'}>${h}</div>`;
   const [d,close]=dlg(`<div class="dh"><div><div class="vt">${tipoTag(t)}<span class="sb">${stepTxt}</span></div><h2 id="dt">${esc(nome(t))}</h2></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
@@ -1463,8 +1517,8 @@ function openView(id,tab0){
   ${tp('ano',`${noteBox}<div class="notes">${anot||'<div class="hint">Nenhuma anotação.</div>'}</div>`)}
   ${tp('his',`${A&&t.mov?`<div class="mvd">Última mudança de posto: ${esc(movLine(t.mov))} · ${dt(t.mov.t)}${t.mov.por?' · por '+esc(t.mov.por):''}</div>`:''}<div class="notes">${hist||'<div class="hint">Sem histórico ainda.</div>'}</div>`)}
   ${A?tp('con',ctw):''}</div>
-  <div class="df">${mA.map(f=>`<button type="button" class="btn pri" data-fs="${f.id}">✔ Finalizar${mA.length>1?': '+esc(f.etapa):' meu passo'}</button>`).join('')}${A&&t.fluxo.some(f=>f.ok)?'<button type="button" class="btn" id="bk">← Devolver passo</button>':''}${dirOf(t)?`<button type="button" class="btn" data-dir="${t.id}">📋 Copiar caminho na rede</button>`:''}<span class="sp"></span>${A?'<button type="button" class="btn" id="ed">✎ Editar</button>':''}</div>`,corOf(t));
-  d.classList.add('view');d.setAttribute('aria-labelledby','dt');bindTabs(d);
+  <div class="df">${mA.map(f=>`<button type="button" class="btn pri" data-fs="${f.id}">✔ Finalizar${mA.length>1?': '+esc(f.etapa):' meu passo'}</button>`).join('')}${A&&t.fluxo.some(f=>f.ok)?'<button type="button" class="btn" id="bk">← Devolver passo</button>':''}${dirOf(t)?`<button type="button" class="btn" data-dir="${t.id}">📋 Copiar caminho na rede</button>`:''}${waF}<span class="sp"></span>${A?'<button type="button" class="btn" id="ed">✎ Editar</button>':''}</div>`,corOf(t));
+  d.classList.add('view');d.setAttribute('aria-labelledby','dt');bindTabs(d);fdZoom(d);
   const on=(s,f)=>{const e=d.querySelector(s);if(e)e.onclick=f};
   const seenNow=movNew(t);if(seenNow)setVisto([id]);
   bindMasks(d);
