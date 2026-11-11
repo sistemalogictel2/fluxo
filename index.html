@@ -591,7 +591,7 @@ dialog.view{width:min(1040px,96vw)}
 .hsb{overflow-x:scroll;overflow-y:hidden;height:16px;margin:0 0 8px;scrollbar-width:auto}
 .hsb[hidden]{display:none}
 .hsb>div{height:1px}
-.board.postit{overflow-x:auto;max-width:100%;padding-top:6px}
+#bdp{overflow-x:auto;max-width:100%;padding-top:6px}
 
 /* ===== Tema Corporativo (padrão) ===== */
 :root[data-skin=corp]{--bg:#eceff4;--s1:#fff;--s2:#f5f7fa;--line:#d3d9e3;--line2:#8794aa;--tx:#152033;--mu:#4a566b;--ac:#1d3b63;--act:#1d3b63;--acbg:#1d3b6314;--ac2:#0f766e;--on2:#fff;--bad:#b42318;--hd:#fff;--hd2:#ffffffe6;--sh:#15203322;--r:8px}
@@ -909,7 +909,8 @@ function bind(){
 /* ---------- Campos da tarefa (cadastro com tipo) ---------- */
 const CT={texto:'Texto',longo:'Texto longo',numero:'Número',data:'Data',valor:'Valor (R$)'};
 const CH={texto:'Texto livre, em uma linha.',longo:'Texto com várias linhas (ex.: observações).',numero:'Só dígitos, sem pontos ou vírgulas. Ex.: 0000000000',data:'Seletor de data, exibida como dd/mm/aaaa.',valor:'Moeda com formatação automática. Ex.: R$ 1.250,00'};
-const DEF_CAMPOS=[{id:'sub',nome:'Subtarefa',tipo:'texto'},{id:'protocolo',nome:'Protocolo',tipo:'numero'},{id:'portal',nome:'Portal',tipo:'texto'},{id:'qtd',nome:'Quantidade',tipo:'numero',fixo:1},{id:'repasse',nome:'Data de repasse',tipo:'data',fixo:1},{id:'obs',nome:'Observações',tipo:'longo'}];
+const DEF_CAMPOS=[{id:'sub',nome:'Subtarefa',tipo:'texto'},{id:'protocolo',nome:'Protocolo',tipo:'numero'},{id:'portal',nome:'Portal',tipo:'texto'},{id:'qtd',nome:'Quantidade',tipo:'numero',fixo:1},{id:'repasse',nome:'Data de repasse',tipo:'data',fixo:1},{id:'vmc',nome:'Valor medição Coordenador',tipo:'valor',fixo:1},{id:'dmc',nome:'Data medição Coordenador',tipo:'data',fixo:1},{id:'vmg',nome:'Valor medição Gestor',tipo:'valor',fixo:1},{id:'dmg',nome:'Data medição Gestor',tipo:'data',fixo:1},{id:'obs',nome:'Observações',tipo:'longo'}];
+const MEDF=['vmc','dmc','vmg','dmg'];
 const campos=()=>S.campos||DEF_CAMPOS;
 const fname=k=>(campos().find(c=>c.id===k)||{}).nome||k;
 const fid=k=>k==='repasse'?'f6':k==='qtd'?'fq':'cf-'+k;
@@ -980,7 +981,7 @@ function tarefaView(TF){
     L.filter(t=>tpTipo(t)===c.id).forEach(t=>{const seen=new Set();holders(t).forEach(w=>{const k=pkey(w.pessoa);if(seen.has(k))return;seen.add(k);if(!m.has(k))m.set(k,{k,n:nm.get(k)||w.pessoa,q:0,mv:0});m.get(k).q++;if(movNew(t))m.get(k).mv++})});
     const P=[...m.values()].sort((x,y)=>y.q-x.q||x.n.localeCompare(y.n,'pt-BR'));
     return P.length?`<section class="col" aria-label="${esc(c.nome)}"><h2><span><i class="dotc" style="background:${c.cor}"></i>${esc(c.nome)}</span><span>${(mvc=>mvc?`<span class="tag mv" title="${mvc} tarefa(s) mudaram de posto">🔔 ${mvc}</span> `:'')(P.reduce((a,p)=>a+p.mv,0))}<em>${P.length}</em></span></h2><div class="hint" style="margin:-6px 6px 8px">${esc(c.sub)}</div><div class="list">${P.map(p=>`<button type="button" class="pcap" data-pk="${esc(p.k)}" data-tp="${esc(c.id)}" style="--k:${c.cor}" aria-label="${esc(p.n)}: ${p.q} tarefa(s) em ${esc(c.nome)}. Ver tarefas"><span class="pn"><span>${esc(p.n)}</span><span class="pct2">${p.q}</span></span><small>${p.q} tarefa(s) neste tipo</small>${p.mv?`<small><span class="tag mv">🔔 ${p.mv} mudou(aram) de posto</span></small>`:''}</button>`).join('')}</div></section>`:''}).join('');
-  return mvSec(5)+(h?`<div class="board">${h}</div>`:'<div class="empty">Nenhuma tarefa com funcionário neste filtro.</div>')}
+  return mvSec(5)+(h?`<div class="hsb" id="hsb" hidden aria-hidden="true"><div></div></div><div class="board" id="bdp">${h}</div>`:'<div class="empty">Nenhuma tarefa com funcionário neste filtro.</div>')}
 function openTP(pk,tid){
   const nm=new Map(flowPeople()),y=S.tipos.find(x=>x.id===tid);
   const L=srt(base().filter(kpiOk).filter(tpOpen).filter(t=>tpTipo(t)===tid&&holders(t).some(h=>pkey(h.pessoa)===pk)));
@@ -1675,8 +1676,12 @@ function openTask(id,pre,after){
   ${isNew?'':`<span class="sp"></span><button type="button" class="btn dan" id="dl">Excluir</button>`}</div></form>`,corOf(t));
   const q=x=>d.querySelector(x),sel=q('#ft');bindTabs(d);
   const Y=()=>S.tipos.find(x=>x.id===sel.value)||{campos:campos().map(c=>c.id),meta:{v:0,u:'dias'}};
+  {const vc=q('#'+fid('vmc')),vg=q('#'+fid('vmg'));if(vc&&vg){let own=!!(t.vmg!==undefined&&t.vmg!==''&&t.vmg!==t.vmc);
+    vg.addEventListener('input',()=>{own=vg.value.trim()!==''&&vg.value!==vc.value});
+    vc.addEventListener('input',()=>{if(!own)vg.value=vc.value});
+    vc.addEventListener('change',()=>{if(!own)vg.value=vc.value})}}
   const recalc=()=>{if(!dirty){const c=calc(Y(),q('#f6').value,q('#fq').value);if(c)q('#f7').value=c}};
-  const apply=user=>{const y=Y();d.querySelectorAll('[data-f]').forEach(e=>e.hidden=!y.campos.includes(e.dataset.f));
+  const apply=user=>{const y=Y();d.querySelectorAll('[data-f]').forEach(e=>e.hidden=!(y.campos.includes(e.dataset.f)||MEDF.includes(e.dataset.f)));
     q('#mh').textContent='Meta de entrega: '+metaTxt(y);
     if(y.cor)d.style.setProperty('--c',y.cor);recalc()};
   sel.onchange=()=>{apply(true);if(isNew)ed.setSteps(stepsOf(Y()));else ed.redraw();tf()};const pv=()=>q('#np').textContent=isNew||t.fx?'Nome da tarefa: '+((Y().nome||'')+' '+q('#f1').value).trim():'';const tf=()=>{const m=medOf(Y()),e=q('#f1'),v=e?e.value:t.tarefa;
