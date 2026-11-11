@@ -551,6 +551,29 @@ dialog.view .df{flex-wrap:wrap;align-items:center}
 .mch:hover{border-color:var(--mu)}
 .mcs{margin-bottom:22px}.mcs>h3{margin:0 0 10px;font-size:17px;display:flex;gap:10px;align-items:center}
 .mcs>h3 em{font-style:normal;font-size:12px;font-weight:700;background:var(--ov);border-radius:99px;padding:0 9px}
+
+/* ===== Abas (card, formulários e Gestão) ===== */
+.tabs{display:flex;gap:2px;padding:0 20px;border-bottom:1px solid var(--line);overflow-x:auto;flex:none;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:10px 14px;cursor:pointer;color:var(--mu);font-weight:700;font-size:14.5px;white-space:nowrap;min-height:44px;display:inline-flex;gap:6px;align-items:center;border-radius:8px 8px 0 0}
+.tabs button:hover{color:var(--tx);background:var(--ov)}
+.tabs button[aria-selected=true]{color:var(--tx);border-bottom-color:var(--act)}
+.tabs em{font-style:normal;font-size:12px;font-weight:700;background:var(--ov);border-radius:99px;padding:0 8px}
+.tabs em.hot{background:var(--bad);color:#fff}
+.tp[hidden]{display:none!important}
+.vb>.tp{display:flex;flex-direction:column;gap:14px;min-width:0}
+.view .vb{min-height:min(56vh,460px)}
+dialog.view{width:min(1040px,96vw)}
+.admin>.tabs{padding:0;margin:0 0 14px}
+.gs-k{font:inherit;color:inherit;text-align:left;cursor:pointer;transition:border-color .15s}.gs-k:hover{border-color:var(--mu)}
+.gs-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.admin>.chips{margin:0 0 4px}
+.chip b{font-weight:800}
+.gs-pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}
+.view .tp .notes{max-height:none}
+.col[data-p].over{border-color:var(--ac)}
+@media(max-width:760px){.tabs{padding:0 8px}}
+.sfw{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}.sfw .sfb{margin:0}.sfb textarea{min-height:64px}
 </style>
 </head>
 <body>
@@ -746,7 +769,7 @@ function card(t,mode){
   const step=t.status==='done'?'✔ Concluída':n?`${dn} de ${n} passos · agora: ${A.length?esc(A.map(a=>a.etapa).join(' + ')):'—'}`:'Sem fluxo';
   const dots=t.fluxo.map((_,i)=>`<i class="${st[i]==='done'?'on':st[i]==='ready'?'cur':''}"></i>`).join('');
   const ex=EX.has(t.id);
-  return `<div class="card${ex?'':' co'}" role="button" tabindex="0" style="--c:${corOf(t)}" draggable="${mode==='k'&&isAdm()}" data-id="${t.id}" aria-label="Abrir tarefa ${esc(nome(t))}. ${esc(step)}">
+  return `<div class="card${ex?'':' co'}" role="button" tabindex="0" style="--c:${corOf(t)}" draggable="${(mode==='k'||view==='equipe')&&isAdm()}" data-id="${t.id}" aria-label="Abrir tarefa ${esc(nome(t))}. ${esc(step)}">
   <span class="tg" role="button" aria-label="${ex?'Recolher':'Expandir'}" aria-expanded="${ex}" title="${ex?'Recolher':'Expandir'}">${ex?'▴':'▾'}</span><h3>${esc(nome(t))}</h3>${t.sub?`<div class="sub">${esc(t.sub)}</div>`:''}
   <div class="step">${step}${late(t)&&!ex?' <span class="tag late">⚠</span>':''}${movNew(t)?` <span class="tag mv" title="${esc(movLine(t.mov))}">🔔 ${t.mov.tp==='d'?'Devolvida':t.mov.fim?'Concluída':t.mov.pp?'Novo posto':'Passo concluído'}${t.mov.pp&&!t.mov.fim?': '+esc(ppShort(t.mov.pp)):''}</span>`:''}${mode==='k'&&A.length?` <span class="sub">→ ${esc([...new Set(A.map(a=>a.pessoa))].join(', '))}</span>`:''}${mA.length?' <span class="tag vez">Sua vez</span>':''}</div><div class="dots" aria-hidden="true">${dots}</div>${ex&&movNew(t)?`<div class="mvd">${esc(movLine(t.mov))} · há ${ago(t.mov.t)}</div>`:''}${mA.map(a=>`<button type="button" class="btn pri fin" data-fin="${t.id}" data-fs="${a.id}">✔ Finalizar${mA.length>1?': '+esc(a.etapa):' meu passo'}</button>`).join('')}
   <div class="meta">${tipoTag(t)}${t.protocolo?`<span class="tag">Prot. ${esc(t.protocolo)}</span>`:''}${t.portal?`<span class="tag">${esc(t.portal)}</span>`:''}
@@ -776,8 +799,8 @@ function render(){
   }else if(view==='admin'){body=adminView()
   }else{
     const P=flowPeople().filter(([k])=>!fPessoa||k===fPessoa);
-    body=`<div class="board postit">${P.map(([pk,p],i)=>{const L=srt(TF.filter(t=>holders(t).some(h=>pkey(h.pessoa)===pk)&&(t.status!=='done'||fKpi==='done')));
-      return `<section class="col" aria-label="${esc(p)}"><h2><span><span class="avatar" aria-hidden="true">${esc(p[0])}</span>${esc(p)}</span><span><button type="button" class="xa" data-xa title="Expandir/recolher todos" aria-label="Expandir ou recolher todos">⇕</button><em>${L.length}</em></span></h2><div class="list">${L.map((t,j)=>card(t,'p').replace('class="card"',`class="card" style="--rot:${(j%2?1:-1)*(0.6+j%3*0.4)}deg;--c:${corOf(t)}"`)).join('')||'<div class="empty">Sem atividades</div>'}</div></section>`}).join('')||'<div class="empty" style="width:100%">Crie uma tarefa com fluxo para ver os funcionários aqui.</div>'}</div>`;
+    body=(isAdm()?'<p class="hint" style="margin:0 0 8px">Arraste um card para a coluna de outro funcionário para passar a ele o passo liberado.</p>':'')+`<div class="board postit">${P.map(([pk,p],i)=>{const L=srt(TF.filter(t=>holders(t).some(h=>pkey(h.pessoa)===pk)&&(t.status!=='done'||fKpi==='done')));
+      return `<section class="col" data-p="${esc(pk)}" data-pn="${esc(p)}" aria-label="${esc(p)}"><h2><span><span class="avatar" aria-hidden="true">${esc(p[0])}</span>${esc(p)}</span><span><button type="button" class="xa" data-xa title="Expandir/recolher todos" aria-label="Expandir ou recolher todos">⇕</button><em>${L.length}</em></span></h2><div class="list">${L.map((t,j)=>card(t,'p').replace('class="card"',`class="card" style="--rot:${(j%2?1:-1)*(0.6+j%3*0.4)}deg;--c:${corOf(t)}"`)).join('')||'<div class="empty">Sem atividades</div>'}</div></section>`}).join('')||'<div class="empty" style="width:100%">Crie uma tarefa com fluxo para ver os funcionários aqui.</div>'}</div>`;
   }
   $('#app').innerHTML=`<div class="stk"><header><div class="logo">Flu<b>xo</b></div>
   <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" ${view===v?'aria-current="page"':''}>${v==='painel'&&!isAdm()?'Minhas tarefas':l}${v==='gestao'?gBadge():''}${v==='tarefa'?mvBadge():''}</button>`).join('')}</nav>
@@ -810,6 +833,9 @@ function bind(){
   document.querySelectorAll('[data-mx]').forEach(b=>b.onclick=()=>{const k=b.dataset.mx,c=b.closest('.mdc'),o=!MX.has(k);o?MX.add(k):MX.delete(k);c.classList.toggle('open',o);b.setAttribute('aria-expanded',o);b.querySelector('.mdg').textContent=o?'▴':'▾'});
   document.querySelectorAll('[data-mo],[data-gm]').forEach(b=>b.onclick=()=>openMedItens(b.dataset.mo||b.dataset.gm));
   document.querySelectorAll('[data-gv]').forEach(b=>b.onclick=()=>openView(b.dataset.gv));
+  document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTab=b.dataset.gt;render()});
+  document.querySelectorAll('[data-gsub]').forEach(b=>b.onclick=()=>{gSub=b.dataset.gsub;render()});
+  document.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{const[a,c]=b.dataset.gk.split('|');gTab=a;if(c)gSub=c;render()});
   document.querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{const k=b.dataset.cc;CC.has(k)?CC.delete(k):CC.add(k);render()});
   document.querySelectorAll('[data-gc]').forEach(b=>b.onclick=()=>copyText(GP.get(b.dataset.gc)||'').then(ok=>toast(ok?'Pauta copiada':'Não foi possível copiar')));
   if(isAdm())document.querySelectorAll('[data-mx]').forEach(b=>dbl(b,()=>{view='med';ANIM=true;render();openMedItens(b.dataset.mx)}));
@@ -825,7 +851,10 @@ function bind(){
   document.querySelectorAll('.xa').forEach(b=>b.onclick=()=>{const ids=[...b.closest('.col').querySelectorAll('.card')].map(c=>c.dataset.id),all=ids.every(i=>EX.has(i));ids.forEach(i=>all?EX.delete(i):EX.add(i));render()});
   document.querySelectorAll('.card .tg').forEach(g=>g.onclick=e=>{e.stopPropagation();const i=g.closest('.card').dataset.id;EX.has(i)?EX.delete(i):EX.add(i);render()});
   document.querySelectorAll('.card').forEach(c=>{c.onkeydown=e=>{if(e.target===c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openView(c.dataset.id)}};c.onclick=()=>openView(c.dataset.id);
-    c.ondragstart=e=>e.dataTransfer.setData('id',c.dataset.id)});
+    c.ondragstart=e=>{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('id',c.dataset.id);const cl=c.closest('.col');e.dataTransfer.setData('pk',cl&&cl.dataset.p||'')}});
+  document.querySelectorAll('.col[data-p]').forEach(col=>{
+    col.ondragover=e=>{if(!isAdm())return;e.preventDefault();col.classList.add('over')};col.ondragleave=()=>col.classList.remove('over');
+    col.ondrop=e=>{e.preventDefault();col.classList.remove('over');reatribuir(e.dataTransfer.getData('id'),e.dataTransfer.getData('pk'),col.dataset.p,col.dataset.pn)}});
   document.querySelectorAll('.col[data-s]').forEach(col=>{
     col.ondragover=e=>{e.preventDefault();col.classList.add('over')};col.ondragleave=()=>col.classList.remove('over');
     col.ondrop=async e=>{e.preventDefault();if(!isAdm())return;const t=S.tasks.find(x=>x.id===e.dataTransfer.getData('id'));if(t){t.status=col.dataset.s;await save();render()}}});
@@ -1182,15 +1211,17 @@ function openTipo(id){
   if(!id&&!(S.medicoes||[]).length){toast('Cadastre uma medição primeiro');adminSec='med';render();return}
   const y=S.tipos.find(x=>x.id===id)||{nome:'',cor:COLORS[0],campos:['protocolo','portal','repasse','obs'],steps:[],meta:{v:0,u:'dias'}};const isNew=!id;
   const [d,close]=dlg(`<form method="dialog"><div class="dh"><h2>${isNew?'Novo tipo de fluxo':'Editar tipo'}</h2><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
-  <div class="db"><div class="full"><label for="tn">Medição (nome do fluxo) *</label><select id="tn" required><option value="">— escolha a medição —</option>${S.medicoes.filter(m=>m.id===y.med||(!y.med&&nk(m.nome)===nk(y.nome))||!S.tipos.some(z=>z.med===m.id&&z.id!==y.id)).map(m=>`<option value="${m.id}" ${m.id===y.med||(!y.med&&nk(m.nome)===nk(y.nome))?'selected':''}>${esc(medLbl(m))}</option>`).join('')}</select><div class="hint">Só aparecem medições cadastradas que ainda não têm fluxo. A cor do fluxo e das tarefas vem da medição.</div></div>
-  <div class="full"><div id="tpe"></div></div>
+  ${tabsH([['geral','Geral'],['passos','Passos'],['diagrama','Diagrama']],'geral','Seções do tipo')}
+  <div class="db tp" data-tp="geral"><div class="full"><label for="tn">Medição (nome do fluxo) *</label><select id="tn" required><option value="">— escolha a medição —</option>${S.medicoes.filter(m=>m.id===y.med||(!y.med&&nk(m.nome)===nk(y.nome))||!S.tipos.some(z=>z.med===m.id&&z.id!==y.id)).map(m=>`<option value="${m.id}" ${m.id===y.med||(!y.med&&nk(m.nome)===nk(y.nome))?'selected':''}>${esc(medLbl(m))}</option>`).join('')}</select><div class="hint">Só aparecem medições cadastradas que ainda não têm fluxo. A cor do fluxo e das tarefas vem da medição.</div></div>
     <div class="full"><label>Campos que aparecem ao criar a tarefa</label><div class="chk">${campos().map(c=>`<label><input type="checkbox" value="${c.id}" ${y.campos.includes(c.id)?'checked':''}>${esc(c.nome)}<span class="ct">${CT[c.tipo]}</span></label>`).join('')}</div>
   <div class="hint">Tarefa, fluxo, status e data estimada sempre aparecem.</div></div>
   <div><label for="mv">Meta de entrega</label><input type="number" min="0" step="any" id="mv" value="${y.meta.v}"></div>
   <div><label for="mu">Unidade</label><select id="mu"><option value="horas">Horas</option><option value="dias">Dias</option><option value="qtd">Quantidade por dia</option></select></div>
   <div class="full hint">Horas e dias calculam a data estimada sozinhos. “Quantidade por dia” usa o campo Quantidade da tarefa (marque-o acima). Use 0 para não ter meta.</div></div>
+  <div class="db tp" data-tp="passos" hidden><div class="full"><div id="tpe"></div></div></div>
+  <div class="db tp" data-tp="diagrama" hidden><div class="full"><div class="fdw" id="tdv"></div><div class="fleg">Cada seta liga um passo ao que depende dele. Passo sem seta chegando é livre; passo sem seta saindo não bloqueia ninguém. Caixa tracejada = passos concomitantes.</div></div></div>
   <div class="df"><button class="btn pri">Salvar tipo</button>${isNew?'':'<span class="sp"></span><button type="button" class="btn dan" id="dl">Excluir tipo</button>'}</div></form>`,y.cor);
-  const D=flowDesigner(d.querySelector('#tpe'),stepsOf(y),{people:false});
+  bindTabs(d);const D=flowDesigner(d.querySelector('#tpe'),stepsOf(y),{people:false,pv:d.querySelector('#tdv')});
   d.querySelector('#mu').value=y.meta.u;
   {const tn=d.querySelector('#tn');tn.onchange=()=>{const m=S.medicoes.find(x=>x.id===tn.value);if(m&&m.cor)d.style.setProperty('--c',m.cor)}}
   d.querySelector('form').onsubmit=async()=>{
@@ -1291,7 +1322,7 @@ function flowDesigner(host,F0,o={}){
     const bl=F.filter(x=>x.id!==f.id&&needOf(F,G,x,by).includes(f.id));
     if(!bl.length&&F.length>1)p.push('não bloqueia nenhum outro passo');
     return p.join(' · ')};
-  const pv=()=>{const e=host.querySelector('[data-pv]');if(!e)return;const G=grp(F),by=byId(F);
+  const pv=()=>{const e=o.pv||host.querySelector('[data-pv]');if(!e)return;const G=grp(F),by=byId(F);
     e.innerHTML=flowSvg(F,{sub:(f)=>o.people?(f.pessoa?shortName(f.pessoa):'— sem responsável —'):(needOf(F,G,f,by).length?'após '+needOf(F,G,f,by).map(num).join(', '):'livre')})};
   const sm=()=>host.querySelectorAll('[data-sm]').forEach(e=>{const f=F[+e.dataset.sm];if(f)e.textContent=sumOf(f)});
   const draw=()=>{const G=grp(F),R=o.people?rank(o.tid()):[];
@@ -1305,7 +1336,7 @@ function flowDesigner(host,F0,o={}){
       </details>
       <details class="fc" data-k="${kf}" ${OP.has(kf)?'open':''}><summary>Campos para preencher (${(f.campos||[]).length})</summary><div class="sk">${campos().map(c=>`<label><input type="checkbox" data-c="${i}" value="${c.id}" ${(f.campos||[]).includes(c.id)?'checked':''}>${esc(c.nome)}</label>`).join('')}</div></details></div>`}).join('')||'<div class="empty">Escolha um tipo de fluxo ou adicione passos</div>'}</div><button type="button" class="btn" data-add>+ Passo</button>
     ${o.people?`<div class="hint">Lista de responsáveis ordenada pelo desempenho neste fluxo (▲ acima de 0, ● regular, ▼ abaixo). Empate: quem fez mais serviços; depois ordem alfabética.</div>${R.length?'':'<div class="hint">Cadastre funcionários em Administração › Funcionários.</div>'}`:'<div class="hint">Em cada passo, marque os campos que quem estiver nele poderá preencher ou editar.</div>'}
-    <div class="fdp"><label>Diagrama do fluxo</label><div class="fdw" data-pv></div><div class="fleg">Cada seta liga um passo ao que depende dele. Passo sem seta chegando é livre; passo sem seta saindo não bloqueia ninguém. Caixa tracejada = passos concomitantes.</div></div>`;
+    ${o.pv?'':'<div class="fdp"><label>Diagrama do fluxo</label><div class="fdw" data-pv></div><div class="fleg">Cada seta liga um passo ao que depende dele. Passo sem seta chegando é livre; passo sem seta saindo não bloqueia ninguém. Caixa tracejada = passos concomitantes.</div></div>'}`;
     host.querySelectorAll('details[data-k]').forEach(e=>e.addEventListener('toggle',()=>{e.open?OP.add(e.dataset.k):OP.delete(e.dataset.k)}));
     host.querySelectorAll('.fr').forEach(r=>{const i=+r.dataset.i,f=F[i];
       r.querySelector('.fi').oninput=e=>{f.etapa=e.target.value;host.querySelectorAll('[data-nm="'+f.id+'"]').forEach(x=>x.textContent=nm(f));sm();pv()};
@@ -1327,7 +1358,7 @@ function flowDesigner(host,F0,o={}){
       const L=F.filter(f=>(f.etapa||'').trim()),ids=new Set(L.map(f=>f.id));
       return{steps:L.map(f=>({id:f.id,etapa:f.etapa.trim(),campos:[...f.campos],dep:f.dep.filter(x=>ids.has(x)),con:f.con.filter(x=>ids.has(x))}))}}};
 }
-const flowEd=(host,t,tid)=>flowDesigner(host,t.fluxo.map(f=>({...f,pessoa:f.pessoa==='Sem responsável'?'':f.pessoa})),{people:true,tid});
+const flowEd=(host,t,tid,pv)=>flowDesigner(host,t.fluxo.map(f=>({...f,pessoa:f.pessoa==='Sem responsável'?'':f.pessoa})),{people:true,tid,pv});
 /* ---------- Finalizar / voltar passo ---------- */
 let _lk=false;
 async function avancar(id,dir,x){if(_lk)return;_lk=true;try{await avancar0(id,dir,x)}finally{_lk=false}}
@@ -1372,11 +1403,27 @@ function pedirDevolucao(id){
   d.querySelector('form').onsubmit=async e=>{e.preventDefault();const tp=d.querySelector('[name=dm]:checked').value,ob=d.querySelector('#do').value.trim(),sid=d.querySelector('#ds').value;
     if(tp==='neg'&&!ob){toast('Informe a observação da devolução negativa');d.querySelector('#do').focus();return}close();await avancar(id,-1,{tp,obs:ob,sid})};
 }
+async function reatribuir(id,from,to,toName){
+  if(!isAdm()||!id||!to||from===to)return;
+  if(!(await sbFresh(id))){toast('Esta tarefa foi atualizada por outra pessoa. Tente de novo.');render();return}
+  const t=S.tasks.find(x=>x.id===id);if(!t)return;
+  const L=act(t).filter(f=>pkey(f.pessoa)===from);
+  if(!L.length){toast('Este card não tem passo liberado com esse funcionário para passar adiante');return}
+  const old=L[0].pessoa,et=L.map(f=>f.etapa).join(' + ');L.forEach(f=>{f.pessoa=toName});
+  t.mov={t:Date.now(),tp:'e',de:et,dp:old,para:et,pp:shortName(toName),fim:0,por:user};
+  (t.notas=t.notas||[]).push({u:user,t:Date.now(),txt:`⇄ ${et} passou de ${old} para ${toName}`});
+  await save();render();toast(`${et} → ${shortName(toName)}`)}
 async function abrirDir(id){
   const t=S.tasks.find(x=>x.id===id),p=t&&dirOf(t);if(!p)return;
   toast(await copyText(p)?'Caminho copiado: '+p:'Não foi possível copiar. Caminho: '+p)}
 /* ---------- Visualização do card ---------- */
-function openView(id){
+const tabsH=(L,act,label)=>`<div class="tabs" role="tablist" aria-label="${label}">${L.map(([k,l,n])=>`<button type="button" role="tab" id="tb-${k}" aria-selected="${k===act}" aria-controls="tp-${k}" tabindex="${k===act?0:-1}" data-tab="${k}">${l}${n?` <em>${n}</em>`:''}</button>`).join('')}</div>`;
+function bindTabs(d,cb){
+  const show=k=>{d.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===k;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1});d.querySelectorAll('[data-tp]').forEach(p=>p.hidden=p.dataset.tp!==k);if(cb)cb(k)};
+  d.querySelectorAll('[data-tab]').forEach(b=>{b.onclick=()=>show(b.dataset.tab);b.onkeydown=e=>{if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;e.preventDefault();const L=[...d.querySelectorAll('[data-tab]')],i=L.indexOf(b),n=L[(i+(e.key==='ArrowRight'?1:L.length-1))%L.length];n.focus();show(n.dataset.tab)}});
+  d.addEventListener('invalid',e=>{const p=e.target.closest&&e.target.closest('[data-tp]');if(p&&p.hidden)show(p.dataset.tp)},true);
+  return show}
+function openView(id,tab0){
   const t=S.tasks.find(x=>x.id===id);if(!t)return;
   const y=tipoOf(t),n=t.fluxo.length,A=isAdm(),SF=new Set(t.fluxo.flatMap(f=>f.campos||[])),st=tstate(t),AC=act(t),mA=AC.filter(mine),dn=st.filter(x=>x==='done').length,G=grp(t.fluxo);
   const stepTxt=t.status==='done'?'✔ Concluída':n?`${dn} de ${n} passos concluídos`:'Sem fluxo';
@@ -1386,9 +1433,9 @@ function openView(id){
   const wait=t.status==='done'?[]:t.fluxo.filter((f,i)=>st[i]==='wait');
   const agRow=f=>{const can=A||mine(f);return `<div class="agr"><span class="agn"><b>${num(f)}. ${esc(f.etapa)}</b><small>${esc(f.pessoa)}${cc(f)}</small></span>${can?`<button type="button" class="btn pri" data-fs="${f.id}">✔ Finalizar${mine(f)?'':' (gestor)'}</button>`:''}${A?`<button type="button" class="btn" data-sk="${f.id}" title="Conclui o passo sem creditar o funcionário">Avançar ⏭</button>`:''}</div>`};
   const wRow=f=>`<div class="agr"><span class="agn"><b>🔒 ${num(f)}. ${esc(f.etapa)}</b><small>${esc(f.pessoa)} · aguarda: ${waitOf(t.fluxo,f).map(z=>num(z)+'. '+esc(z.etapa)).join(', ')}</small></span></div>`;
-  const panel=n?`<section class="agp" aria-label="Passos liberados agora"><h3>${t.status==='done'?'Tarefa concluída':'Liberados agora'} <em>${AC.length}</em></h3>${AC.map(agRow).join('')||`<div class="hint">${t.status==='done'?'Todos os passos foram concluídos.':'Nenhum passo liberado no momento.'}</div>`}</section>${wait.length?`<section class="agp wt" aria-label="Passos aguardando liberação"><h3>Aguardando liberação <em>${wait.length}</em></h3>${wait.map(wRow).join('')}</section>`:''}`:'';
-  const diag=n?`<div class="fdw">${flowSvg(t.fluxo,{st,sub:(f,i)=>shortName(f.pessoa)+(f.ok>1e11?' · '+dt(f.ok):'')})}</div>`:'<div class="empty">Sem passos</div>';
-  const hist=(t.notas||[]).slice(-5).reverse().map(x=>`<div class="note">${esc(x.txt)}<small>${esc(x.u)} · ${dt(x.t)}</small></div>`).join('');
+  const panel=n?`<section class="agp" aria-label="Passos liberados agora"><h3>${t.status==='done'?'Tarefa concluída':'Liberados agora'} <em>${AC.length}</em></h3>${AC.map(agRow).join('')||`<div class="hint">${t.status==='done'?'Todos os passos foram concluídos.':'Nenhum passo liberado no momento.'}</div>`}</section>${wait.length?`<section class="agp wt" aria-label="Passos aguardando liberação"><h3>Aguardando liberação <em>${wait.length}</em></h3>${wait.map(wRow).join('')}</section>`:''}`:'<div class="empty">Esta tarefa não tem passos.</div>';
+  const diag=n?`<div class="fdw">${flowSvg(t.fluxo,{st,sub:(f,i)=>shortName(f.pessoa)+(f.ok>1e11?' · '+dt(f.ok):'')})}</div><div class="fleg">Verde = concluído · amarelo = liberado agora · tracejado = aguardando · caixa tracejada verde = passos concomitantes.</div>`:'<div class="empty">Sem passos</div>';
+  const hist=(t.notas||[]).slice(-30).reverse().map(x=>`<div class="note">${esc(x.txt)}<small>${esc(x.u)} · ${dt(x.t)}</small></div>`).join('');
   const lbl=p=>p<0||!t.fluxo[p]?'Geral':`Passo ${p+1} · ${esc(t.fluxo[p].etapa)}`;
   const anot=(t.anot||[]).slice().reverse().map(a=>`<div class="note"><b>${lbl(a.passo)}</b><div style="white-space:pre-wrap">${esc(a.txt)}</div><small>${esc(a.u)} · ${dt(a.t)}</small>${A?`<button type="button" class="btn dan" data-da="${a.id}" style="min-height:30px;padding:2px 10px;margin-top:6px">Excluir</button>`:''}</div>`).join('');
   const pn=mA.length?t.fluxo.indexOf(mA[0]):-1;
@@ -1400,33 +1447,37 @@ function openView(id){
   const blocks=t.fluxo.map((f,i)=>{const L=(f.campos||[]).map(k=>campos().find(c=>c.id===k)).filter(Boolean);if(!L.length)return'';
     const ed=A||(t.status!=='done'&&st[i]==='ready'&&mine(f));
     return `<div class="sfb${st[i]==='ready'&&t.status!=='done'?' cur':''}"><h3>${i+1} · ${esc(f.etapa)} <small>${esc(f.pessoa)}${ed?'':' · só leitura'}</small></h3><div class="sfg">${L.map(c=>sfv(c,i,ed)).join('')}</div></div>`}).join('');
-  const seen=new Set(),who=[];(AC.length?AC:holders(t)).forEach(f=>{const k=pkey(f.pessoa);if(!seen.has(k)){seen.add(k);who.push(f)}});
-  const ctw=A?`<div class="ctw">${who.map(w=>{const ct=contactFor(w.pessoa),msg=`Olá ${fn1(w.pessoa)}, sobre a tarefa "${nome(t)}"${t.protocolo?' (protocolo '+t.protocolo+')':''}${t.final?', entrega prevista '+fmt(t.final):''}. `;
+  /* contatos: quem tem passo liberado primeiro */
+  const seen=new Set(),who=[];[...AC,...t.fluxo].forEach(f=>{const k=pkey(f.pessoa);if(!seen.has(k)){seen.add(k);who.push(f)}});
+  const ctw=A?`<div class="ctw">${who.map(w=>{const ct=contactFor(w.pessoa),on=AC.some(a=>pkey(a.pessoa)===pkey(w.pessoa)),msg=`Olá ${fn1(w.pessoa)}, sobre a tarefa "${nome(t)}"${t.protocolo?' (protocolo '+t.protocolo+')':''}${t.final?', entrega prevista '+fmt(t.final):''}. `;
     const wa=ct&&ct.whatsapp?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(ct.whatsapp,msg)}" data-cob="${t.id}">${WA_IMG} WhatsApp</a>`:`<button type="button" class="btn wa off" data-miss="${esc(w.pessoa)}">${WA_IMG} WhatsApp</button>`;
     const ml=ct&&ct.email?`<div class="mailbox"><span class="ml"><small>✉ E-mail</small><b>${esc(ct.email)}</b></span><button type="button" class="btn mail" data-em="${esc(ct.email)}" aria-label="Copiar e-mail de ${esc(w.pessoa)}">⧉ Copiar</button></div>`:`<button type="button" class="btn mail off" data-miss="${esc(w.pessoa)}">✉ E-mail</button>`;
-    return `<div class="ctp"><b>${esc(w.pessoa)}</b>${wa}${ml}</div>`}).join('')}</div>`:'';
+    return `<div class="ctp"><b>${esc(w.pessoa)}${on?' <span class="tag vez">passo liberado</span>':''}</b>${wa}${ml}</div>`}).join('')}</div>`:'';
+  const T=[['res','Resumo',AC.length],['dia','Diagrama',0],['ano','Anotações',(t.anot||[]).length],['his','Histórico',(t.notas||[]).length],...(A?[['con','Contatos',0]]:[])],tb=T.some(x=>x[0]===tab0)?tab0:'res';
+  const tp=(k,h)=>`<div class="tp" role="tabpanel" id="tp-${k}" data-tp="${k}" aria-labelledby="tb-${k}" ${k===tb?'':'hidden'}>${h}</div>`;
   const [d,close]=dlg(`<div class="dh"><div><div class="vt">${tipoTag(t)}<span class="sb">${stepTxt}</span></div><h2 id="dt">${esc(nome(t))}</h2></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
-  <div class="vb"><section class="vg">${diag}
-  <div class="vl">${A&&t.mov?`<div class="mvd">Última mudança de posto: ${esc(movLine(t.mov))} · ${dt(t.mov.t)}${t.mov.por?' · por '+esc(t.mov.por):''}</div>`:''}${panel}<div class="kv">${kv.map(([k,v])=>`<div><label>${k}</label><span>${esc(v)}</span></div>`).join('')}</div>
-  ${blocks}${blocks.includes('data-sf')?'<button type="button" class="btn" id="sv" style="margin-bottom:14px">Salvar campos</button>':''}
-  ${campos().filter(c=>c.tipo==='longo'&&t[c.id]&&!SF.has(c.id)).map(c=>`<label>${esc(c.nome)}</label><p class="obs">${esc(t[c.id])}</p>`).join('')}</div>
-  <aside class="vr" aria-label="Anotações e histórico"><label>Anotações</label><div class="notes">${anot||'<div class="hint">Nenhuma anotação.</div>'}</div>${noteBox}
-  ${hist?`<label>Histórico</label><div class="notes">${hist}</div>`:''}</aside></section></div>
-  <div class="df">${A&&t.fluxo.some(f=>f.ok)?'<button type="button" class="btn" id="bk">← Devolver passo</button>':''}${dirOf(t)?`<button type="button" class="btn" data-dir="${t.id}">📋 Copiar caminho na rede</button>`:''}<span class="sp"></span>${A?'<button type="button" class="btn" id="ed">✎ Editar</button>':''}${ctw}</div>`,corOf(t));
-  d.classList.add('view');d.setAttribute('aria-labelledby','dt');
+  ${tabsH(T,tb,'Seções da tarefa')}
+  <div class="vb">
+  ${tp('res',`${panel}<div class="kv">${kv.map(([k,v])=>`<div><label>${k}</label><span>${esc(v)}</span></div>`).join('')}</div>${blocks?`<div class="sfw">${blocks}</div>`:''}${blocks.includes('data-sf')?'<button type="button" class="btn" id="sv" style="align-self:flex-start">Salvar campos</button>':''}${campos().filter(c=>c.tipo==='longo'&&t[c.id]&&!SF.has(c.id)).map(c=>`<div><label>${esc(c.nome)}</label><p class="obs">${esc(t[c.id])}</p></div>`).join('')}`)}
+  ${tp('dia',diag)}
+  ${tp('ano',`${noteBox}<div class="notes">${anot||'<div class="hint">Nenhuma anotação.</div>'}</div>`)}
+  ${tp('his',`${A&&t.mov?`<div class="mvd">Última mudança de posto: ${esc(movLine(t.mov))} · ${dt(t.mov.t)}${t.mov.por?' · por '+esc(t.mov.por):''}</div>`:''}<div class="notes">${hist||'<div class="hint">Sem histórico ainda.</div>'}</div>`)}
+  ${A?tp('con',ctw):''}</div>
+  <div class="df">${mA.map(f=>`<button type="button" class="btn pri" data-fs="${f.id}">✔ Finalizar${mA.length>1?': '+esc(f.etapa):' meu passo'}</button>`).join('')}${A&&t.fluxo.some(f=>f.ok)?'<button type="button" class="btn" id="bk">← Devolver passo</button>':''}${dirOf(t)?`<button type="button" class="btn" data-dir="${t.id}">📋 Copiar caminho na rede</button>`:''}<span class="sp"></span>${A?'<button type="button" class="btn" id="ed">✎ Editar</button>':''}</div>`,corOf(t));
+  d.classList.add('view');d.setAttribute('aria-labelledby','dt');bindTabs(d);
   const on=(s,f)=>{const e=d.querySelector(s);if(e)e.onclick=f};
   const seenNow=movNew(t);if(seenNow)setVisto([id]);
   bindMasks(d);
   const saveF=async(force)=>{let ch=0;d.querySelectorAll('[data-sf]').forEach(e=>{const c=campos().find(x=>x.id===e.dataset.sf);if(!c)return;const v=readVal(c,e);if((t[c.id]??'')!==v){t[c.id]=v;ch=1}});if(ch||force)await save();return ch};
   d.querySelectorAll('[data-sf]').forEach(e=>e.addEventListener('change',async()=>{if(await saveF()&&SB.on&&SB.ok&&!SB.dirty)toast('Salvo no banco ✔')}));
   d._oc=()=>{saveF();if(seenNow)render()};
-  on('#nb',async()=>{const x=d.querySelector('#na').value.trim();if(!x){toast('Escreva a anotação');return}await saveF();const ns=d.querySelector('#ns');(t.anot=t.anot||[]).push({id:'a'+Date.now(),passo:ns?+ns.value:pn,u:user,t:Date.now(),txt:x});await save();close();render();openView(id)});
-  d.querySelectorAll('[data-da]').forEach(b=>b.onclick=async()=>{if(!confirm('Excluir esta anotação?'))return;t.anot=(t.anot||[]).filter(a=>a.id!==b.dataset.da);await save();close();render();openView(id)});
+  on('#nb',async()=>{const x=d.querySelector('#na').value.trim();if(!x){toast('Escreva a anotação');return}await saveF();const ns=d.querySelector('#ns');(t.anot=t.anot||[]).push({id:'a'+Date.now(),passo:ns?+ns.value:pn,u:user,t:Date.now(),txt:x});await save();close();render();openView(id,'ano')});
+  d.querySelectorAll('[data-da]').forEach(b=>b.onclick=async()=>{if(!confirm('Excluir esta anotação?'))return;t.anot=(t.anot||[]).filter(a=>a.id!==b.dataset.da);await save();close();render();openView(id,'ano')});
   on('#sv',async()=>{await saveF(true);if(!SB.on)toast('Campos salvos');else if(SB.ok&&!SB.dirty)toast('Campos salvos no banco ✔')});
   on('#ed',()=>{close();openTask(id)});on('#bk',()=>{close();pedirDevolucao(id)});
   d.querySelectorAll('[data-fs]').forEach(b=>b.onclick=async()=>{await saveF();const f=t.fluxo.find(x=>x.id===b.dataset.fs);if(!f)return;
     const mis=(f.campos||[]).map(k=>campos().find(c=>c.id===k)).filter(c=>c&&(t[c.id]==null||String(t[c.id]).trim()===''));
-    if(mis.length){toast('Preencha antes de finalizar o passo: '+mis.map(c=>c.nome).join(', '));const e=d.querySelector('[data-sf="'+mis[0].id+'"]');if(e)e.focus();return}close();await avancar(id,1,{sid:f.id})});
+    if(mis.length){toast('Preencha antes de finalizar o passo: '+mis.map(c=>c.nome).join(', '));const e=d.querySelector('[data-sf="'+mis[0].id+'"]');if(e){const p=e.closest('[data-tp]');if(p&&p.hidden)d.querySelector('[data-tab="'+p.dataset.tp+'"]').click();e.focus()}return}close();await avancar(id,1,{sid:f.id})});
   d.querySelectorAll('[data-sk]').forEach(b=>b.onclick=async()=>{await saveF();const sid=b.dataset.sk;close();await avancar(id,2,{sid})});
   d.querySelectorAll('[data-em]').forEach(em=>em.onclick=()=>copyText(em.dataset.em).then(ok=>{if(ok){em.textContent='✔ Copiado';setTimeout(()=>em.textContent='⧉ Copiar',2000);toast('E-mail copiado')}else toast('Não foi possível copiar — selecione o e-mail e copie manualmente')}));
   d.querySelectorAll('[data-miss]').forEach(b=>b.onclick=()=>{const w=b.dataset.miss;close();view='admin';adminSec='func';render();toast(`Cadastre o contato de ${w||'funcionário'} para usar este botão`)});
@@ -1436,7 +1487,7 @@ function openView(id){
 /* ---------- Tarefa (criar / editar) ---------- */
 
 /* ---------- Gestão: o que o gestor precisa cobrar ---------- */
-let GP=new Map();
+let GP=new Map(),gTab='acao',gSub='';
 const dias=(a,b)=>Math.round((new Date(a+'T12:00:00')-new Date(b+'T12:00:00'))/864e5);
 function lastMove(t){const ts=[...(t.fluxo||[]).map(f=>f.ok||0),...(t.ev||[]).map(e=>e.t||0),...(t.notas||[]).map(n=>n.t||0),...(t.anot||[]).map(n=>n.t||0)],c=+String(t.id).replace(/\D/g,'');if(c>1e12)ts.push(c);return Math.max(0,...ts)}
 const paradaDias=t=>{const l=lastMove(t);return l?Math.floor((Date.now()-l)/864e5):0};
@@ -1456,28 +1507,32 @@ function gestaoView(){
   const rowT=(r,tag,cls,txt)=>{const{t,A}=r;
     const wb=A.map(w=>{const ct=contactFor(w.pessoa),msg=`Olá ${fn1(w.pessoa)}, sobre a tarefa "${nome(t)}" (passo ${w.etapa}): ${txt}. Consegue me dar uma posição?`;return ct&&ct.whatsapp?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(ct.whatsapp,msg)}" data-cob="${t.id}">${WA_IMG} Cobrar${A.length>1?' '+esc(fn1(w.pessoa)):''}</a>`:''}).join('');
     return `<div class="gs-row" style="--c:${corOf(t)}"><button type="button" class="gm" data-gv="${t.id}"><b>${esc(nome(t))}</b><small>${A.length?A.map(w=>esc(w.etapa)+' · '+esc(w.pessoa)).join(' + '):'Sem passo liberado'}${t.final?' · entrega '+fmt(t.final):''}</small></button><span class="tag${cls?' '+cls:''}">${tag}</span>${wb}</div>`};
-  const lst=(L,fn,max=8)=>L.length?L.slice(0,max).map(fn).join('')+(L.length>max?`<p class="hint">+ ${L.length-max} na aba Todas as tarefas.</p>`:''):'<div class="empty">Nada por aqui ✔</div>';
-  const sec=(tt,n,b)=>`<section class="gs-sec"><h3>${tt} <em>${n}</em></h3>${b}</section>`;
-  const sub=(h,L,fn)=>L.length?`<h4>${h} (${L.length})</h4>${lst(L,fn)}`:'';
-  const acao=sec('Precisa de ação agora',G.n,((G.atr.length+G.prox.length+G.par.length+G.sem.length)?
-    sub('Atrasadas',G.atr,r=>rowT(r,`⚠ ${-r.d} dia(s) de atraso`,'late',`está atrasada há ${-r.d} dia(s)`))
-    +sub('Vencem em até 2 dias',G.prox,r=>rowT(r,r.d===0?'Vence hoje':r.d===1?'Vence amanhã':'Vence em 2 dias','',r.d===0?'vence hoje':r.d===1?'vence amanhã':'vence em 2 dias'))
-    +sub('Paradas há 3 dias ou mais',G.par,r=>rowT(r,`Parada há ${r.p} dias`,'',`está parada há ${r.p} dias`))
-    +sub('Passo sem responsável',G.sem,r=>`<div class="gs-row" style="--c:${corOf(r.t)}"><button type="button" class="gm" data-gv="${r.t.id}"><b>${esc(nome(r.t))}</b><small>Defina quem faz cada passo (Editar)</small></button><span class="tag late">Sem responsável</span></div>`)
-    :'<div class="empty">Nada pendente: tudo em dia ou já cobrado hoje ✔</div>')
-    +sub('Cobrados hoje',G.cob,r=>`<div class="gs-row" style="--c:${corOf(r.t)}"><button type="button" class="gm" data-gv="${r.t.id}"><b>${esc(nome(r.t))}</b><small>${r.A.map(w=>esc(w.etapa)+' · '+esc(w.pessoa)).join(' + ')}${r.t.final?' · entrega '+fmt(r.t.final):''}</small></button><span class="tag ok">✓ Cobrado ${new Date(r.t.cob).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span></div>`));
+  const lst=(L,fn,max=40)=>L.length?L.slice(0,max).map(fn).join('')+(L.length>max?`<p class="hint">+ ${L.length-max} na aba Todas as tarefas.</p>`:''):'<div class="empty">Nada por aqui ✔</div>';
+  const semR=r=>`<div class="gs-row" style="--c:${corOf(r.t)}"><button type="button" class="gm" data-gv="${r.t.id}"><b>${esc(nome(r.t))}</b><small>Defina quem faz cada passo (Editar)</small></button><span class="tag late">Sem responsável</span></div>`;
+  const cobR=r=>`<div class="gs-row" style="--c:${corOf(r.t)}"><button type="button" class="gm" data-gv="${r.t.id}"><b>${esc(nome(r.t))}</b><small>${r.A.map(w=>esc(w.etapa)+' · '+esc(w.pessoa)).join(' + ')}${r.t.final?' · entrega '+fmt(r.t.final):''}</small></button><span class="tag ok">✓ Cobrado ${new Date(r.t.cob).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span></div>`;
+  const SUBS=[['atr','Atrasadas',G.atr,r=>rowT(r,`⚠ ${-r.d} dia(s) de atraso`,'late',`está atrasada há ${-r.d} dia(s)`)],
+    ['prox','Vencem em até 2 dias',G.prox,r=>rowT(r,r.d===0?'Vence hoje':r.d===1?'Vence amanhã':'Vence em 2 dias','',r.d===0?'vence hoje':r.d===1?'vence amanhã':'vence em 2 dias')],
+    ['par','Paradas há 3+ dias',G.par,r=>rowT(r,`Parada há ${r.p} dias`,'',`está parada há ${r.p} dias`)],
+    ['sem','Sem responsável',G.sem,semR],['cob','Cobrados hoje',G.cob,cobR]];
+  const sb=SUBS.find(x=>x[0]===gSub)||SUBS.find(x=>x[2].length&&x[0]!=='cob')||SUBS.find(x=>x[2].length)||SUBS[0];
+  const acao=`<div class="chips" role="group" aria-label="Tipo de pendência">${SUBS.map(([k,l,L])=>`<button type="button" class="chip${k===sb[0]?' on':''}" data-gsub="${k}">${l} <b>${L.length}</b></button>`).join('')}</div>
+    <div class="gs-list">${sb[2].length?lst(sb[2],sb[3]):(G.n?'<div class="empty">Nada nesta lista ✔</div>':'<div class="empty">Nada pendente: tudo em dia ou já cobrado hoje ✔</div>')}</div>`;
   const P=(S.contatos||[]).map(c=>({c,L:G.R.filter(r=>r.A.some(w=>pkey(w.pessoa)==='c:'+c.id)).map(r=>r.t)}));
   const com=P.filter(x=>x.L.length).sort((a,b)=>b.L.filter(late).length-a.L.filter(late).length||b.L.length-a.L.length),livres=P.filter(x=>!x.L.length).map(x=>chipName(x.c));
-  const pauta=sec('Pauta por funcionário',com.length,(com.map(({c,L})=>{const a=L.filter(late).length,S2=srt(L),
+  const pauta=`<div class="gs-pg">${com.map(({c,L})=>{const a=L.filter(late).length,S2=srt(L),
       txt=`Olá ${fn1(c.nome)}, sua pauta de hoje (${L.length}):\n`+S2.map((t,i)=>`${i+1}. ${nome(t)} — ${myE(t,c)}${t.final?' · entrega '+fmt(t.final):''}${late(t)?' (ATRASADA)':''}`).join('\n');GP.set(c.id,txt);
-    return `<article class="gs-p"><div class="gs-ph"><b>${esc(chipName(c))}</b><span class="tag">${L.length} em aberto</span>${a?`<span class="tag late">${a} atrasada(s)</span>`:''}</div><ul>${S2.slice(0,4).map(t=>`<li><button type="button" data-gv="${t.id}">${esc(nome(t))}</button><small>${esc(myE(t,c))}${t.final?' · '+fmt(t.final):''}</small></li>`).join('')}</ul>${L.length>4?`<small>+ ${L.length-4} tarefa(s)</small>`:''}<div class="gs-pa"><button type="button" class="btn" data-gc="${c.id}">⧉ Copiar pauta</button>${c.whatsapp?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(c.whatsapp,txt)}" data-cob="${L.map(t=>t.id).join(',')}">${WA_IMG} Enviar pauta</a>`:''}</div></article>`}).join('')||'<div class="empty">Nenhum funcionário com tarefa em aberto.</div>')
-    +(livres.length?`<p class="hint"><b>Sem tarefas em aberto:</b> ${esc(livres.join(', '))}</p>`:''));
+    return `<article class="gs-p"><div class="gs-ph"><b>${esc(chipName(c))}</b><span class="tag">${L.length} em aberto</span>${a?`<span class="tag late">${a} atrasada(s)</span>`:''}</div><ul>${S2.slice(0,5).map(t=>`<li><button type="button" data-gv="${t.id}">${esc(nome(t))}</button><small>${esc(myE(t,c))}${t.final?' · '+fmt(t.final):''}</small></li>`).join('')}</ul>${L.length>5?`<small>+ ${L.length-5} tarefa(s)</small>`:''}<div class="gs-pa"><button type="button" class="btn" data-gc="${c.id}">⧉ Copiar pauta</button>${c.whatsapp?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(c.whatsapp,txt)}" data-cob="${L.map(t=>t.id).join(',')}">${WA_IMG} Enviar pauta</a>`:''}</div></article>`}).join('')||'<div class="empty" style="grid-column:1/-1">Nenhum funcionário com tarefa em aberto.</div>'}</div>`
+    +(livres.length?`<p class="hint"><b>Sem tarefas em aberto:</b> ${esc(livres.join(', '))}</p>`:'');
   const M=(S.medicoes||[]).map(m=>{const{no}=medItens(m),tot=(m.itens||[]).length,d=medItens(m).ok.filter(x=>x.t.every(t=>t.status==='done')).length;return{m,no:no.length,d,tot,dd:m.prazo?dias(m.prazo,today()):null}})
     .filter(x=>x.tot&&x.d<x.tot&&(x.no||(x.dd!==null&&x.dd<=7))).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999'));
-  const med=sec('Medições que pedem atenção',M.length,lst(M,({m,no,d,tot,dd})=>`<button type="button" class="gs-row" data-gm="${esc(m.id)}" style="--c:${corMed(m)}"><span><b>${esc(medLbl(m))}</b><small>${d} de ${tot} concluídos · ${no?no+' item(ns) sem tarefa':'todos cadastrados'}</small></span><span class="tag${dd!==null&&dd<0?' late':''}">${dd===null?'Sem prazo':dd<0?'Venceu há '+(-dd)+' d':dd===0?'Vence hoje':'Vence em '+dd+' d'}</span></button>`,10));
-  const K=(n,l,hot)=>`<div class="gs-k${hot&&n?' hot':''}"><b>${n}</b><span>${l}</span></div>`;
-  return `<div class="admin"><div class="gs-k4">${K(G.atr.length,'atrasadas',1)}${K(G.prox.length,'vencem em até 2 dias')}${K(G.par.length,'paradas há 3+ dias')}${K(M.reduce((a,x)=>a+x.no,0),'itens de medição sem tarefa',1)}</div>
-  <div class="gs-g"><div class="gs-col">${mvSec(6)}${acao}</div><div class="gs-col">${pauta}${med}</div></div></div>`;
+  const med=`<div class="gs-list">${lst(M,({m,no,d,tot,dd})=>`<button type="button" class="gs-row" data-gm="${esc(m.id)}" style="--c:${corMed(m)}"><span><b>${esc(medLbl(m))}</b><small>${d} de ${tot} concluídos · ${no?no+' item(ns) sem tarefa':'todos cadastrados'}</small></span><span class="tag${dd!==null&&dd<0?' late':''}">${dd===null?'Sem prazo':dd<0?'Venceu há '+(-dd)+' d':dd===0?'Vence hoje':'Vence em '+dd+' d'}</span></button>`)}</div>`;
+  const nmov=S.tasks.filter(movNew).length,mov=mvSec(40)||'<div class="empty">Nenhuma tarefa mudou de posto recentemente ✔</div>';
+  const K=(n,l,hot,go)=>`<button type="button" class="gs-k${hot&&n?' hot':''}" data-gk="${go}"><b>${n}</b><span>${l}</span></button>`;
+  const GT=[['acao','Ação agora',G.n,1],['pauta','Pauta por funcionário',com.length],['med','Medições',M.length],['mov','Mudaram de posto',nmov,1]];
+  if(!GT.some(x=>x[0]===gTab))gTab='acao';
+  return `<div class="admin"><div class="gs-k4">${K(G.atr.length,'atrasadas',1,'acao|atr')}${K(G.prox.length,'vencem em até 2 dias',0,'acao|prox')}${K(G.par.length,'paradas há 3+ dias',0,'acao|par')}${K(M.reduce((a,x)=>a+x.no,0),'itens de medição sem tarefa',1,'med|')}</div>
+  <div class="tabs" role="tablist" aria-label="Gestão">${GT.map(([k,l,n,h])=>`<button type="button" role="tab" aria-selected="${gTab===k}" data-gt="${k}">${l}${n?` <em${h?' class="hot"':''}>${n}</em>`:''}</button>`).join('')}</div>
+  <div role="tabpanel">${gTab==='acao'?acao:gTab==='pauta'?pauta:gTab==='med'?med:mov}</div></div>`;
 }
 
 /* ---------- Aba Medições: itens cadastrados x faltando ---------- */
@@ -1525,19 +1580,21 @@ function openTask(id,pre,after){
   const t=S.tasks.find(x=>x.id===id)||{tipo:S.tipos[0]?.id||'',tarefa:'',sub:'',protocolo:'',qtd:'',fluxo:[],status:'todo',repasse:today(),final:'',portal:'',obs:'',notas:[],...(pre||{})};
   const isNew=!id;let dirty=!isNew;
   const [d,close]=dlg(`<form method="dialog" id="tf"><div class="dh"><h2 id="dt">${isNew?'Nova tarefa':esc(t.tarefa)}</h2><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
-  <div class="db">
+  ${tabsH([['dados','Dados'],['fluxo','Fluxo'],['diagrama','Diagrama']],'dados','Seções da tarefa')}
+  <div class="db tp" data-tp="dados">
   <div class="full"><label for="ft">Tipo de fluxo</label><select id="ft">${!t.tipo?'<option value="">Sem tipo</option>':''}${S.tipos.map(y=>`<option value="${y.id}" ${t.tipo===y.id?'selected':''}>${esc(tipoLbl(y))}</option>`).join('')}</select><div class="hint" id="mh"></div></div>
   <div class="full"><label for="f1">Título *</label><div id="f1w"></div><div class="hint" id="np"></div></div>
   ${campos().filter(c=>['texto','numero','valor'].includes(c.tipo)).map(c=>fieldHtml(c,t)).join('')}
-  <div class="full"><div id="fed"></div></div>
   ${campos().filter(c=>c.tipo==='data').map(c=>fieldHtml(c,t)).join('')}
   <div><label for="f7">Data estimada final</label><input type="date" id="f7" value="${t.final}"></div>
   <div><label for="f8">Status</label><select id="f8">${COLS.map(([k,l])=>`<option value="${k}" ${t.status===k?'selected':''}>${l}</option>`).join('')}</select></div>
   ${campos().filter(c=>c.tipo==='longo').map(c=>fieldHtml(c,t)).join('')}
   </div>
+  <div class="db tp" data-tp="fluxo" hidden><div class="full"><div id="fed"></div></div></div>
+  <div class="db tp" data-tp="diagrama" hidden><div class="full"><div class="fdw" id="fdv"></div><div class="fleg">Cada seta liga um passo ao que depende dele. Passo sem seta chegando é livre; passo sem seta saindo não bloqueia ninguém. Caixa tracejada = passos concomitantes.</div></div></div>
   <div class="df"><button class="btn pri">Salvar</button>
   ${isNew?'':`<span class="sp"></span><button type="button" class="btn dan" id="dl">Excluir</button>`}</div></form>`,corOf(t));
-  const q=x=>d.querySelector(x),sel=q('#ft');
+  const q=x=>d.querySelector(x),sel=q('#ft');bindTabs(d);
   const Y=()=>S.tipos.find(x=>x.id===sel.value)||{campos:campos().map(c=>c.id),meta:{v:0,u:'dias'}};
   const recalc=()=>{if(!dirty){const c=calc(Y(),q('#f6').value,q('#fq').value);if(c)q('#f7').value=c}};
   const apply=user=>{const y=Y();d.querySelectorAll('[data-f]').forEach(e=>e.hidden=!y.campos.includes(e.dataset.f));
@@ -1547,7 +1604,7 @@ function openTask(id,pre,after){
     q('#f1w').innerHTML=m?`<select id="f1" required><option value="">— escolha o item —</option>${m.itens.map(i=>`<option ${i===v?'selected':''}>${esc(i)}</option>`).join('')}${!isNew&&v&&v===t.tarefa&&!m.itens.includes(v)?`<option selected>${esc(v)}</option>`:''}</select>`:`<input type="text" id="f1" required placeholder="Título" value="${esc(v)}">`;
     q('#f1').oninput=pv;q('#f1').onchange=pv;pv()};q('#f6').oninput=recalc;q('#fq').oninput=recalc;bindMasks(d);q('#f7').oninput=()=>dirty=true;
   apply(false);
-  const ed=flowEd(q('#fed'),t,()=>sel.value);if(isNew)ed.setSteps(stepsOf(Y()));tf();
+  const ed=flowEd(q('#fed'),t,()=>sel.value,q('#fdv'));if(isNew)ed.setSteps(stepsOf(Y()));tf();
   const collect=()=>{
     t.tipo=sel.value;if(isNew)t.fx=1;t.tarefa=q('#f1').value.trim();campos().forEach(c=>{const e=q('#'+fid(c.id));if(e)t[c.id]=readVal(c,e)});
     {const r=ed.get();t.fluxo=r.fluxo;t.dag=1;delete t.passo}
