@@ -592,6 +592,25 @@ dialog.view{width:min(1040px,96vw)}
 .hsb[hidden]{display:none}
 .hsb>div{height:1px}
 .board.postit{overflow-x:auto;max-width:100%;padding-top:6px}
+
+/* ===== Tema Corporativo (padrão) ===== */
+:root[data-skin=corp]{--bg:#eceff4;--s1:#fff;--s2:#f5f7fa;--line:#d3d9e3;--line2:#8794aa;--tx:#152033;--mu:#4a566b;--ac:#1d3b63;--act:#1d3b63;--acbg:#1d3b6314;--ac2:#0f766e;--on2:#fff;--bad:#b42318;--hd:#fff;--hd2:#ffffffe6;--sh:#15203322;--r:8px}
+:root[data-skin=corp] .btn{border-radius:7px}
+:root[data-skin=corp] .btn.pri{color:#fff;box-shadow:none}
+:root[data-skin=corp] .btn.pri:hover{box-shadow:none}
+:root[data-skin=corp] .stk{border-bottom:2px solid var(--ac);box-shadow:0 2px 10px var(--sh)}
+:root[data-skin=corp] .fdg .nd.ready .nm,:root[data-skin=corp] .postit .avatar{fill:#fff;color:#fff}
+:root[data-skin=corp] dialog{border-radius:10px;box-shadow:0 24px 70px #15203366}
+:root[data-skin=corp] dialog::backdrop{background:#152033aa}
+/* Esteira do processo (linha de montagem) no card */
+.pipe{list-style:none;margin:0;padding:10px 24px;display:flex;gap:0;overflow-x:auto;border-bottom:1px solid var(--line);background:var(--s2);flex:none}
+.pipe li{flex:1 0 auto;min-width:120px;display:flex;align-items:center;gap:8px;padding:6px 18px 6px 12px;background:var(--s1);border:1px solid var(--line);margin-right:-8px;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,0 100%,12px 50%);padding-left:22px;color:var(--mu)}
+.pipe li:first-child{padding-left:12px;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,0 100%)}
+.pipe li b{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--ov);color:var(--tx)}
+.pipe li span{display:flex;flex-direction:column;font-weight:700;font-size:13px;line-height:1.15;min-width:0}
+.pipe li small{font-weight:400;font-size:11.5px;color:var(--mu)}
+.pipe li.done{background:color-mix(in srgb,var(--ac2) 14%,var(--s1));color:var(--tx)}.pipe li.done b{background:var(--ac2);color:#fff}
+.pipe li.ready{background:var(--acbg);color:var(--tx);box-shadow:inset 0 -3px 0 var(--act)}.pipe li.ready b{background:var(--act);color:#fff}
 </style>
 </head>
 <body>
@@ -603,9 +622,9 @@ dialog.view{width:min(1040px,96vw)}
 
 <script>
 const PREF=(()=>{try{return JSON.parse(localStorage.getItem('fluxo-ui')||'{}')}catch(e){return{}}})();
-const THEMES=[['dark','Escuro'],['light','Claro'],['warm','Quente']],ZOOMS=[1,1.1,1.2];
-const themeOf=()=>THEMES.some(x=>x[0]===PREF.t)?PREF.t:(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');
-function applyPref(){const r=document.documentElement;r.dataset.theme=themeOf();r.style.setProperty('--z',ZOOMS[PREF.z||0]||1);try{localStorage.setItem('fluxo-ui',JSON.stringify(PREF))}catch(e){}}
+const THEMES=[['corp','Corporativo'],['dark','Escuro'],['light','Claro'],['warm','Quente']],ZOOMS=[1,1.1,1.2];
+const themeOf=()=>THEMES.some(x=>x[0]===PREF.t)?PREF.t:'corp';
+function applyPref(){const r=document.documentElement;if(!PREF.corp){PREF.corp=1;PREF.t='corp'}const th=themeOf();r.dataset.theme=th==='corp'?'light':th;r.dataset.skin=th==='corp'?'corp':'';r.style.setProperty('--z',ZOOMS[PREF.z||0]||1);try{localStorage.setItem('fluxo-ui',JSON.stringify(PREF))}catch(e){}}
 function cycTheme(){const i=THEMES.findIndex(x=>x[0]===themeOf());PREF.t=THEMES[(i+1)%THEMES.length][0];applyPref();render()}
 function cycZoom(){PREF.z=((PREF.z||0)+1)%ZOOMS.length;applyPref();render()}
 const COLORS=['#fde68a','#fbcfe8','#bfdbfe','#bbf7d0','#ddd6fe','#fed7aa','#a5f3fc','#e5e7eb'];
@@ -1507,10 +1526,11 @@ function openView(id,tab0){
     return `<div class="ctp"><b>${esc(w.pessoa)}${on?' <span class="tag vez">passo liberado</span>':''}</b>${wa}${ml}</div>`}).join('')}</div>`:'';
   const waSeen=new Set(),waF=A?AC.filter(w=>{const k=pkey(w.pessoa);if(waSeen.has(k))return false;waSeen.add(k);return true}).map(w=>{const ct=contactFor(w.pessoa),msg=`Olá ${fn1(w.pessoa)}, sobre a tarefa "${nome(t)}"${t.protocolo?' (protocolo '+t.protocolo+')':''}${t.final?', entrega prevista '+fmt(t.final):''}. `,tt=`WhatsApp: ${w.pessoa} (${w.etapa})`;
     return ct&&ct.whatsapp?`<a class="btn wa" target="_blank" rel="noopener" href="${waLink(ct.whatsapp,msg)}" data-cob="${t.id}" title="${esc(tt)}" aria-label="${esc(tt)}">${WA_IMG} ${esc(fn1(w.pessoa))}</a>`:`<button type="button" class="btn wa off" data-miss="${esc(w.pessoa)}" title="${esc(tt+' — sem contato cadastrado')}" aria-label="${esc(tt+' — sem contato cadastrado')}">${WA_IMG} ${esc(fn1(w.pessoa))}</button>`}).join(''):'';
+  const pipe=n?`<ol class="pipe" aria-label="Esteira do processo">${t.fluxo.map((f,i)=>`<li class="${st[i]||''}" title="${esc(f.etapa+' · '+f.pessoa)}"><b>${st[i]==='done'?'✓':i+1}</b><span>${esc(f.etapa)}<small>${esc(shortName(f.pessoa))}</small></span></li>`).join('')}</ol>`:'';
   const T=[['res','Resumo',AC.length],['dia','Diagrama',0],['ano','Anotações',(t.anot||[]).length],['his','Histórico',(t.notas||[]).length],...(A?[['con','Contatos',0]]:[])],tb=T.some(x=>x[0]===tab0)?tab0:'res';
   const tp=(k,h)=>`<div class="tp" role="tabpanel" id="tp-${k}" data-tp="${k}" aria-labelledby="tb-${k}" ${k===tb?'':'hidden'}>${h}</div>`;
   const [d,close]=dlg(`<div class="dh"><div><div class="vt">${tipoTag(t)}<span class="sb">${stepTxt}</span></div><h2 id="dt">${esc(nome(t))}</h2></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
-  ${tabsH(T,tb,'Seções da tarefa')}
+  ${pipe}${tabsH(T,tb,'Seções da tarefa')}
   <div class="vb">
   ${tp('res',`${panel}<div class="kv">${kv.map(([k,v])=>`<div><label>${k}</label><span>${esc(v)}</span></div>`).join('')}</div>${blocks?`<div class="sfw">${blocks}</div>`:''}${blocks.includes('data-sf')?'<button type="button" class="btn" id="sv" style="align-self:flex-start">Salvar campos</button>':''}${campos().filter(c=>c.tipo==='longo'&&t[c.id]&&!SF.has(c.id)).map(c=>`<div><label>${esc(c.nome)}</label><p class="obs">${esc(t[c.id])}</p></div>`).join('')}`)}
   ${tp('dia',diag)}
