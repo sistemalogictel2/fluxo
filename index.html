@@ -611,6 +611,11 @@ dialog.view{width:min(1040px,96vw)}
 .pipe li small{font-weight:400;font-size:11.5px;color:var(--mu)}
 .pipe li.done{background:color-mix(in srgb,var(--ac2) 14%,var(--s1));color:var(--tx)}.pipe li.done b{background:var(--ac2);color:#fff}
 .pipe li.ready{background:var(--acbg);color:var(--tx);box-shadow:inset 0 -3px 0 var(--act)}.pipe li.ready b{background:var(--act);color:#fff}
+
+/* Botões de WhatsApp do rodapé: <a> e <button> com a mesma aparência */
+.df .btn.wa{display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;flex:0 0 auto}
+.df .btn.wa.off{border-style:solid;opacity:.85}
+.df .btn.wa .wai{width:20px;height:20px;flex:none}
 </style>
 </head>
 <body>
@@ -998,7 +1003,7 @@ function hero(){
   const h={painel:['A operação, <strong>de ponta a ponta</strong>',story()],
   tarefa:['Quem está em <strong>cada tipo de fluxo</strong>',story()],
   equipe:['Quem está com <strong>cada tarefa</strong>',story()],
-  gestao:['O que o <strong>gestor</strong> precisa cobrar','Atrasos, prazos próximos, tarefas paradas e itens sem tarefa, com a pauta de cada funcionário.'],
+  gestao:['O que o <strong>gestor</strong> precisa cobrar','Atrasos, prazos próximos, tarefas paradas e itens sem tarefa.'],
   med:['Os <strong>itens</strong> de cada medição','Medições organizadas por classe. Veja quais itens já viraram tarefa e quais ainda faltam cadastrar.'],
   guia:['Aprenda a usar o <strong>Fluxo</strong>','Siga os passos na ordem: primeiro os cadastros, depois as tarefas e o acompanhamento.'],
   func:['Quem faz <strong>a equipe</strong>','Cadastre os funcionários e os contatos usados nos botões de WhatsApp e e-mail.'],
@@ -1119,9 +1124,9 @@ const GUIA=[
   m:'<span class="sd on"></span><span class="sd on"></span><span class="sd cur"></span><span class="sd cur"></span><span class="sd"></span><span class="hint">2 concluídos · 2 liberados · 1 aguardando</span>',
   l:['Clique no card para abrir a tarefa.','Preencha os campos do seu passo (salvam sozinhos ao sair do campo).','Clique em “✔ Finalizar meu passo”. Os passos que dependiam dele são liberados; quando todos estiverem concluídos, a tarefa fica concluída.','Registre ocorrências em Anotações.','O cartão mostra o diagrama, os passos liberados agora e os que aguardam liberação. Gestor também usa “Avançar ⏭” e “← Devolver passo” (escolhe qual passo reabrir). Na devolução, Administrativa não altera a nota; Negativa exige observação e reduz a nota.','No rodapé do card, o gestor tem WhatsApp e Copiar e-mail de cada responsável com passo liberado, e Copiar caminho na rede.'],
   tip:'Quando uma tarefa chega na sua vez, o sistema avisa na tela.',e:'card'},
- {f:'Acompanhar',t:'Gestão: o que cobrar hoje',x:'Tela inicial do gestor, com pendências, pauta por funcionário e medições que pedem atenção.',
+ {f:'Acompanhar',t:'Gestão: o que cobrar hoje',x:'Tela inicial do gestor, com pendências, medições que pedem atenção.',
   m:'<span class="nd">Atrasadas</span><span class="nd">Vencem em até 2 dias</span><span class="nd">Paradas 3+ dias</span>',
-  l:['Abra a aba Gestão.','Em “Precisa de ação agora”: atrasadas, vencendo em até 2 dias, paradas há 3 dias ou mais e passos sem responsável.','Cobre pelo WhatsApp: a mensagem já vem pronta e a tarefa vira “Cobrado hoje”.','Em “Pauta por funcionário”, copie a pauta do dia de cada pessoa.','Para “Passo sem responsável”, abra a tarefa, clique em Editar e escolha quem faz.'],
+  l:['Abra a aba Gestão.','Em “Precisa de ação agora”: atrasadas, vencendo em até 2 dias, paradas há 3 dias ou mais e passos sem responsável.','Cobre pelo WhatsApp: a mensagem já vem pronta e a tarefa vira “Cobrado hoje”.','Para “Passo sem responsável”, abra a tarefa, clique em Editar e escolha quem faz.'],
   go:['gestao','','Abrir Gestão']},
  {f:'Acompanhar',t:'Veja as medições',x:'O menu lateral e a aba Medições mostram o andamento de cada medição, agrupadas por classe.',
   m:'<span class="nd">Calisto<small>Tarefas 12 · Cadastradas 8 · Concluídas 5 · Prazo 30/12</small></span>',
@@ -1530,7 +1535,7 @@ function openView(id,tab0){
   const T=[['res','Resumo',AC.length],['dia','Diagrama',0],['ano','Anotações',(t.anot||[]).length],['his','Histórico',(t.notas||[]).length],...(A?[['con','Contatos',0]]:[])],tb=T.some(x=>x[0]===tab0)?tab0:'res';
   const tp=(k,h)=>`<div class="tp" role="tabpanel" id="tp-${k}" data-tp="${k}" aria-labelledby="tb-${k}" ${k===tb?'':'hidden'}>${h}</div>`;
   const [d,close]=dlg(`<div class="dh"><div><div class="vt">${tipoTag(t)}<span class="sb">${stepTxt}</span></div><h2 id="dt">${esc(nome(t))}</h2></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
-  ${pipe}${tabsH(T,tb,'Seções da tarefa')}
+  ${tabsH(T,tb,'Seções da tarefa')}${pipe}
   <div class="vb">
   ${tp('res',`${panel}<div class="kv">${kv.map(([k,v])=>`<div><label>${k}</label><span>${esc(v)}</span></div>`).join('')}</div>${blocks?`<div class="sfw">${blocks}</div>`:''}${blocks.includes('data-sf')?'<button type="button" class="btn" id="sv" style="align-self:flex-start">Salvar campos</button>':''}${campos().filter(c=>c.tipo==='longo'&&t[c.id]&&!SF.has(c.id)).map(c=>`<div><label>${esc(c.nome)}</label><p class="obs">${esc(t[c.id])}</p></div>`).join('')}`)}
   ${tp('dia',diag)}
@@ -1602,11 +1607,11 @@ function gestaoView(){
   const med=`<div class="gs-list">${lst(M,({m,no,d,tot,dd})=>`<button type="button" class="gs-row" data-gm="${esc(m.id)}" style="--c:${corMed(m)}"><span><b>${esc(medLbl(m))}</b><small>${d} de ${tot} concluídos · ${no?no+' item(ns) sem tarefa':'todos cadastrados'}</small></span><span class="tag${dd!==null&&dd<0?' late':''}">${dd===null?'Sem prazo':dd<0?'Venceu há '+(-dd)+' d':dd===0?'Vence hoje':'Vence em '+dd+' d'}</span></button>`)}</div>`;
   const nmov=S.tasks.filter(movNew).length,mov=mvSec(40)||'<div class="empty">Nenhuma tarefa mudou de posto recentemente ✔</div>';
   const K=(n,l,hot,go)=>`<button type="button" class="gs-k${hot&&n?' hot':''}" data-gk="${go}"><b>${n}</b><span>${l}</span></button>`;
-  const GT=[['acao','Ação agora',G.n,1],['pauta','Pauta por funcionário',com.length],['med','Medições',M.length],['mov','Mudaram de posto',nmov,1]];
+  const GT=[['acao','Ação agora',G.n,1],['med','Medições',M.length],['mov','Mudaram de posto',nmov,1]];
   if(!GT.some(x=>x[0]===gTab))gTab='acao';
   return `<div class="admin"><div class="gs-k4">${K(G.atr.length,'atrasadas',1,'acao|atr')}${K(G.prox.length,'vencem em até 2 dias',0,'acao|prox')}${K(G.par.length,'paradas há 3+ dias',0,'acao|par')}${K(M.reduce((a,x)=>a+x.no,0),'itens de medição sem tarefa',1,'med|')}</div>
   <div class="tabs" role="tablist" aria-label="Gestão">${GT.map(([k,l,n,h])=>`<button type="button" role="tab" aria-selected="${gTab===k}" data-gt="${k}">${l}${n?` <em${h?' class="hot"':''}>${n}</em>`:''}</button>`).join('')}</div>
-  <div role="tabpanel">${gTab==='acao'?acao:gTab==='pauta'?pauta:gTab==='med'?med:mov}</div></div>`;
+  <div role="tabpanel">${gTab==='acao'?acao:gTab==='med'?med:mov}</div></div>`;
 }
 
 /* ---------- Aba Medições: itens cadastrados x faltando ---------- */
