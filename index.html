@@ -631,6 +631,18 @@ dialog.view{width:min(1040px,96vw)}
 #fsb{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:150;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 12px;max-width:94vw;padding:10px 14px;background:var(--s1);color:var(--tx);border:2px solid var(--ac);border-radius:12px;box-shadow:0 12px 32px #0006;font-size:15px}
 #fsb[hidden]{display:none}
 @media print{#fsb{display:none!important}}
+
+/* ===== Menu lateral de medições: mais largo e recolhível ===== */
+@media(min-width:1100px){.msb{flex-basis:320px;width:320px}}
+@media(min-width:1500px){.msb{flex-basis:360px;width:360px}}
+.msh2{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.msx{display:flex;align-items:center;gap:8px;flex:1;min-width:0;min-height:36px;background:none;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:16px;color:var(--tx);text-align:left;padding:4px 0}
+.msx em{font-style:normal;font-size:12px;font-weight:700;background:var(--ov);border-radius:99px;padding:0 8px}
+.msx span{margin-left:auto;color:var(--mu)}
+.msr{min-height:32px;padding:2px 10px;font-size:12.5px;white-space:nowrap}
+.msb.min{flex-basis:56px;width:56px;padding:10px 6px}
+.msb.min .msx{flex-direction:column;align-items:center;gap:10px;width:100%}
+.msb.min .msx span{margin:0}.msb.min .msx b{writing-mode:vertical-rl;font-size:15px}
 </style>
 </head>
 <body>
@@ -770,7 +782,9 @@ function medSide(){
   const cardM=({m,t,n,d,cor,v})=>{const lt=!!m.prazo&&m.prazo<today()&&d<(t||n),o=MX.has(m.id);
     return `<article class="mdc${lt?' late':''}${o?' open':''}" style="--c:${cor}"><button type="button" class="mdh" data-mx="${esc(m.id)}" aria-expanded="${o}" title="${o?'Recolher':'Ver informações'}"><span class="mdn">${esc(m.nome)}${lt?' ⚠':''}</span><span class="mdg" aria-hidden="true">${o?'▴':'▾'}</span></button><div class="mdb"><div class="mdr"><span>Medição</span><b>${esc(medNm(m.medicao))||'—'}</b></div><div class="mdr"><span>Tarefas</span><b>${t}</b></div><div class="mdr"><span>Cadastradas</span><b>${n}</b></div><div class="mdr"><span>Valor Coordenador</span><b>${brl(v.c.t)}</b></div><div class="mdr"><span>Valor Gestor</span><b>${brl(v.g.t)}</b></div><div class="mdr"><span>Concluídas</span><b>${d}</b></div><div class="mdr mdp"><span>Prazo de entrega</span><b>${m.prazo?fmt(m.prazo)+(lt?' ⚠':''):'Sem prazo'}</b></div></div></article>`};
   const G=byMed(L).filter(g=>g.L.length||g.c.id);
-  return `<aside class="msb" aria-label="Medições e concessionárias cadastradas"><h2 class="msh">Medições <em>${(S.medicoes||[]).length}</em></h2>${G.map(g=>{const cl=!CC.has(g.c.id||'_');return `<section class="mcg"><button type="button" class="mch" data-cc="${esc(g.c.id||'_')}" aria-expanded="${!cl}" title="${cl?'Expandir':'Recolher'} ${esc(g.c.nome)}"><span class="mcn">${esc(g.c.nome)}</span><em>${g.L.length}</em><span class="mdg" aria-hidden="true">${cl?'▸':'▾'}</span></button>${cl?'':`<div class="msl">${valBox(valSum(T.filter(t=>{const c=concOf(tipoOf(t));return c&&(c.medicao||'')===g.c.id})))}${g.L.map(cardM).join('')||'<div class="empty">Nenhuma concessionária.</div>'}</div>`}</section>`}).join('')||'<div class="empty">Nenhuma medição cadastrada.</div>'}</aside>`}
+  const nM=(S.medicoes||[]).length;
+  if(PREF.sb)return `<aside class="msb min" aria-label="Medições (recolhido)"><button type="button" class="msx" data-sbt aria-expanded="false" title="Mostrar o menu de medições"><span aria-hidden="true">▸</span><em>${nM}</em><b>Medições</b></button></aside>`;
+  return `<aside class="msb" aria-label="Medições e concessionárias cadastradas"><div class="msh2"><button type="button" class="msx" data-sbt aria-expanded="true" title="Recolher o menu de medições"><b>Medições</b><em>${nM}</em><span aria-hidden="true">◂</span></button><button type="button" class="btn msr" data-sbc title="Recolher todas as classes e medições abertas">Recolher tudo</button></div>${G.map(g=>{const cl=!CC.has(g.c.id||'_');return `<section class="mcg"><button type="button" class="mch" data-cc="${esc(g.c.id||'_')}" aria-expanded="${!cl}" title="${cl?'Expandir':'Recolher'} ${esc(g.c.nome)}"><span class="mcn">${esc(g.c.nome)}</span><em>${g.L.length}</em><span class="mdg" aria-hidden="true">${cl?'▸':'▾'}</span></button>${cl?'':`<div class="msl">${valBox(valSum(T.filter(t=>{const c=concOf(tipoOf(t));return c&&(c.medicao||'')===g.c.id})))}${g.L.map(cardM).join('')||'<div class="empty">Nenhuma concessionária.</div>'}</div>`}</section>`}).join('')||'<div class="empty">Nenhuma medição cadastrada.</div>'}</aside>`}
 /* ---------- Usuários (definidos no banco) ---------- */
 function usrPane(){
   const cn=id=>{const c=(S.contatos||[]).find(x=>x.id===id);return c?c.nome:''};
@@ -904,6 +918,7 @@ function bind(){
   document.querySelectorAll('[data-gsub]').forEach(b=>b.onclick=()=>{gSub=b.dataset.gsub;render()});
   document.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{const[a,c]=b.dataset.gk.split('|');gTab=a;if(c)gSub=c;render()});
   document.querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{const k=b.dataset.cc;CC.has(k)?CC.delete(k):CC.add(k);render()});
+  document.querySelectorAll('[data-sbt]').forEach(b=>b.onclick=()=>{PREF.sb=!PREF.sb;applyPref();render()});document.querySelectorAll('[data-sbc]').forEach(b=>b.onclick=()=>{CC.clear();MX.clear();render()});
   document.querySelectorAll('[data-gc]').forEach(b=>b.onclick=()=>copyText(GP.get(b.dataset.gc)||'').then(ok=>toast(ok?'Pauta copiada':'Não foi possível copiar')));
   if(isAdm())document.querySelectorAll('[data-mx]').forEach(b=>dbl(b,()=>{view='med';ANIM=true;render();openConcItens(b.dataset.mx)}));
   document.querySelectorAll('[data-cx]').forEach(b=>b.onclick=()=>{const k=b.dataset.cx;colOpen=colNow===k?null:k;ANIM=true;render()});
