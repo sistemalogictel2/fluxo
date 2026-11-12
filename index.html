@@ -1638,7 +1638,7 @@ function gestaoView(){
   const SUBS=[['atr','Atrasadas',G.atr,r=>rowT(r,`⚠ ${-r.d} dia(s) de atraso`,'late',`está atrasada há ${-r.d} dia(s)`)],
     ['prox','Vencem em até 2 dias',G.prox,r=>rowT(r,r.d===0?'Vence hoje':r.d===1?'Vence amanhã':'Vence em 2 dias','',r.d===0?'vence hoje':r.d===1?'vence amanhã':'vence em 2 dias')],
     ['par','Paradas há 3+ dias',G.par,r=>rowT(r,`Parada há ${r.p} dias`,'',`está parada há ${r.p} dias`)],
-    ['sem','Sem responsável',G.sem,semR],['cob','Cobrados hoje',G.cob,cobR]];
+    ['Não possui','Sem responsável',G.sem,semR],['cob','Cobrados hoje',G.cob,cobR]];
   const sb=SUBS.find(x=>x[0]===gSub)||SUBS.find(x=>x[2].length&&x[0]!=='cob')||SUBS.find(x=>x[2].length)||SUBS[0];
   const acao=`<div class="chips" role="group" aria-label="Tipo de pendência">${SUBS.map(([k,l,L])=>`<button type="button" class="chip${k===sb[0]?' on':''}" data-gsub="${k}">${l} <b>${L.length}</b></button>`).join('')}</div>
     <div class="gs-list">${sb[2].length?lst(sb[2],sb[3]):(G.n?'<div class="empty">Nada nesta lista ✔</div>':'<div class="empty">Nada pendente: tudo em dia ou já cobrado hoje ✔</div>')}</div>`;
