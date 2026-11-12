@@ -648,6 +648,7 @@ dialog.view{width:min(1040px,96vw)}
 .mvh{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:28px;padding:2px 0;background:none;border:0;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-align:left}
 .mvh:hover{color:var(--act)}.mvt{color:var(--mu);font-size:12.5px;font-weight:600}
 @media(min-width:861px){.msb{flex:0 0 clamp(300px,25vw,400px);width:clamp(300px,25vw,400px)}.msb.min{flex-basis:56px;width:56px}}
+.mvc{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font-size:12.5px}.mvc b{color:var(--tx);font-weight:700}
 </style>
 </head>
 <body>
@@ -777,9 +778,9 @@ const MESES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','
 const mesLbl=k=>k==='_'?'Sem mês medido':MESES[+k.slice(5,7)-1]+'/'+k.slice(0,4);
 function valSum(L){const r={n:L.length,c:{t:0,m:new Map()},g:{t:0,m:new Map()}};
   L.forEach(t=>[['c','vmc','dmc'],['g','vmg','dmg']].forEach(([k,v,d])=>{const x=+t[v];if(!x)return;const mk=t[d]?String(t[d]).slice(0,7):'_';r[k].t+=x;r[k].m.set(mk,(r[k].m.get(mk)||0)+x)}));return r}
-const VX=()=>PREF.vx||(PREF.vx={});
+const VXS={all:true},VX=()=>VXS;
 const valPart=(nm,p,k)=>{const cl=!!VX()[k];return `<h4><button type="button" class="mvh" data-vx="${k}" aria-expanded="${!cl}" title="${cl?'Mostrar':'Recolher'} valores do ${nm}"><span>${cl?'▸':'▾'} ${nm}</span><b>${brl(p.t)}</b></button></h4>${cl?'':p.m.size?`<ul>${[...p.m].sort((a,b)=>(a[0]==='_')-(b[0]==='_')||a[0].localeCompare(b[0])).map(([k,v])=>`<li><span>${mesLbl(k)}</span><b>${brl(v)}</b></li>`).join('')}</ul>`:'<div class="mvn">Nenhum valor lançado</div>'}`};
-const valBox=v=>{const cl=!!VX().all;return `<div class="mvs"><button type="button" class="mvh mvt" data-vx="all" aria-expanded="${!cl}" title="${cl?'Mostrar':'Recolher'} todos os valores"><span>${cl?'▸':'▾'} Valor total · ${v.n} tarefa${v.n===1?'':'s'} somada${v.n===1?'':'s'}</span></button>${cl?`<div class="mvn">Coordenador ${brl(v.c.t)} · Gestor ${brl(v.g.t)}</div>`:valPart('Coordenador',v.c,'c')+valPart('Gestor',v.g,'g')}</div>`};
+const valBox=v=>{const cl=!!VX().all;return `<div class="mvs"><button type="button" class="mvh mvt" data-vx="all" aria-expanded="${!cl}" title="${cl?'Mostrar':'Recolher'} todos os valores"><span>${cl?'▸':'▾'} Valor total · ${v.n} tarefa${v.n===1?'':'s'} somada${v.n===1?'':'s'}</span></button>${cl?`<div class="mvn mvc"><span>Coordenador</span><b>${brl(v.c.t)}</b></div><div class="mvn mvc"><span>Gestor</span><b>${brl(v.g.t)}</b></div>`:valPart('Coordenador',v.c,'c')+valPart('Gestor',v.g,'g')}</div>`};
 function medSide(){
   if(!isAdm())return'';
   const T=S.tasks.filter(vis);
