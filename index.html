@@ -1739,7 +1739,7 @@ function openTask(id,pre,after){
     {const r=ed.get();t.fluxo=r.fluxo;t.dag=1;delete t.passo}
     t.final=q('#f7').value;t.status=q('#f8').value;
   };
-  q('#tf').onsubmit=async e=>{e.preventDefault();const r=ed.get();if(!r.fluxo.length||r.fluxo.some(f=>f.pessoa==='Sem responsável')){toast('Defina os passos e o responsável de cada um');return}if(cyc(r.fluxo)){toast('Há uma dependência circular no fluxo. Revise as dependências dos passos.');return}const a0=isNew?null:snap(t);collect();
+  q('#tf').onsubmit=async e=>{e.preventDefault();const r=ed.get();if(!r.fluxo.length){toast('Defina os passos do fluxo');return}if(cyc(r.fluxo)){toast('Há uma dependência circular no fluxo. Revise as dependências dos passos.');return}const a0=isNew?null:snap(t);collect();
     if(a0){const a1=snap(t);if(a0.k!==a1.k)t.mov={t:Date.now(),tp:'e',de:a0.e||'—',dp:a0.p||'—',para:a1.e,pp:a1.p,fim:a1.k===''?1:0,por:user}}
     if(isNew){t.id='t'+Date.now();S.tasks.push(t)}await save();close();render();if(after)setTimeout(after,200)};
   if(!isNew){
