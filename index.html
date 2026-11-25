@@ -785,6 +785,11 @@ html[data-anim] .gb u{animation:fxBar .8s cubic-bezier(.2,.8,.2,1) both;animatio
 .gmls::-webkit-scrollbar{width:10px}.gmls::-webkit-scrollbar-track{background:color-mix(in srgb,var(--mu) 12%,transparent);border-radius:99px}
 .gmls::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--mu) 55%,transparent);border-radius:99px;border:2px solid transparent;background-clip:padding-box}
 .gmls::-webkit-scrollbar-thumb:hover{background:color-mix(in srgb,var(--act) 80%,var(--mu));background-clip:padding-box}
+/* zoom + centralização */
+.gmtb{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:4px;z-index:2}
+.gmtb button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line2);background:var(--bg);color:var(--tx);font-size:18px;cursor:pointer}.gmtb button:hover{border-color:var(--act)}
+.gmp .gmap{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}.gmp .gmap:active{cursor:grabbing}
+.gcp>.gbig{align-items:center;text-align:center}.gmbig{justify-content:center}.gmst{text-align:center}.gmst div{align-items:center}.gmhd{justify-content:center;position:relative}.gmhd .btn{position:absolute;right:0}.gmr2 h4{text-align:center}.gmp{align-items:center}
 </style>
 </head>
 <body>
@@ -1832,7 +1837,7 @@ function gMapHtml(T0){
   const op=(id,l,cur,o)=>`<label class="gfi"><span>${l}</span><select class="fsel" id="${id}"><option value="">Todos</option>${o.map(([v,t])=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
   gMapFl=op('gfuf','UF',gUf,ufs.map(u=>[u,u+' · '+UFN[u]]))+op('gfmun','Município',gMun,muns.map(([k,e])=>[k,e.n]));
   const bin=v=>v?Math.min(5,Math.ceil(v/mx*5)):0,col=v=>v?gRamp((bin(v)-1)/4):'#1c2740';
-  const sv=`<svg class="gsv gmap${gUf?' hs':''}" data-mx="${mx}" viewBox="${BRVB}" role="img" aria-label="Mapa do Brasil por UF">${Object.keys(BRMAP).map(u=>{const v=cnt[u]||0;return`<path data-guf="${u}" data-n="${v}" data-nm="${esc(UFN[u])}" class="${gUf===u?'on':''}" d="${BRMAP[u]}" fill="${col(v)}"></path>`}).join('')}<g class="gmlb"></g></svg>`;
+  const sv=`<svg class="gsv gmap${gUf?' hs':''}" data-mx="${mx}" data-tt="${Object.values(cnt).reduce((a,b)=>a+b,0)}" viewBox="${BRVB}" role="img" aria-label="Mapa do Brasil por UF">${Object.keys(BRMAP).map(u=>{const v=cnt[u]||0;return`<path data-guf="${u}" data-n="${v}" data-nm="${esc(UFN[u])}" class="${gUf===u?'on':''}" d="${BRMAP[u]}" fill="${col(v)}"></path>`}).join('')}<g class="gmlb"></g></svg>`;
   const lg=`<div class="gml2">${[1,2,3,4,5].map(b=>{const lo=Math.floor((b-1)*mx/5)+1,hi=Math.ceil(b*mx/5);return lo>hi?'':`<span><i style="background:${gRamp((b-1)/4)}"></i>${lo===hi?hi:lo+'–'+hi}</span>`}).join('')}<span><i style="background:#1c2740"></i>0</span></div>`;
   const U=Object.entries(cnt).sort((a,b)=>b[1]-a[1]),um=Math.max(1,...U.map(x=>x[1]));
   const ML=[...MM.values()].filter(e=>!gMun||gNorm(e.n)===gMun).sort((a,b)=>b.c-a.c).slice(0,gUf?80:12),mm=Math.max(1,...ML.map(e=>e.c));
@@ -1840,15 +1845,28 @@ function gMapHtml(T0){
   const lst=gUf?(ML.length?ML.map(e=>row(`data-gmun="${esc(gNorm(e.n))}"`,e.n,e.c,mm,gRamp(mm>1?(e.c-1)/(mm-1):1))).join(''):`<p class="hint">${fm?'Nenhum município preenchido nas tarefas.':'Não encontrei o campo “Município” nas tarefas.'}</p>`):U.map(([u,c])=>row(`data-guf="${u}" data-h="${u}" title="${esc(UFN[u])}"`,u,c,um,col(c))).join('');
   const top=U[0];
   const side=`<aside class="gmr2"><div class="gmhd"><small>${gUf?esc(UFN[gUf]):'Brasil'}${gMun?' · '+esc((MM.get(gMun)||{}).n||''):''}</small>${gUf||gMun?'<button type="button" class="btn" id="gfx2">← Brasil</button>':''}</div><div class="gmbig"><b>${tot}</b><span>tarefa(s)</span></div><div class="gmst"><div><b>${gUf?1:U.length}</b><span>UF(s)</span></div><div><b>${gUf?MM.size:new Set(G.filter(g=>g.mun).map(g=>gNorm(g.mun))).size}</b><span>município(s)</span></div><div><b>${top?top[0]:'–'}</b><span>líder${top?' · '+top[1]:''}</span></div></div><h4>${gUf?'Municípios':'Estados'}</h4><div class="gmls${gUf?'':' g2'}">${lst}</div></aside>`;
-  return`<div class="gme"><div class="gmp">${sv}<div class="gmtip" hidden></div>${lg}</div>${side}</div><p class="hint">${tot} tarefa(s) com UF${semUf?' · '+semUf+' sem UF':''}. Passe o mouse para ver os números · clique num estado para selecionar e filtrar (clique de novo para limpar).</p>`;
+  return`<div class="gme"><div class="gmp"><div class="gmtb"><button type="button" data-z="in" aria-label="Aproximar">+</button><button type="button" data-z="out" aria-label="Afastar">−</button><button type="button" data-z="0" aria-label="Centralizar">⟲</button></div>${sv}<div class="gmtip" hidden></div>${lg}</div>${side}</div><p class="hint">${tot} tarefa(s) com UF${semUf?' · '+semUf+' sem UF':''}. Passe o mouse para ver os números · clique num estado para selecionar e filtrar · clique fora do mapa para limpar · roda do mouse = zoom · arraste = mover.</p>`;
 }
 function gMapInit(){
   const sv=document.querySelector('svg.gmap');if(!sv)return;
-  const pn=sv.closest('.gmp'),tip=pn.querySelector('.gmtip'),lb=sv.querySelector('.gmlb'),wrap=pn.parentNode;
-  sv.querySelectorAll('path').forEach(p=>{try{const b=p.getBBox(),n=+p.dataset.n;if(b.width<20)return;const t=document.createElementNS('http://www.w3.org/2000/svg','text'),x=b.x+b.width/2;t.setAttribute('x',x);t.setAttribute('y',b.y+b.height/2);t.setAttribute('text-anchor','middle');t.setAttribute('style','font-size:'+Math.max(8,Math.min(11,b.width/2.8))+'px');if(!n)t.setAttribute('class','z');if(p.classList.contains('on'))t.setAttribute('class',(t.getAttribute('class')||'')+' on');t.innerHTML=p.dataset.guf+(n?'<tspan x="'+x+'" dy="1.05em">'+n+'</tspan>':'');lb.appendChild(t)}catch(e){}});
+  const pn=sv.closest('.gmp'),tip=pn.querySelector('.gmtip'),lb=sv.querySelector('.gmlb'),wrap=pn.parentNode,NS='http://www.w3.org/2000/svg';
+  const v0=sv.viewBox.baseVal,B={x:v0.x,y:v0.y,w:v0.width,h:v0.height};let V={...B},drag=null,moved=0;
+  const paths=[...sv.querySelectorAll('path')],bb=new Map();paths.forEach(p=>{try{bb.set(p,p.getBBox())}catch(e){}});
+  const lab=()=>{const k=V.w/B.w;lb.innerHTML='';paths.forEach(p=>{const b=bb.get(p);if(!b||b.width<20*k)return;const n=+p.dataset.n,x=b.x+b.width/2,t=document.createElementNS(NS,'text');t.setAttribute('x',x);t.setAttribute('y',b.y+b.height/2);t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');t.setAttribute('style','font-size:'+Math.max(8*k,Math.min(12*k,b.width/2.8))+'px;stroke-width:'+2.2*k+'px');t.setAttribute('class',(n?'':'z ')+(p.classList.contains('on')?'on':''));t.innerHTML=p.dataset.guf+(n?'<tspan x="'+x+'" dy="1.1em">'+n+'</tspan>':'');lb.appendChild(t)})};
+  const set=()=>{sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));lab()};
+  const zoom=(f,cx,cy)=>{const w=Math.max(B.w/10,Math.min(B.w,V.w*f)),r=w/V.w;cx=cx==null?V.x+V.w/2:cx;cy=cy==null?V.y+V.h/2:cy;V={x:cx-(cx-V.x)*r,y:cy-(cy-V.y)*r,w,h:V.h*r};if(w>=B.w)V={...B};set()};
+  const pt=e=>{const r=sv.getBoundingClientRect(),sc=Math.min(r.width/V.w,r.height/V.h),ox=(r.width-V.w*sc)/2,oy=(r.height-V.h*sc)/2;return[V.x+(e.clientX-r.left-ox)/sc,V.y+(e.clientY-r.top-oy)/sc,sc]};
+  pn.querySelectorAll('[data-z]').forEach(b=>b.onclick=e=>{e.stopPropagation();b.dataset.z==='0'?(V={...B},set()):zoom(b.dataset.z==='in'?.7:1.4)});
+  sv.addEventListener('wheel',e=>{e.preventDefault();const[x,y]=pt(e);zoom(e.deltaY<0?.8:1.25,x,y)},{passive:false});
+  sv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,v:{...V},sc:pt(e)[2]};moved=0});
+  const mv=e=>{if(!drag||!sv.isConnected)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>5)moved=1;if(moved){V.x=drag.v.x-dx/drag.sc;V.y=drag.v.y-dy/drag.sc;sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));tip.hidden=true}};
+  addEventListener('pointermove',mv);addEventListener('pointerup',()=>{drag=null;setTimeout(()=>moved=0,0)});
+  pn.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault();return}if(!e.target.closest('path,button,.gmtip')&&(gUf||gMun)){gUf=gMun='';render()}},true);
+  sv.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault()}},true);
   const hl=u=>{wrap.querySelectorAll('.hv').forEach(x=>x.classList.remove('hv'));if(u)wrap.querySelectorAll('[data-guf="'+u+'"]').forEach(x=>x.classList.add('hv'))};
-  sv.querySelectorAll('path').forEach(p=>{p.addEventListener('mousemove',e=>{const r=pn.getBoundingClientRect(),n=+p.dataset.n,mx=+sv.dataset.mx;tip.innerHTML='<b>'+p.dataset.nm+'</b><span>'+n+' tarefa(s)</span>'+(n&&mx>0?'<em>'+Math.round(n/mx*100)+'% do maior estado</em>':'');tip.hidden=false;tip.style.left=Math.min(e.clientX-r.left+14,r.width-170)+'px';tip.style.top=Math.max(4,e.clientY-r.top-58)+'px';hl(p.dataset.guf)});p.addEventListener('mouseleave',()=>{tip.hidden=true;hl('')})});
+  paths.forEach(p=>{p.addEventListener('mousemove',e=>{if(moved)return;const r=pn.getBoundingClientRect(),n=+p.dataset.n,tt=+sv.dataset.tt;tip.innerHTML='<b>'+p.dataset.nm+'</b><span>'+n+' tarefa(s)</span>'+(n&&tt>0?'<em>Representa '+Math.round(n/tt*100)+'% do total</em>':'');tip.hidden=false;tip.style.left=Math.min(e.clientX-r.left+14,r.width-170)+'px';tip.style.top=Math.max(4,e.clientY-r.top-58)+'px';hl(p.dataset.guf)});p.addEventListener('mouseleave',()=>{tip.hidden=true;hl('')})});
   wrap.querySelectorAll('.gmrow[data-h]').forEach(r=>{r.addEventListener('mouseenter',()=>hl(r.dataset.h));r.addEventListener('mouseleave',()=>hl(''))});
+  lab();
 }
 function gFit(){
   const p=document.querySelector('.gcp');if(!p)return;
