@@ -828,13 +828,16 @@ html[data-anim] .gb u{animation:fxBar .8s cubic-bezier(.2,.8,.2,1) both;animatio
 @media(max-width:620px){.rg:not(.r1){grid-template-columns:1fr}.rks{grid-template-columns:repeat(2,minmax(0,1fr))}.rg{grid-template-columns:1fr}.rc.w2{grid-column:auto}.rtw{grid-template-columns:1fr}}
 .gmls.g2{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));column-gap:16px;row-gap:4px}.gmr2 .gmls.g2 .gmrow{grid-template-columns:30px minmax(30px,1fr) auto;gap:8px;padding:4px 6px;font-size:13px}.gmr2 .gmls.g2 .gmrow i{height:9px}.gmr2 .gmls.g2 .gmrow b{min-width:28px}
 .rg.r1 .rl{gap:9px}.rg.r1 .rr{padding:5px 8px;font-size:13.5px;gap:14px}
-.fxi{position:fixed;inset:0;z-index:99999;overflow:hidden;user-select:none;cursor:default}
-.fxbg{position:absolute;inset:0;background:radial-gradient(60% 55% at 50% 50%,color-mix(in srgb,var(--act) 22%,transparent),transparent 72%),var(--bg);box-shadow:inset 0 0 22vmin color-mix(in srgb,var(--tx) 32%,transparent)}
-.fxbar{position:absolute;left:0;right:0;height:11vh;background:#000}.fxbar.t{top:0}.fxbar.b{bottom:0}
-.fxw{position:absolute;left:50%;top:50%;white-space:nowrap;line-height:1;letter-spacing:-.02em;color:var(--tx);perspective:900px;will-change:transform}
+.fxi{position:fixed;inset:0;z-index:99999;overflow:hidden;user-select:none;cursor:pointer}
+.fxbg{position:absolute;inset:0;background:radial-gradient(62% 58% at 50% 50%,color-mix(in srgb,var(--act) 20%,transparent),transparent 74%),var(--bg);box-shadow:inset 0 0 24vmin color-mix(in srgb,var(--tx) 28%,transparent)}
+.fxw{position:absolute;left:50%;top:50%;white-space:nowrap;line-height:1;letter-spacing:-.02em;color:var(--tx);will-change:transform}
 .fxw span{display:inline-block;will-change:transform}.fxw .fa{font-weight:300}.fxw .fb,.fxw .fx{font-weight:800;color:var(--act)}
 .fxflare{position:absolute;left:12vw;right:12vw;top:50%;height:3px;margin-top:-1px;background:linear-gradient(90deg,transparent,var(--act),#fff,var(--act),transparent);box-shadow:0 0 26px var(--act);opacity:0}
 .fxring{position:absolute;left:50%;top:50%;width:20vmin;height:20vmin;margin:-10vmin 0 0 -10vmin;border-radius:50%;border:3px solid var(--act);opacity:0}
+.fxl{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2.2vmin;will-change:transform}
+.fxm{width:min(36vmin,320px);height:min(36vmin,320px);overflow:visible}
+.fxwm{font-size:min(10vmin,92px);line-height:1;letter-spacing:-.02em;color:var(--tx);font-weight:300;white-space:nowrap}.fxwm .l{display:inline-block;font-style:normal}.fxwm .k{font-weight:800;color:var(--act)}
+.fxtg{font-size:min(2.1vmin,18px);text-transform:uppercase;letter-spacing:.32em;color:var(--mu);font-weight:600;padding-left:.32em}
 </style>
 </head>
 <body>
@@ -942,36 +945,53 @@ let USR=null;const MX=new Set(),CC=new Set();
 async function rpc(fn,args){const r=await fetch(sbU('rpc/'+fn),{method:'POST',headers:sbH(),body:JSON.stringify(args)}),t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
   if(!r.ok)throw new Error((j&&j.message)||'Erro '+r.status);return j}
 async function loadUsr(){try{USR=await rpc('fx_usuarios_listar',{p_token:ME.tk})}catch(e){USR=[];toast('Não foi possível carregar os usuários: '+e.message)}if(view==='admin'&&adminSec==='usr')render()}
-/* ---------- Abertura cinematográfica após o login ---------- */
+/* ---------- Abertura estilo comercial após o login ---------- */
 function introFx(done){
   const h=document.querySelector('.login h1');
   if(matchMedia('(prefers-reduced-motion: reduce)').matches||!h||!h.animate){done();return}
   const act=getComputedStyle(document.documentElement).getPropertyValue('--act').trim()||'#f2c14e',vw=innerWidth,vh=innerHeight,
     fs=Math.max(72,Math.min(vw*.16,vh*.26,170)),f0=parseFloat(getComputedStyle(h).fontSize)||30,s0=f0/fs,rg=document.createRange();rg.selectNodeContents(h);const r=rg.getBoundingClientRect();
+  const P='-16,-100 16,-100 12,100 -12,100',bar=(c,rot)=>`<g class="${c}"><polygon points="${P}" transform="rotate(${rot})" fill="url(#fxg${c==='b1'?1:2})" stroke="url(#fxg${c==='b1'?1:2})" stroke-width="10" stroke-linejoin="round"/></g>`;
+  const svg=`<svg class="fxm" viewBox="-110 -110 220 220" aria-hidden="true"><defs>
+    <linearGradient id="fxg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:color-mix(in srgb,var(--act) 62%,#fff)"/><stop offset="1" style="stop-color:var(--act)"/></linearGradient>
+    <linearGradient id="fxg2" x1="0" y1="1" x2="0" y2="0"><stop offset="0" style="stop-color:color-mix(in srgb,var(--ac2) 62%,#fff)"/><stop offset="1" style="stop-color:var(--ac2)"/></linearGradient>
+    <linearGradient id="fxsh" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".8"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <clipPath id="fxc1"><polygon points="${P}" transform="rotate(45)"/></clipPath>
+    <clipPath id="fxcu"><polygon points="${P}" transform="rotate(45)"/><polygon points="${P}" transform="rotate(-45)"/></clipPath></defs>
+    ${bar('b2',-45)}${bar('b1',45)}
+    <g clip-path="url(#fxc1)"><polygon class="fxit" points="${P}" transform="rotate(-45)" fill="#fff" fill-opacity=".34" opacity="0"/></g>
+    <g clip-path="url(#fxcu)"><g transform="skewX(-20)"><rect class="fxsh" x="-170" y="-140" width="80" height="280" fill="url(#fxsh)"/></g></g></svg>`;
   const o=document.createElement('div');o.className='fxi';
-  o.innerHTML=`<div class="fxbg"></div><div class="fxbar t"></div><div class="fxbar b"></div><div class="fxflare"></div><div class="fxring"></div><div class="fxw" style="font-size:${fs}px"><span class="fa">Flu</span><span class="fx">x</span><span class="fb">o</span></div>`;
+  o.innerHTML=`<div class="fxbg"></div><div class="fxflare"></div><div class="fxring"></div>
+    <div class="fxw" style="font-size:${fs}px"><span class="fa">Flu</span><span class="fx">x</span><span class="fb">o</span></div>
+    <div class="fxl">${svg}<div class="fxwm">${'Flu'.split('').map(c=>`<i class="l">${c}</i>`).join('')}<i class="l k">x</i><i class="l k">o</i></div><div class="fxtg">Organizador de tarefas</div></div>`;
   document.body.appendChild(o);h.style.visibility='hidden';
-  const q=x=>o.querySelector(x),W=q('.fxw'),X=q('.fx'),A=q('.fa'),B=q('.fb'),E='cubic-bezier(.7,0,.2,1)',
-    T=(x,y,k)=>`translate(-50%,-50%) translate(${x}px,${y}px) scale(${k})`,dx=r.left+r.width/2-vw/2,dy=r.top+r.height/2-vh/2,card=document.querySelector('.login');
+  const q=x=>o.querySelector(x),qa=x=>[...o.querySelectorAll(x)],W=q('.fxw'),X=q('.fx'),A=q('.fa'),B=q('.fb'),M=q('.fxm'),L=q('.fxl'),E='cubic-bezier(.7,0,.2,1)',OV='cubic-bezier(.2,.9,.25,1.12)',
+    T=(x,y,k)=>`translate(-50%,-50%) translate(${x}px,${y}px) scale(${k})`,dx=r.left+r.width/2-vw/2,dy=r.top+r.height/2-vh/2,card=document.querySelector('.login'),tm=[];
+  let fin=0;const end=(ms)=>{if(fin)return;fin=1;tm.forEach(clearTimeout);done();o.animate([{opacity:1},{opacity:0}],{duration:ms,fill:'forwards'});setTimeout(()=>o.remove(),ms+60)};
+  o.onclick=()=>end(350);
   card&&card.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale(.94) translateY(14px)'}],{duration:450,easing:'ease',fill:'forwards'});
   q('.fxbg').animate([{opacity:0},{opacity:1}],{duration:500,fill:'both'});
-  q('.fxbar.t').animate([{transform:'translateY(-100%)'},{transform:'none'}],{duration:800,easing:E,fill:'both'});
-  q('.fxbar.b').animate([{transform:'translateY(100%)'},{transform:'none'}],{duration:800,easing:E,fill:'both'});
   /* 1. a palavra voa para o centro e cresce */
   W.animate([{transform:T(dx,dy,s0)},{transform:T(0,0,1)}],{duration:1100,delay:150,easing:E,fill:'both'});
-  /* 2. faixa de luz + o X muda de cor até a cor principal do tema */
   q('.fxflare').animate([{opacity:0,transform:'scaleX(0)'},{opacity:1,transform:'scaleX(1)',offset:.45},{opacity:0,transform:'scaleX(1.1)'}],{duration:1000,delay:1150,easing:'ease-out',fill:'both'});
-  X.animate([{color:act},{color:'#ff4d6d',offset:.25},{color:'#8b5cf6',offset:.5},{color:'#22d3ee',offset:.75},{color:act}],{duration:1300,delay:1250,easing:'ease-in-out',fill:'both'});
-  A.animate([{transform:'none',opacity:1,filter:'blur(0)'},{transform:'translateX(-.45em)',opacity:0,filter:'blur(10px)'}],{duration:750,delay:1350,easing:E,fill:'both'});
-  B.animate([{transform:'none',opacity:1,filter:'blur(0)'},{transform:'translateX(.45em)',opacity:0,filter:'blur(10px)'}],{duration:750,delay:1350,easing:E,fill:'both'});
-  /* 3. o X cresce, gira em 3D e brilha */
-  X.animate([{transform:'rotateY(0) scale(1)',textShadow:'0 0 0 transparent'},{transform:'rotateY(360deg) scale(2)',textShadow:`0 0 60px ${act}`}],{duration:1300,delay:1350,easing:E,fill:'both'});
-  q('.fxring').animate([{opacity:.9,transform:'scale(.3)'},{opacity:0,transform:'scale(9)'}],{duration:1000,delay:2150,easing:'ease-out',fill:'both'});
-  /* 4. o X invade a tela e revela o sistema */
-  X.animate([{transform:'rotateY(0) scale(2)'},{transform:'rotateY(0) scale(48)'}],{duration:800,delay:2700,easing:'cubic-bezier(.6,0,.9,.4)',fill:'forwards'});
-  setTimeout(done,3250);
-  o.animate([{opacity:1},{opacity:0}],{duration:650,delay:3300,easing:'ease-in',fill:'forwards'});
-  setTimeout(()=>o.remove(),4050);
+  /* 2. a palavra se desfaz e vira a marca */
+  A.animate([{transform:'none',opacity:1,filter:'blur(0)'},{transform:'translateX(-.5em)',opacity:0,filter:'blur(10px)'}],{duration:700,delay:1350,easing:E,fill:'both'});
+  B.animate([{transform:'none',opacity:1,filter:'blur(0)'},{transform:'translateX(.5em)',opacity:0,filter:'blur(10px)'}],{duration:700,delay:1350,easing:E,fill:'both'});
+  X.animate([{transform:'scale(1)',opacity:1,filter:'blur(0)'},{transform:'scale(2.2)',opacity:0,filter:'blur(8px)'}],{duration:650,delay:1400,easing:E,fill:'both'});
+  /* 3. as duas fitas cruzam e formam o X */
+  const fly=(c,x,y,d)=>q('.'+c).animate([{transform:`translate(${x}px,${y}px) scale(.6)`,opacity:0},{opacity:1,offset:.25},{transform:'none',opacity:1}],{duration:900,delay:d,easing:OV,fill:'both'});
+  fly('b1',-320,-320,1650);fly('b2',320,320,1800);
+  q('.fxit').animate([{opacity:0},{opacity:1}],{duration:500,delay:2500,fill:'both'});
+  q('.fxring').animate([{opacity:.85,transform:'scale(.3)'},{opacity:0,transform:'scale(9)'}],{duration:1100,delay:2450,easing:'ease-out',fill:'both'});
+  M.animate([{filter:'drop-shadow(0 0 0 transparent)'},{filter:`drop-shadow(0 0 30px ${act})`}],{duration:700,delay:2500,easing:'ease-out',fill:'both'});
+  q('.fxsh').animate([{transform:'translateX(0)'},{transform:'translateX(520px)'}],{duration:1000,delay:2800,easing:'ease-in-out',fill:'both'});
+  /* 4. assinatura: nome e legenda */
+  qa('.fxwm .l').forEach((e,i)=>e.animate([{transform:'translateY(.5em)',opacity:0,filter:'blur(8px)'},{transform:'none',opacity:1,filter:'blur(0)'}],{duration:650,delay:3250+i*90,easing:'cubic-bezier(.2,.8,.2,1)',fill:'both'}));
+  q('.fxtg').animate([{opacity:0,letterSpacing:'.6em'},{opacity:1,letterSpacing:'.32em'}],{duration:900,delay:3800,easing:'ease-out',fill:'both'});
+  /* 5. a marca invade a tela e revela o sistema */
+  L.animate([{transform:'translate(-50%,-50%) scale(1)'},{transform:'translate(-50%,-50%) scale(30)'}],{duration:800,delay:4800,easing:'cubic-bezier(.6,0,.9,.4)',fill:'both'});
+  tm.push(setTimeout(done,5300),setTimeout(()=>{if(!fin){fin=1;o.animate([{opacity:1},{opacity:0}],{duration:650,fill:'forwards'});setTimeout(()=>o.remove(),700)}},5350));
 }
 function loginScreen(){
   $('#app').innerHTML=`<div class="login"><h1>Flu<strong>xo</strong></h1><p>Entre para acompanhar a operação.</p>
