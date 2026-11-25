@@ -787,11 +787,11 @@ function medSide(){
   const L=(S.concessionarias||[]).map(m=>{const X=T.filter(t=>daConc(tipoOf(t),m));return{m,t:(m.itens||[]).length,n:X.length,d:X.filter(t=>t.status==='done').length,cor:corConc(m),v:valSum(X)}})
     .sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999')||a.m.nome.localeCompare(b.m.nome,'pt-BR'));
   const cardM=({m,t,n,d,cor,v})=>{const lt=!!m.prazo&&m.prazo<today()&&d<(t||n),o=MX.has(m.id);
-    return `<article class="mdc${lt?' late':''}${o?' open':''}" style="--c:${cor}"><button type="button" class="mdh" data-mx="${esc(m.id)}" aria-expanded="${o}" title="${o?'Recolher':'Ver informações'}"><span class="mdn">${esc(m.nome)}${lt?' ⚠':''}</span><span class="mdg" aria-hidden="true">${o?'▴':'▾'}</span></button><div class="mdb"><div class="mdr"><span>Medição</span><b>${esc(medNm(m.medicao))||'—'}</b></div><div class="mdr"><span>Tarefas</span><b>${t}</b></div><div class="mdr"><span>Cadastradas</span><b>${n}</b></div><div class="mdr"><span>Valor Coordenador</span><b>${brl(v.c.t)}</b></div><div class="mdr"><span>Valor Gestor</span><b>${brl(v.g.t)}</b></div><div class="mdr"><span>Concluídas</span><b>${d}</b></div><div class="mdr mdp"><span>Prazo de entrega</span><b>${m.prazo?fmt(m.prazo)+(lt?' ⚠':''):'Sem prazo'}</b></div></div></article>`};
+    return `<article class="mdc${lt?' late':''}${o?' open':''}" style="--c:${cor}"><button type="button" class="mdh" data-mx="${esc(m.id)}" aria-expanded="${o}" title="${o?'Recolher':'Ver informações'}"><span class="mdn">${esc(m.nome)}${lt?' ⚠':''}</span><span class="mdg" aria-hidden="true">${o?'▴':'▾'}</span></button><div class="mdb"><div class="mdr"><span>Medição</span><b>${esc(medNm(m.medicao))||'—'}</b></div><div class="mdr"><span>Tarefas</span><b>${t}</b></div><div class="mdr"><span>Cadastradas</span><b>${n}</b></div><div class="mdr"><span>Concluídas</span><b>${d}</b></div><div class="mdr mdp"><span>Prazo de entrega</span><b>${m.prazo?fmt(m.prazo)+(lt?' ⚠':''):'Sem prazo'}</b></div></div></article>`};
   const G=byMed(L).filter(g=>g.L.length||g.c.id);
   const nM=(S.medicoes||[]).length;
   if(PREF.sb)return `<aside class="msb min" aria-label="Medições (recolhido)"><button type="button" class="msx" data-sbt aria-expanded="false" title="Mostrar o menu de medições"><span aria-hidden="true">▸</span><em>${nM}</em><b>Medições</b></button></aside>`;
-  return `<aside class="msb" aria-label="Medições e concessionárias cadastradas"><div class="msh2"><button type="button" class="msx" data-sbt aria-expanded="true" title="Recolher o menu de medições"><b>Medições</b><em>${nM}</em><span aria-hidden="true">◂</span></button><button type="button" class="btn msr" data-sbc title="Recolher todas as classes e medições abertas">Recolher tudo</button></div>${G.map(g=>{const cl=!CC.has(g.c.id||'_');return `<section class="mcg"><button type="button" class="mch" data-cc="${esc(g.c.id||'_')}" aria-expanded="${!cl}" title="${cl?'Expandir':'Recolher'} ${esc(g.c.nome)}"><span class="mcn">${esc(g.c.nome)}</span><em>${g.L.length}</em><span class="mdg" aria-hidden="true">${cl?'▸':'▾'}</span></button>${cl?'':`<div class="msl">${valBox(valSum(T.filter(t=>{const c=concOf(tipoOf(t));return c&&(c.medicao||'')===g.c.id})))}${g.L.map(cardM).join('')||'<div class="empty">Nenhuma concessionária.</div>'}</div>`}</section>`}).join('')||'<div class="empty">Nenhuma medição cadastrada.</div>'}</aside>`}
+  return `<aside class="msb" aria-label="Medições e concessionárias cadastradas"><div class="msh2"><button type="button" class="msx" data-sbt aria-expanded="true" title="Recolher o menu de medições"><b>Medições</b><em>${nM}</em><span aria-hidden="true">◂</span></button><button type="button" class="btn msr" data-sbc title="Recolher todas as classes e medições abertas">Recolher tudo</button></div>${G.map(g=>{const cl=!CC.has(g.c.id||'_');return `<section class="mcg"><button type="button" class="mch" data-cc="${esc(g.c.id||'_')}" aria-expanded="${!cl}" title="${cl?'Expandir':'Recolher'} ${esc(g.c.nome)}"><span class="mcn">${esc(g.c.nome)}</span><em>${g.L.length}</em><span class="mdg" aria-hidden="true">${cl?'▸':'▾'}</span></button>${cl?'':`<div class="msl">${g.L.map(cardM).join('')||'<div class="empty">Nenhuma concessionária.</div>'}</div>`}</section>`}).join('')||'<div class="empty">Nenhuma medição cadastrada.</div>'}</aside>`}
 /* ---------- Usuários (definidos no banco) ---------- */
 function usrPane(){
   const cn=id=>{const c=(S.contatos||[]).find(x=>x.id===id);return c?c.nome:''};
@@ -954,26 +954,31 @@ function bind(){
 /* ---------- Campos da tarefa (cadastro com tipo) ---------- */
 const CT={texto:'Texto',longo:'Texto longo',numero:'Número',data:'Data',valor:'Valor (R$)'};
 const CH={texto:'Texto livre, em uma linha.',longo:'Texto com várias linhas (ex.: observações).',numero:'Só dígitos, sem pontos ou vírgulas. Ex.: 0000000000',data:'Seletor de data, exibida como dd/mm/aaaa.',valor:'Moeda com formatação automática. Ex.: R$ 1.250,00'};
-const DEF_CAMPOS=[{id:'sub',nome:'Subtarefa',tipo:'texto'},{id:'protocolo',nome:'Protocolo',tipo:'numero'},{id:'portal',nome:'Portal',tipo:'texto'},{id:'qtd',nome:'Quantidade',tipo:'numero',fixo:1},{id:'repasse',nome:'Data de repasse',tipo:'data',fixo:1},{id:'vmc',nome:'Valor concessionária Coordenador',tipo:'valor',fixo:1},{id:'dmc',nome:'Data concessionária Coordenador',tipo:'data',fixo:1},{id:'vmg',nome:'Valor concessionária Gestor',tipo:'valor',fixo:1},{id:'dmg',nome:'Data concessionária Gestor',tipo:'data',fixo:1},{id:'obs',nome:'Observações',tipo:'longo'}];
+const DEF_CAMPOS=[{id:'sub',nome:'Subtarefa',tipo:'texto'},{id:'protocolo',nome:'Protocolo',tipo:'numero'},{id:'portal',nome:'Portal',tipo:'texto'},{id:'qtd',nome:'Quantidade',tipo:'numero',fixo:1},{id:'repasse',nome:'Data de repasse',tipo:'data',fixo:1},{id:'vmc',nome:'Medição Logictel',tipo:'mes',fixo:1},{id:'dmc',nome:'Data concessionária Coordenador',tipo:'data',fixo:1},{id:'vmg',nome:'Medição V.tal (Romel)',tipo:'texto',fixo:1},{id:'dmg',nome:'Data concessionária Gestor',tipo:'data',fixo:1},{id:'obs',nome:'Observações',tipo:'longo'}];
 const MEDF=['vmc','dmc','vmg','dmg'];
 const campos=()=>S.campos||DEF_CAMPOS;
 const fname=k=>(campos().find(c=>c.id===k)||{}).nome||k;
 const fid=k=>k==='repasse'?'f6':k==='qtd'?'fq':'cf-'+k;
 const brl=v=>(v===''||v==null||isNaN(v))?'':'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-const fmtVal=(c,v)=>(v===''||v==null)?'':c.tipo==='data'?fmt(v):c.tipo==='valor'?brl(v):String(v);
+const fmtMes=v=>{const m=/^(\d{4})-(\d{2})/.exec(v==null?'':String(v));return m&&+m[2]>=1&&+m[2]<=12?MESES[+m[2]-1][0].toUpperCase()+MESES[+m[2]-1].slice(1)+'/'+m[1].slice(2):''};
+const parseMes=s=>{s=String(s||'').trim().toLowerCase();if(!s)return'';let m=/^(\d{1,2})\s*[\/\-. ]\s*(\d{2}|\d{4})$/.exec(s),mo,y;if(m){mo=+m[1];y=m[2]}else{m=/^([a-zç]{3})[a-zç]*\s*[\/\-. ]?\s*(\d{2}|\d{4})$/.exec(s);if(!m)return'';mo=MESES.indexOf(m[1])+1;y=m[2]}if(mo<1||mo>12)return'';if(y.length===2)y='20'+y;return y+'-'+String(mo).padStart(2,'0')};
+const fmtVal=(c,v)=>(v===''||v==null)?'':c.tipo==='data'?fmt(v):c.tipo==='mes'?fmtMes(v):c.tipo==='valor'?brl(v):String(v);
 function fieldHtml(c,t){const v=t[c.id]??'',id=fid(c.id),n=esc(c.nome);let i;
   if(c.tipo==='longo')i=`<textarea id="${id}">${esc(v)}</textarea>`;
   else if(c.tipo==='data')i=`<input type="date" id="${id}" value="${esc(v)}">`;
+  else if(c.tipo==='mes')i=`<input type="text" id="${id}" data-t="mes" value="${esc(fmtMes(v))}" placeholder="Mmm/aa (ex.: Nov/26)" maxlength="12" autocomplete="off">`;
   else if(c.tipo==='valor')i=`<input type="text" inputmode="numeric" id="${id}" data-t="valor" value="${esc(brl(v))}" placeholder="R$ 0,00" autocomplete="off">`;
   else if(c.tipo==='numero')i=`<input type="text" inputmode="numeric" id="${id}" data-t="numero" value="${esc(v)}" placeholder="0000000000" autocomplete="off">`;
   else i=`<input type="text" id="${id}" value="${esc(v)}">`;
   return `<div${c.tipo==='longo'?' class="full"':''} data-f="${c.id}"><label for="${id}">${n}</label>${i}</div>`}
 function bindMasks(root){
+  root.querySelectorAll('[data-t=mes]').forEach(i=>i.addEventListener('blur',()=>{const p=parseMes(i.value);i.value=p?fmtMes(p):''}));
   root.querySelectorAll('[data-t=numero]').forEach(i=>i.addEventListener('input',()=>{i.value=i.value.replace(/\D/g,'')}));
   root.querySelectorAll('[data-t=valor]').forEach(i=>i.addEventListener('input',()=>{const g=i.value.replace(/\D/g,'');i.value=g?brl(parseInt(g,10)/100):''}))}
-function readVal(c,e){if(c.tipo==='valor'){const g=e.value.replace(/\D/g,'');return g?parseInt(g,10)/100:''}return c.tipo==='longo'?e.value:e.value.trim()}
+function readVal(c,e){if(c.tipo==='mes')return parseMes(e.value);if(c.tipo==='valor'){const g=e.value.replace(/\D/g,'');return g?parseInt(g,10)/100:''}return c.tipo==='longo'?e.value:e.value.trim()}
 function ensureCampos(){if(!Array.isArray(S.campos))S.campos=[];
-  DEF_CAMPOS.filter(d=>d.fixo&&!S.campos.some(c=>c.id===d.id)).forEach(d=>S.campos.push({...d}))}
+  DEF_CAMPOS.filter(d=>d.fixo&&!S.campos.some(c=>c.id===d.id)).forEach(d=>S.campos.push({...d}));
+  DEF_CAMPOS.filter(d=>d.id==='vmc'||d.id==='vmg').forEach(d=>{const c=S.campos.find(x=>x.id===d.id);if(c){c.nome=d.nome;c.tipo=d.tipo}})}
 const DEF_TIPOS=[];const _SEED_ANTIGO=[{id:'ty1',nome:'Limpar',cor:COLORS[3],campos:['obs'],passos:['Arrumar lençóis','Tirar pó','Arrumar mesa do PC','Arrumar guarda-roupas','Passar pano','Perfumar'],meta:{v:0,u:'dias'}}];
 function ensureTipos(){ensureCampos();if(!S.contatos)S.contatos=[];if(!Array.isArray(S.concessionarias))S.concessionarias=[];if(!Array.isArray(S.tipos))S.tipos=[];if(!Array.isArray(S.medicoes))S.medicoes=[];if(!Array.isArray(S.tasks))S.tasks=[];S.tasks.forEach(migTask);S.tipos.forEach(migTipo);syncCores()}
 /* A cor é escolhida só na concessionária; fluxo, tarefas e cards seguem essa cor */
@@ -1564,7 +1569,7 @@ function openView(id,tab0){
   const noteBox=A||mA.length?`<div class="nt"><label for="na">Nova anotação${A?'':' · '+esc(mA[0].etapa)}</label>${A?`<select id="ns" class="fsel" aria-label="Passo da anotação">${t.fluxo.map((f,i)=>`<option value="${i}" ${AC[0]&&f.id===AC[0].id?'selected':''}>Passo ${i+1} · ${esc(f.etapa)} (${esc(f.pessoa)})</option>`).join('')}<option value="-1">Geral (todos os passos)</option></select>`:''}<textarea id="na" rows="3"></textarea><button type="button" class="btn pri" id="nb" style="margin-top:8px">Salvar anotação</button></div>`:'';
   const sfv=(c,i,ed)=>{const id=`sf${i}-${c.id}`,v=t[c.id]??'',fl=c.tipo==='longo'?' class="full"':'';
     if(!ed)return `<div${fl}><label>${esc(c.nome)}</label><span class="obs">${esc(fmtVal(c,v)||'—')}</span></div>`;
-    const x=c.tipo==='longo'?`<textarea id="${id}" data-sf="${c.id}">${esc(v)}</textarea>`:c.tipo==='data'?`<input type="date" id="${id}" data-sf="${c.id}" value="${esc(v)}">`:`<input type="text" id="${id}" data-sf="${c.id}" ${c.tipo==='valor'||c.tipo==='numero'?`inputmode="numeric" data-t="${c.tipo}"`:''} value="${esc(c.tipo==='valor'?brl(v):v)}" autocomplete="off">`;
+    const x=c.tipo==='longo'?`<textarea id="${id}" data-sf="${c.id}">${esc(v)}</textarea>`:c.tipo==='data'?`<input type="date" id="${id}" data-sf="${c.id}" value="${esc(v)}">`:c.tipo==='mes'?`<input type="text" id="${id}" data-sf="${c.id}" data-t="mes" value="${esc(fmtMes(v))}" placeholder="Mmm/aa (ex.: Nov/26)" maxlength="12" autocomplete="off">`:`<input type="text" id="${id}" data-sf="${c.id}" ${c.tipo==='valor'||c.tipo==='numero'?`inputmode="numeric" data-t="${c.tipo}"`:''} value="${esc(c.tipo==='valor'?brl(v):v)}" autocomplete="off">`;
     return `<div${fl}><label for="${id}">${esc(c.nome)}</label>${x}</div>`};
   const blocks=t.fluxo.map((f,i)=>{const L=(f.campos||[]).map(k=>campos().find(c=>c.id===k)).filter(Boolean);if(!L.length)return'';
     const ed=A||(t.status!=='done'&&st[i]==='ready'&&mine(f));
@@ -1709,7 +1714,7 @@ function openTask(id,pre,after){
   <div class="db tp" data-tp="dados">
   <div class="full"><label for="ft">Tipo de fluxo</label><select id="ft">${!t.tipo?'<option value="">Sem tipo</option>':''}${S.tipos.map(y=>`<option value="${y.id}" ${t.tipo===y.id?'selected':''}>${esc(tipoLbl(y))}</option>`).join('')}</select><div class="hint" id="mh"></div></div>
   <div class="full"><label for="f1">Título *</label><div id="f1w"></div><div class="hint" id="np"></div></div>
-  ${campos().filter(c=>['texto','numero','valor'].includes(c.tipo)).map(c=>fieldHtml(c,t)).join('')}
+  ${campos().filter(c=>['texto','numero','valor','mes'].includes(c.tipo)).map(c=>fieldHtml(c,t)).join('')}
   ${campos().filter(c=>c.tipo==='data').map(c=>fieldHtml(c,t)).join('')}
   <div><label for="f7">Data estimada final</label><input type="date" id="f7" value="${t.final}"></div>
   <div><label for="f8">Status</label><select id="f8">${COLS.map(([k,l])=>`<option value="${k}" ${t.status===k?'selected':''}>${l}</option>`).join('')}</select></div>
@@ -1721,10 +1726,6 @@ function openTask(id,pre,after){
   ${isNew?'':`<span class="sp"></span><button type="button" class="btn dan" id="dl">Excluir</button>`}</div></form>`,corOf(t));
   const q=x=>d.querySelector(x),sel=q('#ft');bindTabs(d);
   const Y=()=>S.tipos.find(x=>x.id===sel.value)||{campos:campos().map(c=>c.id),meta:{v:0,u:'dias'}};
-  {const vc=q('#'+fid('vmc')),vg=q('#'+fid('vmg'));if(vc&&vg){let own=!!(t.vmg!==undefined&&t.vmg!==''&&t.vmg!==t.vmc);
-    vg.addEventListener('input',()=>{own=vg.value.trim()!==''&&vg.value!==vc.value});
-    vc.addEventListener('input',()=>{if(!own)vg.value=vc.value});
-    vc.addEventListener('change',()=>{if(!own)vg.value=vc.value})}}
   const recalc=()=>{if(!dirty){const c=calc(Y(),q('#f6').value,q('#fq').value);if(c)q('#f7').value=c}};
   const apply=user=>{const y=Y();d.querySelectorAll('[data-f]').forEach(e=>e.hidden=!(y.campos.includes(e.dataset.f)||MEDF.includes(e.dataset.f)));
     q('#mh').textContent='Meta de entrega: '+metaTxt(y);
