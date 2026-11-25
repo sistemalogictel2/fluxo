@@ -692,6 +692,15 @@ html[data-anim] .gb u{animation:fxBar .8s cubic-bezier(.2,.8,.2,1) both;animatio
 :root[data-skin=glass] dialog{background:#ffffffc2;border:1px solid #fffd;box-shadow:0 30px 80px #1e3a5f55}
 :root[data-skin=glass] dialog::backdrop{background:#1e3a5f55;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 :root[data-skin=glass] .btn.pri{color:#fff}
+/* ===== Ajustes: contraste (claro/glass) e "Sua vez" ===== */
+:root[data-skin=glass] :is(nav button[aria-current=page],.amenu button[aria-current=step],.amenu button[aria-current=page],.fb.cur,.stp li.cur b,.bar .amenu-bar button[aria-current=page],.mpg button.on,.skip,.skip:focus,.btn.pri){color:#fff}
+:root[data-skin=glass] :is(.tabs button,nav button,.chip,.mdn,.mcn,.tag){text-shadow:none}
+:root[data-skin=glass] .tabs button:not([aria-selected=true]){color:#2f3b52}
+:root[data-skin=glass] .tabs button[aria-selected=true]{color:#0b5a54;border-bottom-color:#0f766e}
+:root[data-theme=light] .tabs button:not([aria-selected=true]){color:#3a4560}
+.tag.vez,:root .tag.vez,.postit .card .tag.vez{background:#f2c14e!important;color:#000!important;font-weight:700}
+.step .tag.vez{display:block;width:fit-content;margin:5px 0 0;white-space:nowrap}
+.gbig .gbg{background:#f2c14e;color:#000;font-weight:700;width:fit-content;border-radius:6px;padding:2px 8px;margin:6px 0 2px;font-size:13px}
 </style>
 </head>
 <body>
@@ -1721,23 +1730,28 @@ function gestaoView(){
   const K=(n,l,hot,go)=>`<button type="button" class="gs-k${hot&&n?' hot':''}" data-gk="${go}"><b data-cu>${n}</b><span>${l}</span></button>`;
   const GT=[['acao','Ação agora',G.n,1],['med','Concessionárias',M.length],['mov','Mudaram de posto',nmov,1]];
   if(!GT.some(x=>x[0]===gTab))gTab='acao';
-  const gcp=(()=>{const B=[];for(let i=-7;i<=14;i++)B.push({d:i,n:0});
-    G.R.forEach(r=>{if(r.d!==null)B[Math.max(-7,Math.min(14,r.d))+7].n++});
-    const semD=G.R.filter(r=>r.d===null).length,tot=G.R.length,atrN=G.R.filter(r=>r.d!==null&&r.d<0).length,mx=Math.max(1,...B.map(b=>b.n)),
+  const gcp=(()=>{
+    const T=S.tasks.filter(vis).filter(t=>/^\d{4}-\d{2}/.test(String(t.vmc||''))),mk=t=>String(t.vmc).slice(0,7),now=today().slice(0,7),
+      mi=k=>+k.slice(0,4)*12+ +k.slice(5,7)-1,mo=n=>Math.floor(n/12)+'-'+String(n%12+1).padStart(2,'0'),ks=T.map(mk).concat(now).sort();
+    let a0=mi(ks[0]);const z0=mi(ks[ks.length-1]);if(z0-a0>23)a0=z0-23;
+    const B=[];for(let i=a0;i<=z0;i++)B.push({k:mo(i),n:0,d:0});
+    T.forEach(t=>{const b=B[mi(mk(t))-a0];if(b){b.n++;if(t.status==='done')b.d++}});
+    const tot=T.length,cur=B.findIndex(b=>b.k===now),curN=cur>=0?B[cur].n:0,abN=T.filter(t=>t.status!=='done').length,mx=Math.max(1,...B.map(b=>b.n)),
       W=660,H=190,X0=12,bw=(W-2*X0)/B.length,base=160,ph=138,st=Math.min(13,ph/mx),rr=Math.max(2,Math.min(5.5,st/2-.6)),
-      cx=i=>X0+bw*i+bw/2,col=b=>b.d<0?'var(--bad)':b.d===0?'var(--ac)':'var(--ac2)',
-      tt=b=>`${b.n} tarefa(s) · ${b.d<0?(b.d===-7?'7+ dias':-b.d+' dia(s)')+' de atraso':b.d===0?'entrega hoje':'entrega em '+b.d+(b.d===14?'+':'')+' dia(s)'}`;
+      cx=i=>X0+bw*i+bw/2,col=b=>b.k===now?'var(--ac)':'var(--ac2)',
+      tt=b=>`${b.n} tarefa(s) · medição ${fmtMes(b.k)}${b.d?' · '+b.d+' concluída(s)':''}`;
     let g='';
     if(gChart==='dots')B.forEach((b,i)=>{for(let k=0;k<b.n;k++)g+=`<circle cx="${cx(i).toFixed(1)}" cy="${(base-rr-k*st).toFixed(1)}" r="${rr.toFixed(1)}" fill="${col(b)}" style="--i:${i+k}"><title>${tt(b)}</title></circle>`});
     else if(gChart==='bar')B.forEach((b,i)=>{const h=b.n/mx*ph;if(b.n)g+=`<rect class="gcb" x="${(X0+bw*i+bw*.14).toFixed(1)}" y="${(base-h).toFixed(1)}" width="${(bw*.72).toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${col(b)}" style="--i:${i}"><title>${tt(b)}</title></rect>`});
     else{const P=B.map((b,i)=>[cx(i),base-b.n/mx*ph]),d='M'+P.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L');
       g=`<path d="${d} L${P[P.length-1][0].toFixed(1)} ${base} L${P[0][0].toFixed(1)} ${base}Z" fill="var(--ac2)" opacity=".14"/><path class="gcl2" pathLength="1" d="${d}" fill="none" stroke="var(--ac2)" stroke-width="2.5" stroke-linejoin="round"/>`+B.map((b,i)=>b.n?`<circle cx="${P[i][0].toFixed(1)}" cy="${P[i][1].toFixed(1)}" r="3.6" fill="${col(b)}" style="--i:${i}"><title>${tt(b)}</title></circle>`:'').join('')}
-    const lb=[[0,'7+ dias atrás'],[7,'hoje'],[14,'+7 dias'],[21,'14+ dias']].map(([i,t])=>`<text x="${cx(i).toFixed(1)}" y="${base+20}" text-anchor="${i===0?'start':i===21?'end':'middle'}" font-size="11" fill="var(--mu)"${i===0?` dx="-${bw/2-2}"`:i===21?` dx="${bw/2-2}"`:''}>${t}</text>`).join('');
-    const svg=`<svg class="gcv" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tarefas em aberto por dia de entrega: ${atrN} atrasadas, ${tot-atrN-semD} no prazo"><line x1="${X0}" y1="${base}" x2="${W-X0}" y2="${base}" stroke="var(--line2)" stroke-width="1"/><line x1="${cx(7).toFixed(1)}" y1="10" x2="${cx(7).toFixed(1)}" y2="${base}" stroke="var(--ac)" stroke-dasharray="3 4" stroke-width="1.4"/>${g}${lb}</svg>`;
+    const step=B.length>12?3:1,lb=B.map((b,i)=>i%step===0||i===cur?`<text x="${cx(i).toFixed(1)}" y="${base+20}" text-anchor="middle" font-size="11" fill="var(--mu)"${b.k===now?' font-weight="700"':''}>${fmtMes(b.k)}</text>`:'').join('');
+    const mkr=cur>=0?`<line x1="${cx(cur).toFixed(1)}" y1="10" x2="${cx(cur).toFixed(1)}" y2="${base}" stroke="var(--ac)" stroke-dasharray="3 4" stroke-width="1.4"/>`:'';
+    const svg=`<svg class="gcv" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tarefas por mês de medição Logictel: ${tot} no total, ${curN} no mês atual"><line x1="${X0}" y1="${base}" x2="${W-X0}" y2="${base}" stroke="var(--line2)" stroke-width="1"/>${mkr}${g}${lb}</svg>`;
     const CH=[['dots','Pontos'],['line','Linha'],['bar','Barras']];
     const PB=(S.concessionarias||[]).filter(m=>(m.itens||[]).length).map(m=>{const c=concItens(m),tt2=m.itens.length,d=c.ok.filter(x=>x.t.every(t=>t.status==='done')).length;return{m,d,tt:tt2}}).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999')).slice(0,6);
     const bars=PB.length?`<div class="gbars"><h4>Andamento por concessionária</h4>${PB.map(({m,d,tt:t2})=>`<div class="gb" style="--c:${corConc(m)}"><span title="${esc(concLbl(m))}">${esc(concLbl(m))}</span><i><u style="--p:${Math.round(d/t2*100)}%"></u></i><b>${d}/${t2}</b></div>`).join('')}</div>`:'';
-    return `<section class="gcp" aria-label="Gráficos"><div class="gbig"><b data-cu>${tot}</b><span>tarefas em aberto</span><small>${atrN} atrasada(s)${semD?' · '+semD+' sem data de entrega':''}</small></div><div class="gcc"><div class="chips" role="group" aria-label="Tipo de gráfico">${CH.map(([k,l])=>`<button type="button" class="chip${gChart===k?' on':''}" data-gc="${k}">${l}</button>`).join('')}</div>${svg}<p class="hint">Entregas previstas das tarefas em aberto, por dia (a linha tracejada é hoje).</p></div>${bars}</section>`})();
+    return `<section class="gcp" aria-label="Gráficos"><div class="gbig"><b data-cu>${tot}</b><span>tarefas com medição</span><span class="gbg">▼ ${curN} · ${fmtMes(now)}</span><small>${abN} em aberto · ${tot-abN} concluída(s)</small></div><div class="gcc"><div class="chips" role="group" aria-label="Tipo de gráfico">${CH.map(([k,l])=>`<button type="button" class="chip${gChart===k?' on':''}" data-gc="${k}">${l}</button>`).join('')}</div>${svg}<p class="hint">Tarefas por mês da Medição Logictel (a linha tracejada é o mês atual).${tot?'':' Nenhuma tarefa com medição preenchida ainda.'}</p></div>${bars}</section>`})();
   return `<div class="admin"><div class="gs-k4">${K(G.atr.length,'atrasadas',1,'acao|atr')}${K(G.prox.length,'vencem em até 2 dias',0,'acao|prox')}${K(G.par.length,'paradas há 3+ dias',0,'acao|par')}${K(M.reduce((a,x)=>a+x.no,0),'itens de concessionária sem tarefa',1,'med|')}</div>${gcp}
   <div class="tabs" role="tablist" aria-label="Gestão">${GT.map(([k,l,n,h])=>`<button type="button" role="tab" aria-selected="${gTab===k}" data-gt="${k}">${l}${n?` <em${h?' class="hot"':''}>${n}</em>`:''}</button>`).join('')}</div>
   <div role="tabpanel">${gTab==='acao'?acao:gTab==='med'?med:mov}</div></div>`;
