@@ -1890,38 +1890,50 @@ function gMapHtml(T0){
   const lst=gUf?(ML.length?ML.map(e=>row(`data-gmun="${esc(gNorm(e.n))}"`,e.n,e.c,mm,gRamp(mm>1?(e.c-1)/(mm-1):1))).join(''):`<p class="hint">${fm?'Nenhum município preenchido nas tarefas.':'Não encontrei o campo “Município” nas tarefas.'}</p>`):U.map(([u,c])=>row(`data-guf="${u}" data-h="${u}" title="${esc(UFN[u])}"`,u,c,um,col(c))).join('');
   const top=U[0];
   const side=`<aside class="gmr2"><div class="gmhd"><small>${gUf?esc(UFN[gUf]):'Brasil'}${gMun?' · '+esc((MM.get(gMun)||{}).n||''):''}</small>${gUf||gMun?'<button type="button" class="btn" id="gfx2">← Brasil</button>':''}</div><div class="gmbig"><b>${tot}</b><span>tarefa(s)</span></div><div class="gmst"><div><b>${gUf?1:U.length}</b><span>UF(s)</span></div><div><b>${gUf?MM.size:new Set(G.filter(g=>g.mun).map(g=>gNorm(g.mun))).size}</b><span>município(s)</span></div><div><b>${top?top[0]:'–'}</b><span>líder${top?' · '+top[1]:''}</span></div></div><h4>${gUf?'Municípios':'Estados'}</h4><div class="gmls${gUf?'':' g2'}">${lst}</div></aside>`;
-  return`<div class="gme"><div class="gmp"><div class="gmtb"><button type="button" data-z="in" aria-label="Aproximar">+</button><button type="button" data-z="out" aria-label="Afastar">−</button><button type="button" data-z="0" aria-label="Centralizar">⟲</button></div>${sv}<div class="gmtip" hidden></div>${lg}</div>${side}</div><p class="hint">${tot} tarefa(s) com UF${semUf?' · '+semUf+' sem UF':''}. Passe o mouse para ver os números · clique num estado para selecionar e filtrar · clique fora do mapa para limpar · roda do mouse = zoom · arraste = mover.</p>`;
+  return`<div class="gme"><div class="gmp"><div class="gmtb"><button type="button" data-z="in" aria-label="Aproximar">+</button><button type="button" data-z="out" aria-label="Afastar">−</button><button type="button" data-z="0" aria-label="Centralizar">⟲</button></div>${sv}<div class="gmtip" hidden></div>${lg}</div>${side}</div><p class="hint">${tot} tarefa(s) com UF${semUf?' · '+semUf+' sem UF':''}. Passe o mouse para ver os números · clique num estado para dar zoom e filtrar · clique fora dele para voltar ao Brasil · roda do mouse = zoom · arraste = mover.</p>`;
 }
 function gMapInit(){
   const sv=document.querySelector('svg.gmap');if(!sv)return;
   const pn=sv.closest('.gmp'),tip=pn.querySelector('.gmtip'),lb=sv.querySelector('.gmlb'),wrap=pn.parentNode,NS='http://www.w3.org/2000/svg';
-  const v0=sv.viewBox.baseVal,B={x:v0.x,y:v0.y,w:v0.width,h:v0.height};let V={...B},drag=null,moved=0;
+  const v0=sv.viewBox.baseVal,B={x:v0.x,y:v0.y,w:v0.width,h:v0.height};
+  {const r0=sv.getBoundingClientRect();if(r0.width>20&&r0.height>20){const asp=Math.max(1.5,r0.width/r0.height);if(B.w/B.h<asp){const nw=B.h*asp;B.x-=(nw-B.w)/2;B.w=nw}else{const nh=B.w/asp;B.y-=(nh-B.h)/2;B.h=nh}}}
+  let V={...B},drag=null,moved=0;
   const paths=[...sv.querySelectorAll('path')],bb=new Map();paths.forEach(p=>{try{bb.set(p,p.getBBox())}catch(e){}});
   const mk=(n,o)=>{const e=document.createElementNS(NS,n);for(const k in o)e.setAttribute(k,o[k]);return e};
   const inP=(p,x,y)=>{try{return p.isPointInFill(new DOMPoint(x,y))}catch(e){return false}};
   const SC=()=>{const r=sv.getBoundingClientRect();return Math.min(r.width/V.w,r.height/V.h)||.7};
   const lab=()=>{
-    lb.innerHTML='';const sc=SC(),f=(V.w>=B.w*.9?9:12)/sc,sw=3/sc,placed=[],x0=V.x,y0=V.y,x1=V.x+V.w,y1=V.y+V.h;
-    const hit=r=>placed.some(q=>r.x<q.x+q.w&&r.x+r.w>q.x&&r.y<q.y+q.h&&r.y+r.h>q.y),inV=r=>r.x>=x0&&r.y>=y0&&r.x+r.w<=x1&&r.y+r.h<=y1;
-    const over=(p,x,y)=>paths.some(q=>{if(q===p)return false;const b=bb.get(q);return b&&x>=b.x&&x<=b.x+b.width&&y>=b.y&&y<=b.y+b.height&&inP(q,x,y)});
+    window._gPrev={...V};lb.innerHTML='';
+    const sc=SC(),f=(V.w>=B.w*.5?10:12)/sc,sw=3/sc,pad=f*.7,placed=[],x0=V.x,y0=V.y,x1=V.x+V.w,y1=V.y+V.h,far=V.w>B.w*.45,outs=[];let ux0=1e9,ux1=-1e9;
+    const hit=r=>placed.some(q=>r.x<q.x+q.w&&r.x+r.w>q.x&&r.y<q.y+q.h&&r.y+r.h>q.y);
     const ord=paths.filter(p=>{const b=bb.get(p);return b&&b.x<x1&&b.x+b.width>x0&&b.y<y1&&b.y+b.height>y0}).sort((a,c)=>bb.get(c).width*bb.get(c).height-bb.get(a).width*bb.get(a).height);
     ord.forEach(p=>{
       const b=bb.get(p),n=+p.dataset.n,cls=(n?'':'z ')+(p.classList.contains('on')?'on':'');
-      const t=mk('text',{x:0,y:0,'text-anchor':'middle',style:'font-size:'+f+'px;stroke-width:'+sw+'px'});
-      t.innerHTML=p.dataset.guf+(n?'<tspan x="0" dy="1.1em">'+n+'</tspan>':'');lb.appendChild(t);
-      const m=t.getBBox(),w=m.width,h=m.height,ox=-(m.x+w/2),oy=-(m.y+h/2);
       let ax=b.x+b.width/2,ay=b.y+b.height/2;
       if(!inP(p,ax,ay)){let best=1e9;for(let i=0;i<=10;i++)for(let j=0;j<=10;j++){const x=b.x+b.width*i/10,y=b.y+b.height*j/10,d=(x-ax)**2+(y-ay)**2;if(d<best&&inP(p,x,y)){best=d;ax=x;ay=y}}}
-      let r={x:ax-w/2,y:ay-h/2,w,h};
-      const fit=[[r.x,r.y],[r.x+w,r.y],[r.x,r.y+h],[r.x+w,r.y+h]].every(c=>inP(p,c[0],c[1]));
-      if(fit&&!hit(r)){t.setAttribute('transform','translate('+(ax+ox)+','+(ay+oy)+')');t.setAttribute('class',cls);placed.push(r);return}
-      const R0=Math.max(b.width,b.height)/2+Math.max(w,h)/2+f*.4;let pick=null,first=null;
-      outer:for(const k of [1,1.25,1.6,2,2.6]){for(const dg of [0,-30,30,-60,60,90,-90,-120,120,150,-150,180]){const a=dg*Math.PI/180,cx=ax+Math.cos(a)*R0*k,cy=ay+Math.sin(a)*R0*k,q={x:cx-w/2,y:cy-h/2,w,h};if(!inV(q))continue;if(!first)first=q;if(hit(q))continue;if([[cx,cy],[q.x,q.y],[q.x+w,q.y],[q.x,q.y+h],[q.x+w,q.y+h]].some(c=>inP(p,c[0],c[1])||over(p,c[0],c[1])))continue;pick=q;break outer}}
-      r=pick||first||r;
-      const qx=Math.max(r.x,Math.min(ax,r.x+r.w)),qy=Math.max(r.y,Math.min(ay,r.y+r.h));
-      lb.insertBefore(mk('line',{x1:ax,y1:ay,x2:qx,y2:qy,class:'gll'+(p.classList.contains('on')?' on':''),'stroke-width':1.3/sc}),t);
-      lb.insertBefore(mk('circle',{cx:ax,cy:ay,r:2.6/sc,class:'gld'}),t);
-      t.setAttribute('transform','translate('+(r.x+w/2+ox)+','+(r.y+h/2+oy)+')');t.setAttribute('class',cls+' o');placed.push(r);
+      if(ax<x0||ax>x1||ay<y0||ay>y1)return;/* fora do zoom atual: some */
+      ux0=Math.min(ux0,b.x);ux1=Math.max(ux1,b.x+b.width);
+      const t=mk('text',{x:0,y:0,'text-anchor':'middle',style:'font-size:'+f+'px;stroke-width:'+sw+'px'});
+      t.innerHTML=p.dataset.guf+(n?'<tspan x="0" dy="1.1em">'+n+'</tspan>':'');lb.appendChild(t);
+      let m=t.getBBox(),w=m.width,h=m.height,ox=-(m.x+w/2),oy=-(m.y+h/2);
+      const r={x:ax-w/2,y:ay-h/2,w,h};
+      if([[r.x,r.y],[r.x+w,r.y],[r.x,r.y+h],[r.x+w,r.y+h]].every(c=>inP(p,c[0],c[1]))&&!hit(r)){t.setAttribute('transform','translate('+(ax+ox)+','+(ay+oy)+')');t.setAttribute('class',cls);placed.push(r);return}
+      if(!n&&far){t.remove();return}
+      t.innerHTML=p.dataset.guf+(n?' '+n:'');m=t.getBBox();
+      outs.push({p,t,ax,ay,w:m.width,h:m.height,ox:-(m.x+m.width/2),oy:-(m.y+m.height/2),cls,n});
+    });
+    if(!outs.length)return;
+    const mw=Math.max(...outs.map(o=>o.w)),hh=Math.max(...outs.map(o=>o.h)),s=hh+f*.8,cap=Math.max(1,Math.floor((V.h-2*pad+f*.8)/s)),
+      eL=Math.max(x0+pad+mw,ux0-f*3.5),eR=Math.min(x1-pad-mw,ux1+f*3.5),mid=(x0+x1)/2;
+    [true,false].forEach(left=>{
+      let L=outs.filter(o=>(o.ax<mid)===left).sort((a,c)=>c.n-a.n);L.slice(cap).forEach(o=>o.t.remove());L=L.slice(0,cap).sort((a,c)=>a.ay-c.ay);
+      let y=L.map(o=>o.ay-o.h/2);
+      for(let i=0;i<y.length;i++)y[i]=Math.max(y[i],i?y[i-1]+s:y0+pad);
+      if(y.length&&y[y.length-1]+hh>y1-pad){y[y.length-1]=y1-pad-hh;for(let i=y.length-2;i>=0;i--)y[i]=Math.min(y[i],y[i+1]-s)}
+      L.forEach((o,i)=>{const rx=left?eL-o.w:eR,ry=y[i],ex=left?rx+o.w:rx,ey=ry+o.h/2,on=o.p.classList.contains('on');
+        lb.insertBefore(mk('line',{x1:o.ax,y1:o.ay,x2:ex,y2:ey,class:'gll'+(on?' on':''),'stroke-width':1.3/sc}),o.t);
+        lb.insertBefore(mk('circle',{cx:o.ax,cy:o.ay,r:2.6/sc,class:'gld'}),o.t);
+        o.t.setAttribute('transform','translate('+(rx+o.w/2+o.ox)+','+(ry+o.h/2+o.oy)+')');o.t.setAttribute('class',o.cls+' o')})
     });
   };
   window._gLab=lab;
@@ -1938,7 +1950,11 @@ function gMapInit(){
   const hl=u=>{wrap.querySelectorAll('.hv').forEach(x=>x.classList.remove('hv'));if(u)wrap.querySelectorAll('[data-guf="'+u+'"]').forEach(x=>x.classList.add('hv'))};
   paths.forEach(p=>{p.addEventListener('mousemove',e=>{if(moved)return;const r=pn.getBoundingClientRect(),n=+p.dataset.n,tt=+sv.dataset.tt;tip.innerHTML='<b>'+p.dataset.nm+'</b><span>'+n+' tarefa(s)</span>'+(n&&tt>0?'<em>Representa '+Math.round(n/tt*100)+'% do total</em>':'');tip.hidden=false;tip.style.left=Math.min(e.clientX-r.left+14,r.width-170)+'px';tip.style.top=Math.max(4,e.clientY-r.top-58)+'px';hl(p.dataset.guf)});p.addEventListener('mouseleave',()=>{tip.hidden=true;hl('')})});
   wrap.querySelectorAll('.gmrow[data-h]').forEach(r=>{r.addEventListener('mouseenter',()=>hl(r.dataset.h));r.addEventListener('mouseleave',()=>hl(''))});
-  lab();
+  const tgt=()=>{const p=gUf&&paths.find(q=>q.dataset.guf===gUf),b=p&&bb.get(p);if(!b)return{...B};const asp=B.w/B.h,m=.2;let w=Math.max(B.w/10,b.width*(1+2*m)),h=Math.max(B.h/10,b.height*(1+2*m));if(w/h<asp)w=h*asp;else h=w/asp;return{x:b.x+b.width/2-w/2,y:b.y+b.height/2-h/2,w,h}};
+  const anim=T=>{const A={...V},t0=performance.now(),D=550,ez=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;lb.style.opacity=0;
+    const step=now=>{if(!sv.isConnected)return;const u=Math.min(1,(now-t0)/D),e=ez(u);V={x:A.x+(T.x-A.x)*e,y:A.y+(T.y-A.y)*e,w:A.w+(T.w-A.w)*e,h:A.h+(T.h-A.h)*e};window._gPrev={...V};
+      if(u<1){sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));requestAnimationFrame(step)}else{V={...T};set();lb.style.opacity=1}};requestAnimationFrame(step)};
+  {const T=tgt(),P0=window._gPrev;if(P0&&(Math.abs(P0.w-T.w)>.5||Math.abs(P0.x-T.x)>.5||Math.abs(P0.y-T.y)>.5)){V={...P0};sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));anim(T)}else{V=T;set()}}
 }
 function gFit(){
   const p=document.querySelector('.gcp');if(!p)return;
