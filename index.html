@@ -657,7 +657,7 @@ dialog.view{width:min(1040px,96vw)}
 .mpf{margin-top:6px;text-align:right}
 input.mpk{cursor:pointer}
 /* ===== Gráficos da Gestão ===== */
-.gcp{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:16px;display:grid;grid-template-columns:minmax(220px,340px) 1fr;gap:16px}
+.gcp{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:16px;display:grid;grid-template-columns:minmax(150px,210px) 1fr;gap:16px}
 .gbig{display:flex;flex-direction:column;justify-content:center;gap:2px}.gbig b{font-size:var(--gs,64px);line-height:1;letter-spacing:-.03em;white-space:nowrap}.gbig b+span+b{margin-top:14px}.gbig span{font-weight:600}.gbig small{color:var(--mu)}
 .gcc{min-width:0}.gcc>.hint{text-align:center}.gcc .chips{margin-bottom:6px}.gcv{width:100%;height:auto;display:block}.gcc .hint{margin:4px 0 0}
 .gbars{grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px;display:grid;gap:6px}.gbars h4{margin:0 0 2px;font-size:14px}
@@ -826,7 +826,7 @@ html[data-anim] .gb u{animation:fxBar .8s cubic-bezier(.2,.8,.2,1) both;animatio
 #rtip{position:fixed;z-index:9999;max-width:300px;padding:6px 10px;font-size:12.5px;line-height:1.35;color:var(--tx);background:var(--bg);border:1px solid var(--line2);border-radius:8px;box-shadow:0 6px 20px var(--sh);pointer-events:none}#rtip[hidden]{display:none}
 @media(max-width:1100px){.rs{height:auto}.rks{grid-template-columns:repeat(3,minmax(0,1fr))}.rg{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none}.rc{min-height:230px}}
 @media(max-width:620px){.rg:not(.r1){grid-template-columns:1fr}.rks{grid-template-columns:repeat(2,minmax(0,1fr))}.rg{grid-template-columns:1fr}.rc.w2{grid-column:auto}.rtw{grid-template-columns:1fr}}
-.gmls.g2{grid-template-columns:1fr;row-gap:8px}.gmr2 .gmls.g2 .gmrow{grid-template-columns:minmax(44px,.5fr) minmax(60px,2fr) minmax(34px,auto);gap:14px;padding:7px 12px;font-size:14px}.gmr2 .gmls.g2 .gmrow i{height:10px}.gmr2 .gmls.g2 .gmrow b{min-width:34px}
+.gmls.g2{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));column-gap:16px;row-gap:4px}.gmr2 .gmls.g2 .gmrow{grid-template-columns:30px minmax(30px,1fr) auto;gap:8px;padding:4px 6px;font-size:13px}.gmr2 .gmls.g2 .gmrow i{height:9px}.gmr2 .gmls.g2 .gmrow b{min-width:28px}
 .rg.r1 .rl{gap:9px}.rg.r1 .rr{padding:5px 8px;font-size:13.5px;gap:14px}
 </style>
 </head>
@@ -2110,7 +2110,7 @@ function gestaoView(){
     const flt=`<div class="gfl">${fs('gfmed','Medição',gSel,ms.map(m=>[m.id,m.nome]))}${fs('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]))}${fs('gfvt','Medição V.tal',gVt,vo.map(v=>[v,v]))}${gMapFl}</div>`;
     const valCampos=campos().filter(c=>c.tipo==='valor');
     const somaVP=T.reduce((acc,t)=>acc+valCampos.reduce((s,c)=>s+(parseFloat(t[c.id])||0),0),0);
-    const vpTxt=somaVP>0?brl(somaVP):'',gsz=vpTxt?Math.max(30,Math.min(64,Math.floor(320/(vpTxt.length*.6)))):64;
+    const vpTxt=somaVP>0?brl(somaVP):'',gsz=vpTxt?Math.max(30,Math.min(64,Math.floor(200/(vpTxt.length*.6)))):64;
     const vpHtml=vpTxt?`<b class="gv">${vpTxt}</b><span>valor total dos projetos${gSel||gLog||gVt||gUf||gMun?' (filtrado)':''}</span>`:'';
     return `<section class="gcp" aria-label="Gráficos">${chBar}<div class="gbig"${vpTxt?` style="--gs:${gsz}px"`:''}>${vpHtml}<b data-cu>${tot}</b><span>tarefas nas medições</span><span class="gbg">${pct}% concluído</span><small>${tot-dn} em andamento ou a fazer · ${dn} concluída(s)</small></div><div class="gcc">${flt}<div class="gbd">${gCh==='map'?'':leg}${gBody}</div></div></section>`})();
   return `<div class="admin"><div class="gs-k4"${gTab==='res'?' hidden':''}>${K(G.atr.length,'atrasadas',1,'acao|atr')}${K(G.prox.length,'vencem em até 2 dias',0,'acao|prox')}${K(G.par.length,'paradas há 3+ dias',0,'acao|par')}${K(M.reduce((a,x)=>a+x.no,0),'itens de concessionária sem tarefa',1,'med|')}</div>
