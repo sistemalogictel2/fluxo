@@ -808,7 +808,7 @@ html[data-anim] .gb u{animation:fxBar .8s cubic-bezier(.2,.8,.2,1) both;animatio
 .btn.clr svg{vertical-align:-5px;margin-right:6px}
 .rg{flex:1 1 0;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px}
 .rc{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
-.rc.w2{grid-column:span 2}.rc h3{margin:0 0 4px;font-size:13.5px;display:flex;gap:6px;align-items:center;line-height:1.2}
+.rc.w2{grid-column:span 2}.rg:not(.r1){grid-template-columns:repeat(2,minmax(0,1fr))}.rg.r1{grid-template-rows:minmax(0,1fr);align-content:start;max-height:56%}.rmore{margin-left:auto;padding:3px 12px}.rg:not(.r1) .rr{font-size:13px;padding:3px 4px}.rg:not(.r1) .rb{height:12px}.rc h3{margin:0 0 4px;font-size:13.5px;display:flex;gap:6px;align-items:center;line-height:1.2}
 .rl{display:flex;flex-direction:column;gap:3px;min-height:0;overflow:hidden}.rc .empty{padding:10px 4px;font-size:13px}
 .rr{font:inherit;font-size:12px;color:var(--tx);background:none;border:1px solid transparent;border-radius:6px;padding:1px 4px;display:grid;grid-template-columns:minmax(56px,36%) minmax(0,1fr) auto;gap:6px;align-items:center;text-align:left;cursor:pointer;min-width:0}
 .rr:hover{background:var(--ov)}.rr.on{border-color:var(--tx);background:var(--ov)}.rr[tabindex="-1"]{cursor:default}
@@ -825,7 +825,7 @@ html[data-anim] .gb u{animation:fxBar .8s cubic-bezier(.2,.8,.2,1) both;animatio
 .rsv .ax{stroke:var(--line2);stroke-width:1}.rsv .lw{fill:none;stroke:var(--okc);stroke-width:2.2}.rsv .lo{fill:none;stroke:var(--wrc);stroke-width:2.2;stroke-dasharray:5 3}.rsv .cw{fill:var(--okc)}.rsv .co{fill:var(--wrc)}
 #rtip{position:fixed;z-index:9999;max-width:300px;padding:6px 10px;font-size:12.5px;line-height:1.35;color:var(--tx);background:var(--bg);border:1px solid var(--line2);border-radius:8px;box-shadow:0 6px 20px var(--sh);pointer-events:none}#rtip[hidden]{display:none}
 @media(max-width:1100px){.rs{height:auto}.rks{grid-template-columns:repeat(3,minmax(0,1fr))}.rg{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none}.rc{min-height:230px}}
-@media(max-width:620px){.rks{grid-template-columns:repeat(2,minmax(0,1fr))}.rg{grid-template-columns:1fr}.rc.w2{grid-column:auto}.rtw{grid-template-columns:1fr}}
+@media(max-width:620px){.rg:not(.r1){grid-template-columns:1fr}.rks{grid-template-columns:repeat(2,minmax(0,1fr))}.rg{grid-template-columns:1fr}.rc.w2{grid-column:auto}.rtw{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -1106,7 +1106,7 @@ function bind(){
   document.querySelectorAll('[data-rk]').forEach(b=>b.onclick=()=>{gK=gK===b.dataset.rk?'':b.dataset.rk;render()});
   document.querySelectorAll('[data-rf]').forEach(b=>b.onclick=()=>{const[k,...r]=b.dataset.rf.split('|'),v=r.join('|');if(k==='uf'){gUf=gUf===v?'':v;gMun=''}else if(k==='med')gSel=gSel===v?'':v;else if(k==='log')gLog=gLog===v?'':v;else if(k==='vt')gVt=gVt===v?'':v;else gR[k]=gR[k]===v?'':v;render()});
   document.querySelectorAll('[data-rcx]').forEach(b=>b.onclick=()=>{const k=b.dataset.rcx;if(k==='k')gK='';else if(k==='med')gSel='';else if(k==='log')gLog='';else if(k==='vt')gVt='';else if(k==='uf'){gUf='';gMun=''}else if(k==='mun')gMun='';else gR[k]='';render()});
-  document.querySelectorAll('[data-rmap]').forEach(b=>b.onclick=()=>{gTab='graf';gCh='map';render()});
+  document.querySelectorAll('[data-rmore]').forEach(b=>b.onclick=()=>{gMore=!gMore;render()});document.querySelectorAll('[data-rmap]').forEach(b=>b.onclick=()=>{gTab='graf';gCh='map';render()});
   document.querySelectorAll('[data-rcap]').forEach(b=>b.onclick=()=>{const v=parseInt(prompt('Limite de tarefas por pessoa (linha do gráfico):',rCap()),10);if(v>0){try{localStorage.setItem('fl_cap',v)}catch(e){}render()}});
   {let tp=document.getElementById('rtip');if(!tp){tp=document.createElement('div');tp.id='rtip';document.body.appendChild(tp);document.addEventListener('mouseover',e=>{const x=e.target.closest&&e.target.closest('[data-tip]'),t=document.getElementById('rtip');if(!x){t.hidden=true;return}t.textContent=x.dataset.tip;t.hidden=false});document.addEventListener('mousemove',e=>{const t=document.getElementById('rtip');if(t.hidden)return;t.style.left=Math.max(4,Math.min(innerWidth-t.offsetWidth-8,e.clientX+14))+'px';t.style.top=Math.min(innerHeight-t.offsetHeight-8,e.clientY+18)+'px'})}tp.hidden=true}
 
@@ -1964,7 +1964,7 @@ function gData(fl){
 const gBadge=()=>{if(!isAdm())return'';const n=gData().n;return n?` <em class="nb" aria-label="${n} pendências">${n}</em>`:''};
 /* ---------- Resumo executivo da Gestão ---------- */
 const ICO_BROOM='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.3 2.7l-5.2 6.9" stroke-width="2.6"/><path d="M13.3 8.4l3.9 2.9-3.7 8.6-9-3.9c.6-3.4 4.2-6.6 8.8-7.6z"/><path d="M9.6 14.4l-1.3 3M12.9 15.4l-.8 2.6"/><path d="M6 2.2l.9 2.1 2.1.9-2.1.9L6 8.2l-.9-2.1L3 5.2l2.1-.9z" fill="currentColor" stroke="none"/><path d="M11 1.2l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5z" fill="currentColor" stroke="none"/><circle cx="3.4" cy="11" r="1.1" fill="currentColor" stroke="none"/><circle cx="6.8" cy="9.8" r=".8" fill="currentColor" stroke="none"/></svg>';
-let gK='',gR={fu:'',st:'',pa:''};
+let gMore=false,gK='',gR={fu:'',st:'',pa:''};
 const RKL={atr:'Atrasadas',prox:'Vencem em até 2 dias',par:'Paradas há 3+ dias',conc:'Concluídas na semana',pct:'Só concluídas',val:'Com valor em aberto'};
 const rDs=D=>{const d=new Date(D);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const rBorn=t=>{const c=+String(t.id).replace(/\D/g,'');return c>1e12?c:0};
@@ -2005,19 +2005,19 @@ function gResumo(){
   const SL=[['✔','Em dia'],['⚠','Atenção'],['✖','Crítico']],
     kh=K.map(([k,q,n,p,u,up,lv,tip])=>{const L=lv(n,p),d=n-p,fm=x=>k==='val'?brlK(x):k==='pct'?x+' p.p.':x,
       dt=d===0?'＝ igual à semana passada':`${d>0?'▲ +':'▼ −'}${fm(Math.abs(d))} vs semana passada`,dc=d===0?'var(--mu)':(d>0)===!!up?'var(--okt)':'var(--bdt)';
-      return `<button type="button" class="rk l${L}${gK===k?' on':''}" data-rk="${k}" aria-pressed="${gK===k}" data-tip="${esc(tip+' Clique para filtrar todos os gráficos.')}"><span class="q">${q} <i class="rq">?</i></span><b>${k==='val'?brlK(n):k==='pct'?n+'%':n}</b><span class="u">${u}</span><span class="d" style="--dc:${dc}"><em>${dt}</em></span><span class="s">${SL[L][0]} ${SL[L][1]}</span></button>`}).join('');
+      return `<button type="button" class="rk l${L}${gK===k?' on':''}" data-rk="${k}" aria-pressed="${gK===k}" data-tip="${esc(tip+' Clique para filtrar todos os gráficos.')}"><span class="q">${q}</span><b>${k==='val'?brlK(n):k==='pct'?n+'%':n}</b><span class="u">${u}</span><span class="d" style="--dc:${dc}"><em>${dt}</em></span><span class="s">${SL[L][0]} ${SL[L][1]}</span></button>`}).join('');
   /* --- 1. Gargalo por passo --- */
   const gm0=new Map();rBase('pa').forEach(t=>act(t).forEach(f=>{const o=gm0.get(f.etapa)||{s:0,n:0};o.s+=paradaDias(t);o.n++;gm0.set(f.etapa,o)}));
-  const GA=[...gm0].map(([e,o])=>({e,n:o.n,a:o.s/o.n})).sort((a,b)=>b.a-a.a||b.n-a.n).slice(0,6),gmx=Math.max(1,...GA.map(x=>x.a));
+  const GA=[...gm0].map(([e,o])=>({e,n:o.n,a:o.s/o.n})).sort((a,b)=>b.a-a.a||b.n-a.n).slice(0,5),gmx=Math.max(1,...GA.map(x=>x.a));
   const c1=`<section class="rc">${hd('Onde o fluxo trava?','Tempo médio que as tarefas ficam paradas em cada passo liberado. O pior passo fica no topo. Clique para filtrar.')}<div class="rl">${GA.length?GA.map(x=>rr({on:gR.pa===x.e,f:'pa|'+x.e,n:(x.a>=5?'⚠ ':'')+esc(x.e),bar:fill(x.a/gmx,lc(x.a>=5?2:x.a>=3?1:0)),v:rN(x.a)+' d · '+x.n,tip:`${x.e}: ${rN(x.a)} dia(s) parado em média · ${x.n} tarefa(s) esperando este passo`})).join(''):em('Nenhum passo travado. Fluxo andando ✔')}</div></section>`;
   /* --- 2. Carga por funcionário --- */
   const pm=new Map();S.tasks.forEach(t=>(t.ev||[]).forEach(e=>{const k=pkey(e.p);let o=pm.get(k);if(!o)pm.set(k,o={f:0,neg:0,adm:0});if(e.k==='f')o.f++;else if(e.tp==='neg')o.neg++;else o.adm++}));
   const nota=k=>{const o=pm.get(k);if(!o)return null;const j=Math.max(o.f,o.neg+o.adm),q=Math.max(0,o.f-o.neg-o.adm);return j?Math.round((q-o.neg)/j*100):0};
-  const Bf=rBase('fu'),CG=(S.contatos||[]).map(ct=>({k:'c:'+ct.id,nm:chipName(ct),n:Bf.filter(t=>act(t).some(f=>pkey(f.pessoa)==='c:'+ct.id)).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n).slice(0,7),sc=Math.max(CAP*1.3,...CG.map(x=>x.n));
+  const Bf=rBase('fu'),CG=(S.contatos||[]).map(ct=>({k:'c:'+ct.id,nm:chipName(ct),n:Bf.filter(t=>act(t).some(f=>pkey(f.pessoa)==='c:'+ct.id)).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n).slice(0,6),sc=Math.max(CAP*1.3,...CG.map(x=>x.n));
   const c2=`<section class="rc">${hd('Quem está sobrecarregado?','Tarefas com passo liberado para cada pessoa, comparadas com o limite (linha). Ao lado, a nota de desempenho. Clique para filtrar.')}<div class="rl">${CG.length?CG.map(x=>{const nt=nota(x.k);return rr({on:gR.fu===x.k,f:'fu|'+x.k,n:(x.n>CAP?'⚠ ':'')+esc(x.nm),bar:fill(x.n/sc,lc(x.n>CAP?2:x.n>=CAP*.8?1:0),CAP/sc),v:`${x.n}/${CAP} · ${nt===null?'–':pl({pct:nt})}`,tip:`${x.nm}: ${x.n} tarefa(s) com passo liberado · limite ${CAP} · nota ${nt===null?'sem dados':pl({pct:nt})}`})}).join(''):em('Ninguém com passo liberado agora.')}</div><div class="rf">Linha = limite de ${CAP} tarefas por pessoa · <button type="button" class="rcap" data-rcap>alterar limite</button></div></section>`;
   /* --- 3. Previsto x realizado por concessionária --- */
   const MC=(S.concessionarias||[]).map(m=>{const ci=concItens(m),tot=(m.itens||[]).length,d=ci.ok.filter(x=>x.t.every(t=>t.status==='done')).length;return{m,tot,d,dd:m.prazo?dias(m.prazo,today()):null}})
-    .filter(x=>x.tot&&x.d<x.tot&&(!gSel||(gSel==='_'?!(S.medicoes||[]).some(q=>q.id===x.m.medicao):x.m.medicao===gSel))).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999')).slice(0,4);
+    .filter(x=>x.tot&&x.d<x.tot&&(!gSel||(gSel==='_'?!(S.medicoes||[]).some(q=>q.id===x.m.medicao):x.m.medicao===gSel))).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999')).slice(0,3);
   const c3=`<section class="rc">${hd('Quanto falta entregar?','Itens concluídos ÷ itens previstos em cada concessionária, com a data de prazo. Ordenado pelo prazo mais próximo.')}<div class="rl">${MC.length?MC.map(({m,tot,d,dd})=>{const pp=d/tot,L=dd!==null&&dd<0?2:dd!==null&&dd<=7&&pp<.7?1:0,pz=dd===null?'sem prazo':dd<0?`⚠ prazo ${fmt(m.prazo)} · venceu há ${-dd} d`:dd===0?'prazo hoje':`prazo ${fmt(m.prazo)} · em ${dd} d`;
     return rr({on:!!m.medicao&&gSel===m.medicao,f:m.medicao?'med|'+m.medicao:'',n:`${esc(concLbl(m))}<small>${pz}</small>`,bar:fill(pp,lc(L)),v:`${d}/${tot} · ${Math.round(pp*100)}%`,tip:`${concLbl(m)}: ${d} de ${tot} itens concluídos · ${pz}`})}).join(''):em('Nenhuma concessionária pendente. Tudo entregue ✔')}</div></section>`;
   /* --- 4. Onde estão (UF) --- */
@@ -2044,8 +2044,8 @@ function gResumo(){
   const CH=[];if(gK)CH.push(['k','Indicador',RKL[gK]]);if(gSel)CH.push(['med','Medição',((S.medicoes||[]).find(m=>m.id===gSel)||{}).nome||'Sem medição']);if(gLog)CH.push(['log','Logictel',fmtMes(gLog)]);if(gVt)CH.push(['vt','V.tal',gVt]);
   if(gUf)CH.push(['uf','Estado',UFN[gUf]||gUf]);if(gMun)CH.push(['mun','Município',gMun]);if(gR.fu){const ct=(S.contatos||[]).find(x=>'c:'+x.id===gR.fu);CH.push(['fu','Funcionário',ct?chipName(ct):gR.fu])}
   if(gR.pa)CH.push(['pa','Passo',gR.pa]);if(gR.st)CH.push(['st','Status',(ST.find(x=>x[0]===gR.st)||[0,gR.st])[1]]);
-  const chips=CH.length?`<span>Filtros ativos:</span>${CH.map(([k,l,v])=>`<button type="button" class="rcp" data-rcx="${k}" aria-label="Remover filtro ${esc(l)}: ${esc(v)}">${esc(l)}: <b>${esc(v)}</b> ✕</button>`).join('')}<button type="button" class="btn clr" id="rx">${ICO_BROOM} Limpar filtros</button>`:'<span>Sem filtros. Clique num indicador, barra ou estado para filtrar todos os gráficos.</span>';
-  return `<div class="rs"><div class="rks">${kh}</div><div class="rch">${chips}</div><div class="rg">${c1}${c2}${c3}${c4}${c5}${c6}${c7}</div></div>`}
+  const chips=CH.length?`<span>Filtros ativos:</span>${CH.map(([k,l,v])=>`<button type="button" class="rcp" data-rcx="${k}" aria-label="Remover filtro ${esc(l)}: ${esc(v)}">${esc(l)}: <b>${esc(v)}</b> ✕</button>`).join('')}<button type="button" class="btn clr" id="rx">${ICO_BROOM} Limpar filtros</button>`:'<span>Clique num indicador ou barra para filtrar.</span>';
+  return `<div class="rs"><div class="rks">${kh}</div><div class="rch">${chips}<button type="button" class="btn rmore" data-rmore>${gMore?'← Voltar ao resumo':'Mais gráficos'}</button></div><div class="rg${gMore?' r1':''}">${gMore?c4+c6+c7:c1+c2+c3+c5}</div></div>`}
 
 function gestaoView(){
   const G=gData(1);GP=new Map();
