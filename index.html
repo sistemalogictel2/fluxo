@@ -987,7 +987,7 @@ function bind(){
   document.querySelectorAll('[data-gv]').forEach(b=>b.onclick=()=>openView(b.dataset.gv));
   document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTab=b.dataset.gt;render()});
   document.querySelectorAll('[data-gmed]').forEach(b=>b.onclick=()=>{gSel=gSel===b.dataset.gmed?'':b.dataset.gmed;render()});
-  [['gfmed',v=>{gMed=v;if(v==='log')gVt='';if(v==='vt')gLog=''}],['gflog',v=>gLog=v],['gfvt',v=>gVt=v]].forEach(([id,fn])=>{const e=$('#'+id);if(e)e.onchange=()=>{fn(e.value);render()}});const gx=$('#gfx');if(gx)gx.onclick=()=>{gSel=gLog=gVt=gMed='';render()};
+  [['gfmed',v=>gSel=v],['gflog',v=>gLog=v],['gfvt',v=>gVt=v]].forEach(([id,fn])=>{const e=$('#'+id);if(e)e.onchange=()=>{fn(e.value);render()}});const gx=$('#gfx');if(gx)gx.onclick=()=>{gSel=gLog=gVt='';render()};
   document.querySelectorAll('[data-gsub]').forEach(b=>b.onclick=()=>{gSub=b.dataset.gsub;render()});
   document.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{const[a,c]=b.dataset.gk.split('|');gTab=a;if(c)gSub=c;render()});
   document.querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{const k=b.dataset.cc;CC.has(k)?CC.delete(k):CC.add(k);render()});
@@ -1698,9 +1698,9 @@ function openView(id,tab0){
 /* ---------- Tarefa (criar / editar) ---------- */
 
 /* ---------- Gestão: o que o gestor precisa cobrar ---------- */
-let GP=new Map(),gTab='acao',gSub='',gChart='dots',gSel='',gLog='',gVt='',gMed='';
+let GP=new Map(),gTab='acao',gSub='',gChart='dots',gSel='',gLog='',gVt='';
 const medMatch=(t,id)=>{const i=medId(tipoOf(t)),ex=(S.medicoes||[]).some(c=>c.id===i);return id==='_'?!ex:i===id};
-const gOk=(t,sel=1)=>(!sel||!gSel||medMatch(t,gSel))&&(!gMed||(gMed==='log'?!!String(t.vmc||'').trim():!!String(t.vmg||'').trim()))&&(!gLog||String(t.vmc||'').slice(0,7)===gLog)&&(!gVt||String(t.vmg||'').trim()===gVt);
+const gOk=(t,sel=1)=>(!sel||!gSel||medMatch(t,gSel))&&(!gLog||String(t.vmc||'').slice(0,7)===gLog)&&(!gVt||String(t.vmg||'').trim()===gVt);
 const dias=(a,b)=>Math.round((new Date(a+'T12:00:00')-new Date(b+'T12:00:00'))/864e5);
 function lastMove(t){const ts=[...(t.fluxo||[]).map(f=>f.ok||0),...(t.ev||[]).map(e=>e.t||0),...(t.notas||[]).map(n=>n.t||0),...(t.anot||[]).map(n=>n.t||0)],c=+String(t.id).replace(/\D/g,'');if(c>1e12)ts.push(c);return Math.max(0,...ts)}
 const paradaDias=t=>{const l=lastMove(t);return l?Math.floor((Date.now()-l)/864e5):0};
@@ -1752,7 +1752,7 @@ function gestaoView(){
       mx=Math.max(1,...C.map(x=>x.n&&Math.max(...x.c.map(y=>y.n)))),PH=190,tot=T.length,dn=T.filter(t=>t.status==='done').length,pct=tot?Math.round(dn/tot*100):0;
     const lo=[...new Set(V.map(t=>String(t.vmc||'').slice(0,7)).filter(k=>/^\d{4}-\d{2}$/.test(k)))].sort(),vo=[...new Set(V.map(t=>String(t.vmg||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
     const fs=(id,l,cur,o)=>`<label class="gfi"><span>${l}</span><select class="fsel" id="${id}"><option value="">Todas</option>${o.map(([v,t])=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
-    const flt=`<div class="gfl">${fs('gfmed','Medições',gMed,[['log','Medição Logictel'],['vt','Medição V.tal (Romel)']])}${gMed==='vt'?'':fs('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]))}${gMed==='log'?'':fs('gfvt','Medição V.tal (Romel)',gVt,vo.map(v=>[v,v]))}${gSel||gLog||gVt||gMed?'<button type="button" class="btn" id="gfx">Limpar filtros</button>':''}</div>`;
+    const flt=`<div class="gfl">${fs('gfmed','Medições',gSel,ms.map(m=>[m.id,m.nome]))}${fs('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]))}${fs('gfvt','Medição V.tal (Romel)',gVt,vo.map(v=>[v,v]))}${gSel||gLog||gVt?'<button type="button" class="btn" id="gfx">Limpar filtros</button>':''}</div>`;
     const leg=`<div class="gleg">${ST.map(([k,l,c])=>`<span style="--c:${c}"><i></i>${l} <b>${T.filter(t=>t.status===k).length}</b></span>`).join('')}</div>`;
     const cols=C.length?`<div class="gcols">${C.map(({m,c,n})=>`<div class="gg${gSel&&gSel!==m.id?' dim':''}" style="flex-grow:${Math.max(1,c.length)}"><div class="gbs">${c.map(({l,cl,n:v})=>{const h=v/mx*PH;return `<u style="--c:${cl};--h:${h.toFixed(1)}px" class="${h<20?'sm':''}" title="${esc(m.nome)} · ${l}: ${v}"><b>${v}</b></u>`}).join('')||'<span class="gz">0</span>'}</div><button type="button" class="gnm${gSel===m.id?' on':''}" data-gmed="${esc(m.id)}" aria-pressed="${gSel===m.id}" title="Filtrar por ${esc(m.nome)} (${n} tarefas)">${esc(m.nome)}</button></div>`).join('')}</div>`:'<div class="empty">Nenhuma medição cadastrada.</div>';
     const PB=(S.concessionarias||[]).filter(m=>(m.itens||[]).length).map(m=>{const c=concItens(m),tt2=m.itens.length,d=c.ok.filter(x=>x.t.every(t=>t.status==='done')).length;return{m,d,tt:tt2}}).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999')).slice(0,6);
