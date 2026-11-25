@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-<script>try{var p=JSON.parse(localStorage.getItem("fluxo-ui")||"{}"),t=p.t||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");document.documentElement.dataset.theme=t;document.documentElement.style.setProperty("--z",[1,1.1,1.2][p.z||0]||1)}catch(e){}</script>
+<script>try{var p=JSON.parse(localStorage.getItem("fluxo-ui")||"{}"),g=p.t==="glass";document.documentElement.dataset.theme=g?"light":"dark";document.documentElement.dataset.skin=g?"glass":"";document.documentElement.style.setProperty("--z",[1,1.1,1.2][p.z||0]||1)}catch(e){}</script>
 <title>Fluxo · Organizador de Tarefas</title>
 <meta name="description" content="Fluxo: organizador de tarefas com fluxos por etapa, equipe e desempenho.">
 <meta name="theme-color" content="#0f141d">
@@ -701,6 +701,13 @@ html[data-anim] .gb u{animation:fxBar .8s cubic-bezier(.2,.8,.2,1) both;animatio
 .tag.vez,:root .tag.vez,.postit .card .tag.vez{background:#f2c14e!important;color:#000!important;font-weight:700}
 .step .tag.vez{display:block;width:fit-content;margin:5px 0 0;white-space:nowrap}
 .gbig .gbg{background:#f2c14e;color:#000;font-weight:700;width:fit-content;border-radius:6px;padding:2px 8px;margin:6px 0 2px;font-size:13px}
+.gleg{display:flex;flex-wrap:wrap;gap:4px 16px;margin-bottom:10px;font-size:13px}.gleg span{display:inline-flex;align-items:center;gap:6px}.gleg i{width:12px;height:12px;border-radius:3px;background:var(--c)}
+.gcols{display:flex;align-items:flex-end;gap:14px;height:225px;overflow-x:auto;padding-bottom:2px}
+.gcl{flex:1 0 78px;max-width:150px;height:100%;display:flex;flex-direction:column;justify-content:flex-end}
+.gtt{text-align:center;font-weight:700;font-size:13px;margin-bottom:3px}
+.gst{display:flex;flex-direction:column-reverse;border-radius:6px;overflow:hidden}
+.gst u{display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:11.5px;font-weight:700;color:#000;background:var(--c);height:var(--h);min-height:3px;overflow:hidden}
+.gnm{height:34px;margin-top:6px;font-size:12px;line-height:1.2;text-align:center;overflow:hidden}
 </style>
 </head>
 <body>
@@ -712,9 +719,9 @@ html[data-anim] .gb u{animation:fxBar .8s cubic-bezier(.2,.8,.2,1) both;animatio
 
 <script>
 const PREF=(()=>{try{return JSON.parse(localStorage.getItem('fluxo-ui')||'{}')}catch(e){return{}}})();
-const THEMES=[['corp','Corporativo'],['dark','Escuro'],['glass','Glass']],ZOOMS=[1,1.1,1.2];
-const themeOf=()=>THEMES.some(x=>x[0]===PREF.t)?PREF.t:'corp';
-function applyPref(){const r=document.documentElement;if(!PREF.corp){PREF.corp=1;PREF.t='corp'}const th=themeOf();const lt=th==='corp'||th==='glass';r.dataset.theme=lt?'light':th;r.dataset.skin=lt?th:'';r.style.setProperty('--z',ZOOMS[PREF.z||0]||1);if(window.fitZ)fitZ();try{localStorage.setItem('fluxo-ui',JSON.stringify(PREF))}catch(e){}}
+const THEMES=[['dark','Escuro'],['glass','Glass']],ZOOMS=[1,1.1,1.2];
+const themeOf=()=>THEMES.some(x=>x[0]===PREF.t)?PREF.t:'dark';
+function applyPref(){const r=document.documentElement;const th=themeOf();const lt=th==='glass';r.dataset.theme=lt?'light':th;r.dataset.skin=lt?th:'';r.style.setProperty('--z',ZOOMS[PREF.z||0]||1);if(window.fitZ)fitZ();try{localStorage.setItem('fluxo-ui',JSON.stringify(PREF))}catch(e){}}
 function cycTheme(){const i=THEMES.findIndex(x=>x[0]===themeOf());PREF.t=THEMES[(i+1)%THEMES.length][0];applyPref();render()}
 function cycZoom(){PREF.z=((PREF.z||0)+1)%ZOOMS.length;applyPref();render()}
 const COLORS=['#fde68a','#fbcfe8','#bfdbfe','#bbf7d0','#ddd6fe','#fed7aa','#a5f3fc','#e5e7eb'];
@@ -976,7 +983,6 @@ function bind(){
   document.querySelectorAll('[data-mo],[data-gm]').forEach(b=>b.onclick=()=>openConcItens(b.dataset.mo||b.dataset.gm));
   document.querySelectorAll('[data-gv]').forEach(b=>b.onclick=()=>openView(b.dataset.gv));
   document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTab=b.dataset.gt;render()});
-  document.querySelectorAll('[data-gc]').forEach(b=>b.onclick=()=>{gChart=b.dataset.gc;render()});
   document.querySelectorAll('[data-gsub]').forEach(b=>b.onclick=()=>{gSub=b.dataset.gsub;render()});
   document.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{const[a,c]=b.dataset.gk.split('|');gTab=a;if(c)gSub=c;render()});
   document.querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{const k=b.dataset.cc;CC.has(k)?CC.delete(k):CC.add(k);render()});
@@ -1262,7 +1268,7 @@ const GUIA=[
   l:['Cada alteração é enviada sozinha; a barra mostra “Supabase conectado”.','Sem internet, as alterações aguardam e são enviadas quando a conexão voltar.','Quem está logado vê o que os outros salvaram em poucos segundos.','Não feche a página enquanto aparecer “Alterações pendentes”.'],e:'banco'},
  {f:'Cuidar',t:'Conforto visual e atalhos',x:'Ajuste a tela e trabalhe mais rápido pelo teclado.',
   m:'<span class="nd">◐ Tema</span><span class="nd">Aa Tamanho</span><span class="kb">N</span><span class="kb">T</span><span class="kb">/</span><span class="kb">1–7</span><span class="kb">Ctrl</span>+<span class="kb">Enter</span><span class="kb">Esc</span>',
-  l:['◐ alterna entre Corporativo, Escuro e Glass. Aa aumenta o texto (100%, 110%, 120%).','N cria tarefa, T troca o tema, / busca.','1 a 7 abrem as abas: Gestão, Todas as tarefas, Por tarefa, Por funcionário, Concessionárias, Administração e Passo a passo.','Ctrl+Enter salva, Esc fecha a janela e ← → navegam neste passo a passo.'],
+  l:['◐ alterna entre Escuro e Glass. Aa aumenta o texto (100%, 110%, 120%).','N cria tarefa, T troca o tema, / busca.','1 a 7 abrem as abas: Gestão, Todas as tarefas, Por tarefa, Por funcionário, Concessionárias, Administração e Passo a passo.','Ctrl+Enter salva, Esc fecha a janela e ← → navegam neste passo a passo.'],
   tip:'Os atalhos não funcionam enquanto você digita em um campo.'},
  {f:'Erros',t:'Possíveis erros e como resolver',x:'Todos os avisos que o sistema pode mostrar, o motivo e o que fazer. Toque em um erro para ver a solução.',all:1,
   l:['Leia a mensagem do aviso: quase sempre ela diz o que falta.','Procure a mensagem no grupo da etapa e siga “O que fazer”.','Se o erro persistir depois de recarregar (F5), avise quem mantém o sistema com o texto exato do aviso.']}];
@@ -1731,27 +1737,17 @@ function gestaoView(){
   const GT=[['acao','Ação agora',G.n,1],['med','Concessionárias',M.length],['mov','Mudaram de posto',nmov,1]];
   if(!GT.some(x=>x[0]===gTab))gTab='acao';
   const gcp=(()=>{
-    const T=S.tasks.filter(vis).filter(t=>/^\d{4}-\d{2}/.test(String(t.vmc||''))),mk=t=>String(t.vmc).slice(0,7),now=today().slice(0,7),
-      mi=k=>+k.slice(0,4)*12+ +k.slice(5,7)-1,mo=n=>Math.floor(n/12)+'-'+String(n%12+1).padStart(2,'0'),ks=T.map(mk).concat(now).sort();
-    let a0=mi(ks[0]);const z0=mi(ks[ks.length-1]);if(z0-a0>23)a0=z0-23;
-    const B=[];for(let i=a0;i<=z0;i++)B.push({k:mo(i),n:0,d:0});
-    T.forEach(t=>{const b=B[mi(mk(t))-a0];if(b){b.n++;if(t.status==='done')b.d++}});
-    const tot=T.length,cur=B.findIndex(b=>b.k===now),curN=cur>=0?B[cur].n:0,abN=T.filter(t=>t.status!=='done').length,mx=Math.max(1,...B.map(b=>b.n)),
-      W=660,H=190,X0=12,bw=(W-2*X0)/B.length,base=160,ph=138,st=Math.min(13,ph/mx),rr=Math.max(2,Math.min(5.5,st/2-.6)),
-      cx=i=>X0+bw*i+bw/2,col=b=>b.k===now?'var(--ac)':'var(--ac2)',
-      tt=b=>`${b.n} tarefa(s) · medição ${fmtMes(b.k)}${b.d?' · '+b.d+' concluída(s)':''}`;
-    let g='';
-    if(gChart==='dots')B.forEach((b,i)=>{for(let k=0;k<b.n;k++)g+=`<circle cx="${cx(i).toFixed(1)}" cy="${(base-rr-k*st).toFixed(1)}" r="${rr.toFixed(1)}" fill="${col(b)}" style="--i:${i+k}"><title>${tt(b)}</title></circle>`});
-    else if(gChart==='bar')B.forEach((b,i)=>{const h=b.n/mx*ph;if(b.n)g+=`<rect class="gcb" x="${(X0+bw*i+bw*.14).toFixed(1)}" y="${(base-h).toFixed(1)}" width="${(bw*.72).toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${col(b)}" style="--i:${i}"><title>${tt(b)}</title></rect>`});
-    else{const P=B.map((b,i)=>[cx(i),base-b.n/mx*ph]),d='M'+P.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L');
-      g=`<path d="${d} L${P[P.length-1][0].toFixed(1)} ${base} L${P[0][0].toFixed(1)} ${base}Z" fill="var(--ac2)" opacity=".14"/><path class="gcl2" pathLength="1" d="${d}" fill="none" stroke="var(--ac2)" stroke-width="2.5" stroke-linejoin="round"/>`+B.map((b,i)=>b.n?`<circle cx="${P[i][0].toFixed(1)}" cy="${P[i][1].toFixed(1)}" r="3.6" fill="${col(b)}" style="--i:${i}"><title>${tt(b)}</title></circle>`:'').join('')}
-    const step=B.length>12?3:1,lb=B.map((b,i)=>i%step===0||i===cur?`<text x="${cx(i).toFixed(1)}" y="${base+20}" text-anchor="middle" font-size="11" fill="var(--mu)"${b.k===now?' font-weight="700"':''}>${fmtMes(b.k)}</text>`:'').join('');
-    const mkr=cur>=0?`<line x1="${cx(cur).toFixed(1)}" y1="10" x2="${cx(cur).toFixed(1)}" y2="${base}" stroke="var(--ac)" stroke-dasharray="3 4" stroke-width="1.4"/>`:'';
-    const svg=`<svg class="gcv" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tarefas por mês de medição Logictel: ${tot} no total, ${curN} no mês atual"><line x1="${X0}" y1="${base}" x2="${W-X0}" y2="${base}" stroke="var(--line2)" stroke-width="1"/>${mkr}${g}${lb}</svg>`;
-    const CH=[['dots','Pontos'],['line','Linha'],['bar','Barras']];
+    const ST=[['todo','A iniciar','#8ea4cf'],['doing','Em andamento','#f2c14e'],['wait','Aguardando','#c4a5f5'],['done','Concluídas','#2fb59f']],
+      T=S.tasks.filter(vis).filter(t=>ST.some(x=>x[0]===t.status)),
+      ms=[...(S.medicoes||[])].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>({id:m.id,nome:m.nome}));
+    if(T.some(t=>!(S.medicoes||[]).some(m=>m.id===medId(tipoOf(t)))))ms.push({id:'',nome:'Sem medição'});
+    const C=ms.map(m=>{const L=T.filter(t=>{const i=medId(tipoOf(t));return m.id?i===m.id:!(S.medicoes||[]).some(x=>x.id===i)}),c={};ST.forEach(([k])=>c[k]=L.filter(t=>t.status===k).length);return{m,c,n:L.length}}),
+      mx=Math.max(1,...C.map(x=>x.n)),PH=150,tot=T.length,dn=T.filter(t=>t.status==='done').length,pct=tot?Math.round(dn/tot*100):0;
+    const leg=`<div class="gleg">${ST.map(([k,l,c])=>`<span style="--c:${c}"><i></i>${l} <b>${T.filter(t=>t.status===k).length}</b></span>`).join('')}</div>`;
+    const cols=C.length?`<div class="gcols">${C.map(({m,c,n})=>`<div class="gcl" title="${esc(m.nome)}: ${n} tarefa(s)"><div class="gtt">${n}</div><div class="gst">${ST.map(([k,l,cl])=>c[k]?`<u style="--c:${cl};--h:${(c[k]/mx*PH).toFixed(1)}px" title="${esc(m.nome)} · ${l}: ${c[k]}">${c[k]}</u>`:'').join('')}</div><div class="gnm">${esc(m.nome)}</div></div>`).join('')}</div>`:'<div class="empty">Nenhuma medição cadastrada.</div>';
     const PB=(S.concessionarias||[]).filter(m=>(m.itens||[]).length).map(m=>{const c=concItens(m),tt2=m.itens.length,d=c.ok.filter(x=>x.t.every(t=>t.status==='done')).length;return{m,d,tt:tt2}}).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999')).slice(0,6);
     const bars=PB.length?`<div class="gbars"><h4>Andamento por concessionária</h4>${PB.map(({m,d,tt:t2})=>`<div class="gb" style="--c:${corConc(m)}"><span title="${esc(concLbl(m))}">${esc(concLbl(m))}</span><i><u style="--p:${Math.round(d/t2*100)}%"></u></i><b>${d}/${t2}</b></div>`).join('')}</div>`:'';
-    return `<section class="gcp" aria-label="Gráficos"><div class="gbig"><b data-cu>${tot}</b><span>tarefas com medição</span><span class="gbg">▼ ${curN} · ${fmtMes(now)}</span><small>${abN} em aberto · ${tot-abN} concluída(s)</small></div><div class="gcc"><div class="chips" role="group" aria-label="Tipo de gráfico">${CH.map(([k,l])=>`<button type="button" class="chip${gChart===k?' on':''}" data-gc="${k}">${l}</button>`).join('')}</div>${svg}<p class="hint">Tarefas por mês da Medição Logictel (a linha tracejada é o mês atual).${tot?'':' Nenhuma tarefa com medição preenchida ainda.'}</p></div>${bars}</section>`})();
+    return `<section class="gcp" aria-label="Gráficos"><div class="gbig"><b data-cu>${tot}</b><span>tarefas nas medições</span><span class="gbg">${pct}% concluído</span><small>${tot-dn} em andamento ou a fazer · ${dn} concluída(s)</small></div><div class="gcc">${leg}${cols}<p class="hint">Tarefas de cada medição, por status.</p></div>${bars}</section>`})();
   return `<div class="admin"><div class="gs-k4">${K(G.atr.length,'atrasadas',1,'acao|atr')}${K(G.prox.length,'vencem em até 2 dias',0,'acao|prox')}${K(G.par.length,'paradas há 3+ dias',0,'acao|par')}${K(M.reduce((a,x)=>a+x.no,0),'itens de concessionária sem tarefa',1,'med|')}</div>${gcp}
   <div class="tabs" role="tablist" aria-label="Gestão">${GT.map(([k,l,n,h])=>`<button type="button" role="tab" aria-selected="${gTab===k}" data-gt="${k}">${l}${n?` <em${h?' class="hot"':''}>${n}</em>`:''}</button>`).join('')}</div>
   <div role="tabpanel">${gTab==='acao'?acao:gTab==='med'?med:mov}</div></div>`;
