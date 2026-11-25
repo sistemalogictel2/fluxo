@@ -790,6 +790,8 @@ html[data-anim] .gb u{animation:fxBar .8s cubic-bezier(.2,.8,.2,1) both;animatio
 .gmtb button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line2);background:var(--bg);color:var(--tx);font-size:18px;cursor:pointer}.gmtb button:hover{border-color:var(--act)}
 .gmp .gmap{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}.gmp .gmap:active{cursor:grabbing}
 .gcp>.gbig{align-items:center;text-align:center}.gmbig{justify-content:center}.gmst{text-align:center}.gmst div{align-items:center}.gmhd{justify-content:center;position:relative}.gmhd .btn{position:absolute;right:0}.gmr2 h4{text-align:center}.gmp{align-items:center}
+.gcp>.gch{width:100%;justify-content:center;gap:8px;align-items:center}.gch .gbr{width:40px;padding:0;display:inline-grid;place-items:center}.gch .gbr:disabled{opacity:.4;cursor:default}.gch .gbr:not(:disabled):hover{border-color:var(--act);color:var(--act)}
+.gmp .gmap text.o{fill:var(--tx);stroke:var(--s2)}.gmp .gmap .gll{stroke:var(--tx);stroke-opacity:.75;fill:none;pointer-events:none}.gmp .gmap .gld{fill:var(--tx);pointer-events:none}.gmp .gmap.hs .gll:not(.on),.gmp .gmap.hs .gld{opacity:.35}
 </style>
 </head>
 <body>
@@ -1067,7 +1069,7 @@ function bind(){
   document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTab=b.dataset.gt;render()});
   document.querySelectorAll('[data-gmed]').forEach(b=>b.onclick=()=>{gSel=gSel===b.dataset.gmed?'':b.dataset.gmed;render()});
   [['gfmed',v=>gSel=v],['gfuf',v=>{gUf=v;gMun=''}],['gfmun',v=>gMun=v],['gflog',v=>gLog=v],['gfvt',v=>gVt=v]].forEach(([id,fn])=>{const e=$('#'+id);if(e)e.onchange=()=>{fn(e.value);render()}});const gx=$('#gfx');if(gx)gx.onclick=()=>{gSel=gLog=gVt=gUf=gMun='';render()};
-  document.querySelectorAll('[data-gch]').forEach(b=>b.onclick=()=>{gCh=b.dataset.gch;render()});document.querySelectorAll('[data-guf]').forEach(b=>b.onclick=()=>{gUf=gUf===b.dataset.guf?'':b.dataset.guf;gMun='';render()});document.querySelectorAll('[data-gmun]').forEach(b=>b.onclick=()=>{gMun=gMun===b.dataset.gmun?'':b.dataset.gmun;render()});{const x=$('#gfx2');if(x)x.onclick=()=>{gUf=gMun='';render()}}document.querySelectorAll('svg.gmap[data-zf]').forEach(sv=>{try{const p=sv.querySelector('path'),b=p.getBBox(),m=Math.max(b.width,b.height)*.06;sv.setAttribute('viewBox',[b.x-m,b.y-m,b.width+2*m,b.height+2*m].join(' '))}catch(e){}});gMapInit();gFit();
+  document.querySelectorAll('[data-gch]').forEach(b=>b.onclick=()=>{gCh=b.dataset.gch;render()});document.querySelectorAll('[data-guf]').forEach(b=>b.onclick=()=>{gUf=gUf===b.dataset.guf?'':b.dataset.guf;gMun='';render()});document.querySelectorAll('[data-gmun]').forEach(b=>b.onclick=()=>{gMun=gMun===b.dataset.gmun?'':b.dataset.gmun;render()});{const x=$('#gfx2');if(x)x.onclick=()=>{gUf=gMun='';render()}}document.querySelectorAll('svg.gmap[data-zf]').forEach(sv=>{try{const p=sv.querySelector('path'),b=p.getBBox(),m=Math.max(b.width,b.height)*.06;sv.setAttribute('viewBox',[b.x-m,b.y-m,b.width+2*m,b.height+2*m].join(' '))}catch(e){}});gFit();gMapInit();
   document.querySelectorAll('[data-gsub]').forEach(b=>b.onclick=()=>{gSub=b.dataset.gsub;render()});
   document.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{const[a,c]=b.dataset.gk.split('|');gTab=a;if(c)gSub=c;render()});
   document.querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{const k=b.dataset.cc;CC.has(k)?CC.delete(k):CC.add(k);render()});
@@ -1852,7 +1854,34 @@ function gMapInit(){
   const pn=sv.closest('.gmp'),tip=pn.querySelector('.gmtip'),lb=sv.querySelector('.gmlb'),wrap=pn.parentNode,NS='http://www.w3.org/2000/svg';
   const v0=sv.viewBox.baseVal,B={x:v0.x,y:v0.y,w:v0.width,h:v0.height};let V={...B},drag=null,moved=0;
   const paths=[...sv.querySelectorAll('path')],bb=new Map();paths.forEach(p=>{try{bb.set(p,p.getBBox())}catch(e){}});
-  const lab=()=>{const k=V.w/B.w;lb.innerHTML='';paths.forEach(p=>{const b=bb.get(p);if(!b||b.width<20*k)return;const n=+p.dataset.n,x=b.x+b.width/2,t=document.createElementNS(NS,'text');t.setAttribute('x',x);t.setAttribute('y',b.y+b.height/2);t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');t.setAttribute('style','font-size:'+Math.max(8*k,Math.min(12*k,b.width/2.8))+'px;stroke-width:'+2.2*k+'px');t.setAttribute('class',(n?'':'z ')+(p.classList.contains('on')?'on':''));t.innerHTML=p.dataset.guf+(n?'<tspan x="'+x+'" dy="1.1em">'+n+'</tspan>':'');lb.appendChild(t)})};
+  const mk=(n,o)=>{const e=document.createElementNS(NS,n);for(const k in o)e.setAttribute(k,o[k]);return e};
+  const inP=(p,x,y)=>{try{return p.isPointInFill(new DOMPoint(x,y))}catch(e){return false}};
+  const SC=()=>{const r=sv.getBoundingClientRect();return Math.min(r.width/V.w,r.height/V.h)||.7};
+  const lab=()=>{
+    lb.innerHTML='';const sc=SC(),f=(V.w>=B.w*.9?9:12)/sc,sw=3/sc,placed=[],x0=V.x,y0=V.y,x1=V.x+V.w,y1=V.y+V.h;
+    const hit=r=>placed.some(q=>r.x<q.x+q.w&&r.x+r.w>q.x&&r.y<q.y+q.h&&r.y+r.h>q.y),inV=r=>r.x>=x0&&r.y>=y0&&r.x+r.w<=x1&&r.y+r.h<=y1;
+    const over=(p,x,y)=>paths.some(q=>{if(q===p)return false;const b=bb.get(q);return b&&x>=b.x&&x<=b.x+b.width&&y>=b.y&&y<=b.y+b.height&&inP(q,x,y)});
+    const ord=paths.filter(p=>{const b=bb.get(p);return b&&b.x<x1&&b.x+b.width>x0&&b.y<y1&&b.y+b.height>y0}).sort((a,c)=>bb.get(c).width*bb.get(c).height-bb.get(a).width*bb.get(a).height);
+    ord.forEach(p=>{
+      const b=bb.get(p),n=+p.dataset.n,cls=(n?'':'z ')+(p.classList.contains('on')?'on':'');
+      const t=mk('text',{x:0,y:0,'text-anchor':'middle',style:'font-size:'+f+'px;stroke-width:'+sw+'px'});
+      t.innerHTML=p.dataset.guf+(n?'<tspan x="0" dy="1.1em">'+n+'</tspan>':'');lb.appendChild(t);
+      const m=t.getBBox(),w=m.width,h=m.height,ox=-(m.x+w/2),oy=-(m.y+h/2);
+      let ax=b.x+b.width/2,ay=b.y+b.height/2;
+      if(!inP(p,ax,ay)){let best=1e9;for(let i=0;i<=10;i++)for(let j=0;j<=10;j++){const x=b.x+b.width*i/10,y=b.y+b.height*j/10,d=(x-ax)**2+(y-ay)**2;if(d<best&&inP(p,x,y)){best=d;ax=x;ay=y}}}
+      let r={x:ax-w/2,y:ay-h/2,w,h};
+      const fit=[[r.x,r.y],[r.x+w,r.y],[r.x,r.y+h],[r.x+w,r.y+h]].every(c=>inP(p,c[0],c[1]));
+      if(fit&&!hit(r)){t.setAttribute('transform','translate('+(ax+ox)+','+(ay+oy)+')');t.setAttribute('class',cls);placed.push(r);return}
+      const R0=Math.max(b.width,b.height)/2+Math.max(w,h)/2+f*.4;let pick=null,first=null;
+      outer:for(const k of [1,1.25,1.6,2,2.6]){for(const dg of [0,-30,30,-60,60,90,-90,-120,120,150,-150,180]){const a=dg*Math.PI/180,cx=ax+Math.cos(a)*R0*k,cy=ay+Math.sin(a)*R0*k,q={x:cx-w/2,y:cy-h/2,w,h};if(!inV(q))continue;if(!first)first=q;if(hit(q))continue;if([[cx,cy],[q.x,q.y],[q.x+w,q.y],[q.x,q.y+h],[q.x+w,q.y+h]].some(c=>inP(p,c[0],c[1])||over(p,c[0],c[1])))continue;pick=q;break outer}}
+      r=pick||first||r;
+      const qx=Math.max(r.x,Math.min(ax,r.x+r.w)),qy=Math.max(r.y,Math.min(ay,r.y+r.h));
+      lb.insertBefore(mk('line',{x1:ax,y1:ay,x2:qx,y2:qy,class:'gll'+(p.classList.contains('on')?' on':''),'stroke-width':1.3/sc}),t);
+      lb.insertBefore(mk('circle',{cx:ax,cy:ay,r:2.6/sc,class:'gld'}),t);
+      t.setAttribute('transform','translate('+(r.x+w/2+ox)+','+(r.y+h/2+oy)+')');t.setAttribute('class',cls+' o');placed.push(r);
+    });
+  };
+  window._gLab=lab;
   const set=()=>{sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));lab()};
   const zoom=(f,cx,cy)=>{const w=Math.max(B.w/10,Math.min(B.w,V.w*f)),r=w/V.w;cx=cx==null?V.x+V.w/2:cx;cy=cy==null?V.y+V.h/2:cy;V={x:cx-(cx-V.x)*r,y:cy-(cy-V.y)*r,w,h:V.h*r};if(w>=B.w)V={...B};set()};
   const pt=e=>{const r=sv.getBoundingClientRect(),sc=Math.min(r.width/V.w,r.height/V.h),ox=(r.width-V.w*sc)/2,oy=(r.height-V.h*sc)/2;return[V.x+(e.clientX-r.left-ox)/sc,V.y+(e.clientY-r.top-oy)/sc,sc]};
@@ -1860,7 +1889,7 @@ function gMapInit(){
   sv.addEventListener('wheel',e=>{e.preventDefault();const[x,y]=pt(e);zoom(e.deltaY<0?.8:1.25,x,y)},{passive:false});
   sv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,v:{...V},sc:pt(e)[2]};moved=0});
   const mv=e=>{if(!drag||!sv.isConnected)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>5)moved=1;if(moved){V.x=drag.v.x-dx/drag.sc;V.y=drag.v.y-dy/drag.sc;sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));tip.hidden=true}};
-  addEventListener('pointermove',mv);addEventListener('pointerup',()=>{drag=null;setTimeout(()=>moved=0,0)});
+  addEventListener('pointermove',mv);addEventListener('pointerup',()=>{const was=moved;drag=null;if(was&&sv.isConnected)lab();setTimeout(()=>moved=0,0)});
   pn.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault();return}if(!e.target.closest('path,button,.gmtip')&&(gUf||gMun)){gUf=gMun='';render()}},true);
   sv.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault()}},true);
   const hl=u=>{wrap.querySelectorAll('.hv').forEach(x=>x.classList.remove('hv'));if(u)wrap.querySelectorAll('[data-guf="'+u+'"]').forEach(x=>x.classList.add('hv'))};
@@ -1877,7 +1906,7 @@ function gFit(){
     PH=Math.max(80,Math.min(300,gb.clientHeight-(lg?lg.offsetHeight+12:0)-(hn?hn.offsetHeight+8:0)-nm-6-34));
     p.querySelectorAll('.gbs u[data-v]').forEach(u=>{const h=+u.dataset.v/mx*PH;u.style.setProperty('--h',h.toFixed(1)+'px');u.classList.toggle('sm',h<20)})}
 }
-if(!window._gFitR){window._gFitR=1;addEventListener('resize',()=>{clearTimeout(gFit.t);gFit.t=setTimeout(gFit,80)})}
+if(!window._gFitR){window._gFitR=1;addEventListener('resize',()=>{clearTimeout(gFit.t);gFit.t=setTimeout(()=>{gFit();window._gLab&&document.querySelector('svg.gmap')&&window._gLab()},80)})}
 const dias=(a,b)=>Math.round((new Date(a+'T12:00:00')-new Date(b+'T12:00:00'))/864e5);
 function lastMove(t){const ts=[...(t.fluxo||[]).map(f=>f.ok||0),...(t.ev||[]).map(e=>e.t||0),...(t.notas||[]).map(n=>n.t||0),...(t.anot||[]).map(n=>n.t||0)],c=+String(t.id).replace(/\D/g,'');if(c>1e12)ts.push(c);return Math.max(0,...ts)}
 const paradaDias=t=>{const l=lastMove(t);return l?Math.floor((Date.now()-l)/864e5):0};
@@ -1932,9 +1961,9 @@ function gestaoView(){
     const fs=(id,l,cur,o)=>`<label class="gfi"><span>${l}</span><select class="fsel" id="${id}"><option value="">Todas</option>${o.map(([v,t])=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
     const leg=`<div class="gleg">${ST.map(([k,l,c])=>`<span style="--c:${c}"><i></i>${l} <b>${T.filter(t=>t.status===k).length}</b></span>`).join('')}</div>`;
     const cols=C.length?`<div class="gcols" data-mx="${mx}">${C.map(({m,c,n})=>`<div class="gg${gSel&&gSel!==m.id?' dim':''}" style="flex-grow:${Math.max(1,c.length)}"><div class="gbs">${c.map(({l,cl,n:v})=>{const h=v/mx*PH;return `<u data-v="${v}" style="--c:${cl};--h:${h.toFixed(1)}px" class="${h<20?'sm':''}" title="${esc(m.nome)} · ${l}: ${v}"><b>${v}</b></u>`}).join('')||'<span class="gz">0</span>'}</div><button type="button" class="gnm${gSel===m.id?' on':''}" data-gmed="${esc(m.id)}" aria-pressed="${gSel===m.id}" title="Filtrar por ${esc(m.nome)} (${n} tarefas)">${esc(m.nome)}</button></div>`).join('')}</div>`:'<div class="empty">Nenhuma medição cadastrada.</div>';
-    const chBar=`<div class="gch" role="group" aria-label="Tipo de gráfico">${GCH.map(([k,l])=>`<button type="button" class="btn${gCh===k?' pri':''}" data-gch="${k}" aria-pressed="${gCh===k}">${l}</button>`).join('')}</div>`;
+    const chBar=`<div class="gch" role="group" aria-label="Tipo de gráfico">${GCH.map(([k,l])=>`<button type="button" class="btn${gCh===k?' pri':''}" data-gch="${k}" aria-pressed="${gCh===k}">${l}</button>`).join('')}<button type="button" class="btn gbr" id="gfx" aria-label="Limpar filtros" title="Limpar filtros"${gSel||gLog||gVt||gUf||gMun?'':' disabled'}><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 3l-6.5 6.5"/><path d="M14.5 8.5l1 1c1 1 1 2.5 0 3.5L9 20H4l-1-5 6.5-5.5c1-.8 3.5-1.3 5 0z"/><path d="M7 14l3 3M5 17l2 2"/></svg></button></div>`;
     const gBody=gCh==='map'?MP:cols+'<p class="hint">Colunas por medição e status. Clique no nome da medição para filtrar a Gestão.</p>';
-    const flt=`<div class="gfl">${fs('gfmed','Medição',gSel,ms.map(m=>[m.id,m.nome]))}${fs('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]))}${fs('gfvt','Medição V.tal',gVt,vo.map(v=>[v,v]))}${gMapFl}${gSel||gLog||gVt||gUf||gMun?'<button type="button" class="btn" id="gfx">Limpar filtros</button>':''}</div>`;
+    const flt=`<div class="gfl">${fs('gfmed','Medição',gSel,ms.map(m=>[m.id,m.nome]))}${fs('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]))}${fs('gfvt','Medição V.tal',gVt,vo.map(v=>[v,v]))}${gMapFl}</div>`;
     const valCampos=campos().filter(c=>c.tipo==='valor');
     const somaVP=T.reduce((acc,t)=>acc+valCampos.reduce((s,c)=>s+(parseFloat(t[c.id])||0),0),0);
     const vpTxt=somaVP>0?brl(somaVP):'',gsz=vpTxt?Math.max(30,Math.min(64,Math.floor(320/(vpTxt.length*.6)))):64;
