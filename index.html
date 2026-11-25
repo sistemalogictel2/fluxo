@@ -656,6 +656,42 @@ dialog.view{width:min(1040px,96vw)}
 .mpg button.on{background:var(--ac);color:#241800;border-color:var(--ac)}
 .mpf{margin-top:6px;text-align:right}
 input.mpk{cursor:pointer}
+/* ===== Gráficos da Gestão ===== */
+.gcp{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:16px;display:grid;grid-template-columns:minmax(150px,210px) 1fr;gap:16px}
+.gbig{display:flex;flex-direction:column;justify-content:center;gap:2px}.gbig b{font-size:64px;line-height:1;letter-spacing:-.03em}.gbig span{font-weight:600}.gbig small{color:var(--mu)}
+.gcc{min-width:0}.gcc .chips{margin-bottom:6px}.gcv{width:100%;height:auto;display:block}.gcc .hint{margin:4px 0 0}
+.gbars{grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px;display:grid;gap:6px}.gbars h4{margin:0 0 2px;font-size:14px}
+.gb{display:grid;grid-template-columns:minmax(90px,220px) 1fr auto;gap:10px;align-items:center;font-size:14px}.gb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gb i{height:10px;border-radius:99px;background:var(--ov,#8884);overflow:hidden;display:block}.gb u{display:block;height:100%;width:var(--p);background:var(--c);border-radius:99px;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+@media(max-width:700px){.gcp{grid-template-columns:1fr}.gbig b{font-size:48px}}
+/* ===== Animações (abertura e troca de aba) ===== */
+@keyframes fxUp{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes fxPop{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:none}}
+@keyframes fxGrow{from{transform:scaleY(0)}to{transform:none}}
+@keyframes fxDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes fxBar{from{width:0}}
+@keyframes fxPulse{50%{opacity:.55;transform:scale(.96)}}
+#splash{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#12372f,#08130f 70%);clip-path:circle(150% at 50% 45%);transition:clip-path .9s cubic-bezier(.7,0,.2,1)}
+#splash.go{clip-path:circle(0% at 50% 45%);pointer-events:none}
+.spl{display:flex;flex-direction:column;align-items:center;gap:10px;color:#e6fff7;font-size:20px;letter-spacing:.2em;animation:fxPulse 1.2s ease-in-out infinite}
+@media(prefers-reduced-motion:no-preference){
+html[data-anim] :is(.gs-k,.gcp,.tcard,.col,.mdc,.gs-row,.gs-p,.kpi,.tabs){animation:fxUp .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0ms)}
+html[data-anim] .gcv circle{animation:fxPop .45s cubic-bezier(.3,1.4,.5,1) both;animation-delay:calc(var(--i,0)*14ms + 250ms);transform-box:fill-box;transform-origin:center}
+html[data-anim] .gcb{animation:fxGrow .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*30ms + 200ms);transform-box:fill-box;transform-origin:bottom}
+html[data-anim] .gcl2{stroke-dasharray:1;animation:fxDraw 1s ease both .2s}
+html[data-anim] .gb u{animation:fxBar .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--d,0ms) + 300ms)}}
+/* ===== Tema Glass (claro frio, vidro fosco) ===== */
+:root[data-skin=glass]{--bg:#e4ecf6;--s1:#ffffff8f;--s2:#ffffff66;--line:#ffffffb8;--line2:#7d8ca6;--tx:#14213a;--mu:#46536b;--ac:#0f766e;--act:#0f766e;--acbg:#0f766e1a;--ac2:#2563eb;--on2:#fff;--bad:#b42318;--ov:#14213a14;--hd:#ffffff80;--hd2:#ffffffb3;--sh:#1e3a5f2e;--r:18px}
+:root[data-skin=glass] body{background:transparent;background-image:none}
+:root[data-skin=glass]{background:linear-gradient(135deg,#d6e4f5,#e9eff8 45%,#d4ece6) fixed}
+:root[data-skin=glass] body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(520px 380px at 12% 8%,#7dd3c455,transparent 70%),radial-gradient(560px 420px at 92% 18%,#60a5fa44,transparent 70%),radial-gradient(600px 460px at 60% 100%,#a5b4fc44,transparent 70%)}
+:root[data-skin=glass] :is(.stk,.tcard,.gs-k,.gs-row,.mdc,.kpi,.card,.gs-p,.gcp,.mpop,.toast,.col,dialog,.chip,.tabs){-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5)}
+:root[data-skin=glass] :is(.tcard,.gs-k,.mdc,.kpi,.gs-p,.gcp,.col){border:1px solid #ffffffc7;box-shadow:0 8px 32px var(--sh),inset 0 1px 0 #ffffffd9}
+:root[data-skin=glass] .stk{background:var(--hd2);border-bottom:1px solid #ffffffb3}
+:root[data-skin=glass] .gs-row,:root[data-skin=glass] .card{background:#ffffff70}
+:root[data-skin=glass] dialog{background:#ffffffc2;border:1px solid #fffd;box-shadow:0 30px 80px #1e3a5f55}
+:root[data-skin=glass] dialog::backdrop{background:#1e3a5f55;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+:root[data-skin=glass] .btn.pri{color:#fff}
 </style>
 </head>
 <body>
@@ -667,9 +703,9 @@ input.mpk{cursor:pointer}
 
 <script>
 const PREF=(()=>{try{return JSON.parse(localStorage.getItem('fluxo-ui')||'{}')}catch(e){return{}}})();
-const THEMES=[['corp','Corporativo'],['dark','Escuro'],['light','Claro'],['warm','Quente']],ZOOMS=[1,1.1,1.2];
+const THEMES=[['corp','Corporativo'],['dark','Escuro'],['glass','Glass']],ZOOMS=[1,1.1,1.2];
 const themeOf=()=>THEMES.some(x=>x[0]===PREF.t)?PREF.t:'corp';
-function applyPref(){const r=document.documentElement;if(!PREF.corp){PREF.corp=1;PREF.t='corp'}const th=themeOf();r.dataset.theme=th==='corp'?'light':th;r.dataset.skin=th==='corp'?'corp':'';r.style.setProperty('--z',ZOOMS[PREF.z||0]||1);if(window.fitZ)fitZ();try{localStorage.setItem('fluxo-ui',JSON.stringify(PREF))}catch(e){}}
+function applyPref(){const r=document.documentElement;if(!PREF.corp){PREF.corp=1;PREF.t='corp'}const th=themeOf();const lt=th==='corp'||th==='glass';r.dataset.theme=lt?'light':th;r.dataset.skin=lt?th:'';r.style.setProperty('--z',ZOOMS[PREF.z||0]||1);if(window.fitZ)fitZ();try{localStorage.setItem('fluxo-ui',JSON.stringify(PREF))}catch(e){}}
 function cycTheme(){const i=THEMES.findIndex(x=>x[0]===themeOf());PREF.t=THEMES[(i+1)%THEMES.length][0];applyPref();render()}
 function cycZoom(){PREF.z=((PREF.z||0)+1)%ZOOMS.length;applyPref();render()}
 const COLORS=['#fde68a','#fbcfe8','#bfdbfe','#bbf7d0','#ddd6fe','#fed7aa','#a5f3fc','#e5e7eb'];
@@ -868,7 +904,9 @@ function card(t,mode){
   ${t.final?`<span class="tag">Entrega ${fmt(t.final)}</span>`:''}${late(t)?'<span class="tag late">⚠ Atrasada</span>':''}</div></div>`;
 }
 
-function render(){
+let FXK='';
+function fxView(){try{const k=[view,typeof adminSec==='undefined'?'':adminSec,gTab].join('|');if(k===FXK)return;FXK=k;const h=document.documentElement;h.dataset.anim=1;setTimeout(()=>{document.querySelectorAll('.gs-k,.gcp,.tcard,.col,.mdc,.gs-row,.gs-p,.kpi,.gbars .gb').forEach((e,i)=>e.style.setProperty('--d',Math.min(i,14)*35+'ms'));document.querySelectorAll('[data-cu]').forEach(e=>{const n=+e.textContent;if(!n)return;const t0=performance.now(),f=now=>{const p=Math.min(1,(now-t0)/700);e.textContent=Math.round(n*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)})},0);clearTimeout(fxView.t);fxView.t=setTimeout(()=>delete h.dataset.anim,1200)}catch(e){}}
+function render(){fxView();
   if(!user){loginScreen();return}
   if(view==='func'){view='admin';adminSec='func'}if(!allowed(view))view='painel';
   if(ACT.includes(view))lastAct=view;
@@ -929,6 +967,7 @@ function bind(){
   document.querySelectorAll('[data-mo],[data-gm]').forEach(b=>b.onclick=()=>openConcItens(b.dataset.mo||b.dataset.gm));
   document.querySelectorAll('[data-gv]').forEach(b=>b.onclick=()=>openView(b.dataset.gv));
   document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTab=b.dataset.gt;render()});
+  document.querySelectorAll('[data-gc]').forEach(b=>b.onclick=()=>{gChart=b.dataset.gc;render()});
   document.querySelectorAll('[data-gsub]').forEach(b=>b.onclick=()=>{gSub=b.dataset.gsub;render()});
   document.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{const[a,c]=b.dataset.gk.split('|');gTab=a;if(c)gSub=c;render()});
   document.querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{const k=b.dataset.cc;CC.has(k)?CC.delete(k):CC.add(k);render()});
@@ -1214,7 +1253,7 @@ const GUIA=[
   l:['Cada alteração é enviada sozinha; a barra mostra “Supabase conectado”.','Sem internet, as alterações aguardam e são enviadas quando a conexão voltar.','Quem está logado vê o que os outros salvaram em poucos segundos.','Não feche a página enquanto aparecer “Alterações pendentes”.'],e:'banco'},
  {f:'Cuidar',t:'Conforto visual e atalhos',x:'Ajuste a tela e trabalhe mais rápido pelo teclado.',
   m:'<span class="nd">◐ Tema</span><span class="nd">Aa Tamanho</span><span class="kb">N</span><span class="kb">T</span><span class="kb">/</span><span class="kb">1–7</span><span class="kb">Ctrl</span>+<span class="kb">Enter</span><span class="kb">Esc</span>',
-  l:['◐ alterna entre Escuro, Claro e Quente. Aa aumenta o texto (100%, 110%, 120%).','N cria tarefa, T troca o tema, / busca.','1 a 7 abrem as abas: Gestão, Todas as tarefas, Por tarefa, Por funcionário, Concessionárias, Administração e Passo a passo.','Ctrl+Enter salva, Esc fecha a janela e ← → navegam neste passo a passo.'],
+  l:['◐ alterna entre Corporativo, Escuro e Glass. Aa aumenta o texto (100%, 110%, 120%).','N cria tarefa, T troca o tema, / busca.','1 a 7 abrem as abas: Gestão, Todas as tarefas, Por tarefa, Por funcionário, Concessionárias, Administração e Passo a passo.','Ctrl+Enter salva, Esc fecha a janela e ← → navegam neste passo a passo.'],
   tip:'Os atalhos não funcionam enquanto você digita em um campo.'},
  {f:'Erros',t:'Possíveis erros e como resolver',x:'Todos os avisos que o sistema pode mostrar, o motivo e o que fazer. Toque em um erro para ver a solução.',all:1,
   l:['Leia a mensagem do aviso: quase sempre ela diz o que falta.','Procure a mensagem no grupo da etapa e siga “O que fazer”.','Se o erro persistir depois de recarregar (F5), avise quem mantém o sistema com o texto exato do aviso.']}];
@@ -1639,7 +1678,7 @@ function openView(id,tab0){
 /* ---------- Tarefa (criar / editar) ---------- */
 
 /* ---------- Gestão: o que o gestor precisa cobrar ---------- */
-let GP=new Map(),gTab='acao',gSub='';
+let GP=new Map(),gTab='acao',gSub='',gChart='dots';
 const dias=(a,b)=>Math.round((new Date(a+'T12:00:00')-new Date(b+'T12:00:00'))/864e5);
 function lastMove(t){const ts=[...(t.fluxo||[]).map(f=>f.ok||0),...(t.ev||[]).map(e=>e.t||0),...(t.notas||[]).map(n=>n.t||0),...(t.anot||[]).map(n=>n.t||0)],c=+String(t.id).replace(/\D/g,'');if(c>1e12)ts.push(c);return Math.max(0,...ts)}
 const paradaDias=t=>{const l=lastMove(t);return l?Math.floor((Date.now()-l)/864e5):0};
@@ -1679,10 +1718,27 @@ function gestaoView(){
     .filter(x=>x.tot&&x.d<x.tot&&(x.no||(x.dd!==null&&x.dd<=7))).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999'));
   const med=`<div class="gs-list">${lst(M,({m,no,d,tot,dd})=>`<button type="button" class="gs-row" data-gm="${esc(m.id)}" style="--c:${corConc(m)}"><span><b>${esc(concLbl(m))}</b><small>${d} de ${tot} concluídos · ${no?no+' item(ns) sem tarefa':'todos cadastrados'}</small></span><span class="tag${dd!==null&&dd<0?' late':''}">${dd===null?'Sem prazo':dd<0?'Venceu há '+(-dd)+' d':dd===0?'Vence hoje':'Vence em '+dd+' d'}</span></button>`)}</div>`;
   const nmov=S.tasks.filter(movNew).length,mov=mvSec(40)||'<div class="empty">Nenhuma tarefa mudou de posto recentemente ✔</div>';
-  const K=(n,l,hot,go)=>`<button type="button" class="gs-k${hot&&n?' hot':''}" data-gk="${go}"><b>${n}</b><span>${l}</span></button>`;
+  const K=(n,l,hot,go)=>`<button type="button" class="gs-k${hot&&n?' hot':''}" data-gk="${go}"><b data-cu>${n}</b><span>${l}</span></button>`;
   const GT=[['acao','Ação agora',G.n,1],['med','Concessionárias',M.length],['mov','Mudaram de posto',nmov,1]];
   if(!GT.some(x=>x[0]===gTab))gTab='acao';
-  return `<div class="admin"><div class="gs-k4">${K(G.atr.length,'atrasadas',1,'acao|atr')}${K(G.prox.length,'vencem em até 2 dias',0,'acao|prox')}${K(G.par.length,'paradas há 3+ dias',0,'acao|par')}${K(M.reduce((a,x)=>a+x.no,0),'itens de concessionária sem tarefa',1,'med|')}</div>
+  const gcp=(()=>{const B=[];for(let i=-7;i<=14;i++)B.push({d:i,n:0});
+    G.R.forEach(r=>{if(r.d!==null)B[Math.max(-7,Math.min(14,r.d))+7].n++});
+    const semD=G.R.filter(r=>r.d===null).length,tot=G.R.length,atrN=G.R.filter(r=>r.d!==null&&r.d<0).length,mx=Math.max(1,...B.map(b=>b.n)),
+      W=660,H=190,X0=12,bw=(W-2*X0)/B.length,base=160,ph=138,st=Math.min(13,ph/mx),rr=Math.max(2,Math.min(5.5,st/2-.6)),
+      cx=i=>X0+bw*i+bw/2,col=b=>b.d<0?'var(--bad)':b.d===0?'var(--ac)':'var(--ac2)',
+      tt=b=>`${b.n} tarefa(s) · ${b.d<0?(b.d===-7?'7+ dias':-b.d+' dia(s)')+' de atraso':b.d===0?'entrega hoje':'entrega em '+b.d+(b.d===14?'+':'')+' dia(s)'}`;
+    let g='';
+    if(gChart==='dots')B.forEach((b,i)=>{for(let k=0;k<b.n;k++)g+=`<circle cx="${cx(i).toFixed(1)}" cy="${(base-rr-k*st).toFixed(1)}" r="${rr.toFixed(1)}" fill="${col(b)}" style="--i:${i+k}"><title>${tt(b)}</title></circle>`});
+    else if(gChart==='bar')B.forEach((b,i)=>{const h=b.n/mx*ph;if(b.n)g+=`<rect class="gcb" x="${(X0+bw*i+bw*.14).toFixed(1)}" y="${(base-h).toFixed(1)}" width="${(bw*.72).toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${col(b)}" style="--i:${i}"><title>${tt(b)}</title></rect>`});
+    else{const P=B.map((b,i)=>[cx(i),base-b.n/mx*ph]),d='M'+P.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L');
+      g=`<path d="${d} L${P[P.length-1][0].toFixed(1)} ${base} L${P[0][0].toFixed(1)} ${base}Z" fill="var(--ac2)" opacity=".14"/><path class="gcl2" pathLength="1" d="${d}" fill="none" stroke="var(--ac2)" stroke-width="2.5" stroke-linejoin="round"/>`+B.map((b,i)=>b.n?`<circle cx="${P[i][0].toFixed(1)}" cy="${P[i][1].toFixed(1)}" r="3.6" fill="${col(b)}" style="--i:${i}"><title>${tt(b)}</title></circle>`:'').join('')}
+    const lb=[[0,'7+ dias atrás'],[7,'hoje'],[14,'+7 dias'],[21,'14+ dias']].map(([i,t])=>`<text x="${cx(i).toFixed(1)}" y="${base+20}" text-anchor="${i===0?'start':i===21?'end':'middle'}" font-size="11" fill="var(--mu)"${i===0?` dx="-${bw/2-2}"`:i===21?` dx="${bw/2-2}"`:''}>${t}</text>`).join('');
+    const svg=`<svg class="gcv" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tarefas em aberto por dia de entrega: ${atrN} atrasadas, ${tot-atrN-semD} no prazo"><line x1="${X0}" y1="${base}" x2="${W-X0}" y2="${base}" stroke="var(--line2)" stroke-width="1"/><line x1="${cx(7).toFixed(1)}" y1="10" x2="${cx(7).toFixed(1)}" y2="${base}" stroke="var(--ac)" stroke-dasharray="3 4" stroke-width="1.4"/>${g}${lb}</svg>`;
+    const CH=[['dots','Pontos'],['line','Linha'],['bar','Barras']];
+    const PB=(S.concessionarias||[]).filter(m=>(m.itens||[]).length).map(m=>{const c=concItens(m),tt2=m.itens.length,d=c.ok.filter(x=>x.t.every(t=>t.status==='done')).length;return{m,d,tt:tt2}}).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999')).slice(0,6);
+    const bars=PB.length?`<div class="gbars"><h4>Andamento por concessionária</h4>${PB.map(({m,d,tt:t2})=>`<div class="gb" style="--c:${corConc(m)}"><span title="${esc(concLbl(m))}">${esc(concLbl(m))}</span><i><u style="--p:${Math.round(d/t2*100)}%"></u></i><b>${d}/${t2}</b></div>`).join('')}</div>`:'';
+    return `<section class="gcp" aria-label="Gráficos"><div class="gbig"><b data-cu>${tot}</b><span>tarefas em aberto</span><small>${atrN} atrasada(s)${semD?' · '+semD+' sem data de entrega':''}</small></div><div class="gcc"><div class="chips" role="group" aria-label="Tipo de gráfico">${CH.map(([k,l])=>`<button type="button" class="chip${gChart===k?' on':''}" data-gc="${k}">${l}</button>`).join('')}</div>${svg}<p class="hint">Entregas previstas das tarefas em aberto, por dia (a linha tracejada é hoje).</p></div>${bars}</section>`})();
+  return `<div class="admin"><div class="gs-k4">${K(G.atr.length,'atrasadas',1,'acao|atr')}${K(G.prox.length,'vencem em até 2 dias',0,'acao|prox')}${K(G.par.length,'paradas há 3+ dias',0,'acao|par')}${K(M.reduce((a,x)=>a+x.no,0),'itens de concessionária sem tarefa',1,'med|')}</div>${gcp}
   <div class="tabs" role="tablist" aria-label="Gestão">${GT.map(([k,l,n,h])=>`<button type="button" role="tab" aria-selected="${gTab===k}" data-gt="${k}">${l}${n?` <em${h?' class="hot"':''}>${n}</em>`:''}</button>`).join('')}</div>
   <div role="tabpanel">${gTab==='acao'?acao:gTab==='med'?med:mov}</div></div>`;
 }
@@ -1813,6 +1869,10 @@ setInterval(()=>{if(user&&Date.now()-_act>120*60*1000){sessionStorage.removeItem
  const first=e=>{if(e.type==='keydown'&&e.key!=='Enter')return;if(e.target.closest&&e.target.closest('#fsb'))return;document.removeEventListener('click',first,true);document.removeEventListener('keydown',first,true);if(!no&&!isFs())go()};
  document.addEventListener('click',first,true);document.addEventListener('keydown',first,true);
  ['fullscreenchange','webkitfullscreenchange','resize'].forEach(ev=>addEventListener(ev,sync));sync()})();
+(function(){try{if(sessionStorage.getItem('fx-sp')||matchMedia('(prefers-reduced-motion:reduce)').matches)return;sessionStorage.setItem('fx-sp','1')}catch(e){}
+  const s=document.createElement('div');s.id='splash';s.setAttribute('aria-hidden','true');
+  s.innerHTML='<div class="spl"><svg viewBox="0 0 64 64" width="64" height="64"><rect width="64" height="64" rx="14" fill="#0f141d"/><path d="M20 46V19h27M20 32h20" stroke="#f2c14e" stroke-width="7" fill="none" stroke-linecap="round"/></svg><b>Fluxo</b></div>';
+  document.body.appendChild(s);setTimeout(()=>s.classList.add('go'),1000);setTimeout(()=>s.remove(),2000)})();
 </script>
 </body>
 </html>
