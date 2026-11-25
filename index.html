@@ -698,6 +698,22 @@ html[data-anim] .gb u{animation:fxBar .8s cubic-bezier(.2,.8,.2,1) both;animatio
 :root[data-skin=glass] .tabs button:not([aria-selected=true]){color:#2f3b52}
 :root[data-skin=glass] .tabs button[aria-selected=true]{color:#0b5a54;border-bottom-color:#0f766e}
 :root[data-theme=light] .tabs button:not([aria-selected=true]){color:#3a4560}
+/* ===== Escuro em vidro (Glass escuro) ===== */
+:root[data-theme=dark]{--bg:#0a1020;--s1:#ffffff12;--s2:#ffffff0d;--line:#ffffff24;--line2:#ffffff47;--tx:#eaf0fb;--mu:#b3bfd6;--hd:#0a102099;--hd2:#0c1428b8;--sh:#02060fa6;--r:18px}
+:root[data-theme=dark]{background:linear-gradient(135deg,#070c1a,#0d1630 48%,#08201f) fixed}
+:root[data-theme=dark] body{background:transparent;background-image:none}
+:root[data-theme=dark] body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(560px 420px at 10% 6%,#2dd4bf30,transparent 70%),radial-gradient(600px 460px at 94% 16%,#3b82f638,transparent 70%),radial-gradient(640px 500px at 58% 104%,#8b5cf633,transparent 70%)}
+:root[data-theme=dark] :is(.stk,.tcard,.gs-k,.gs-row,.mdc,.kpi,.card,.gs-p,.gcp,.mpop,.toast,.col,dialog,.chip,.tabs,.msb,.mcd){-webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6)}
+:root[data-theme=dark] :is(.tcard,.gs-k,.mdc,.kpi,.gs-p,.gcp,.col,.mcd){border:1px solid #ffffff26;box-shadow:0 10px 36px var(--sh),inset 0 1px 0 #ffffff2e}
+:root[data-theme=dark] .stk{background:var(--hd2);border-bottom:1px solid #ffffff1f}
+:root[data-theme=dark] :is(.gs-row,.card){background:#ffffff0f;border-color:#ffffff1f}
+:root[data-theme=dark] dialog{background:#0f1830d9;border:1px solid #ffffff2b;box-shadow:0 30px 90px #000a}
+:root[data-theme=dark] dialog::backdrop{background:#02061088;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+:root[data-theme=dark] :is(input,select,textarea):not([type=checkbox]):not([type=radio]):not([type=color]){background-color:#ffffff10;border-color:#ffffff2e}
+:root[data-theme=dark] .tabs button[aria-selected=true]{color:var(--ac);border-bottom-color:var(--ac)}
+.gs-k4{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;margin-bottom:8px}.gs-k{flex-direction:row;gap:6px;padding:4px 10px;border-radius:9px;min-height:0}.gs-k b{font-size:17px;line-height:1}.gs-k span{font-size:11px;line-height:1.15;text-align:left}
+.gmap[data-zf]{max-height:460px;margin:0 auto}.gmw.zf{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.gmw.zf .gmr{max-height:460px;overflow:auto;padding-right:6px}@media(max-width:720px){.gmw.zf{grid-template-columns:1fr}}
+:root[data-theme=dark] .gmap path{stroke:#ffffff55}:root[data-theme=dark] .gmap path.on{stroke:#fff}
 .tag.vez,:root .tag.vez,.postit .card .tag.vez{background:#f2c14e!important;color:#000!important;font-weight:700}
 .step .tag.vez{display:block;width:fit-content;margin:5px 0 0;white-space:nowrap}
 .gbig .gbg{background:#f2c14e;color:#000;font-weight:700;width:fit-content;border-radius:6px;padding:2px 8px;margin:6px 0 2px;font-size:13px}
@@ -996,7 +1012,7 @@ function bind(){
   document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTab=b.dataset.gt;render()});
   document.querySelectorAll('[data-gmed]').forEach(b=>b.onclick=()=>{gSel=gSel===b.dataset.gmed?'':b.dataset.gmed;render()});
   [['gfmed',v=>gSel=v],['gfuf',v=>{gUf=v;gMun=''}],['gfmun',v=>gMun=v],['gflog',v=>gLog=v],['gfvt',v=>gVt=v]].forEach(([id,fn])=>{const e=$('#'+id);if(e)e.onchange=()=>{fn(e.value);render()}});const gx=$('#gfx');if(gx)gx.onclick=()=>{gSel=gLog=gVt=gUf=gMun='';render()};
-  document.querySelectorAll('[data-gch]').forEach(b=>b.onclick=()=>{gCh=b.dataset.gch;render()});document.querySelectorAll('[data-guf]').forEach(b=>b.onclick=()=>{gUf=gUf===b.dataset.guf?'':b.dataset.guf;gMun='';render()});document.querySelectorAll('[data-gmun]').forEach(b=>b.onclick=()=>{gMun=gMun===b.dataset.gmun?'':b.dataset.gmun;render()});{const x=$('#gfx2');if(x)x.onclick=()=>{gUf=gMun='';render()}}
+  document.querySelectorAll('[data-gch]').forEach(b=>b.onclick=()=>{gCh=b.dataset.gch;render()});document.querySelectorAll('[data-guf]').forEach(b=>b.onclick=()=>{gUf=gUf===b.dataset.guf?'':b.dataset.guf;gMun='';render()});document.querySelectorAll('[data-gmun]').forEach(b=>b.onclick=()=>{gMun=gMun===b.dataset.gmun?'':b.dataset.gmun;render()});{const x=$('#gfx2');if(x)x.onclick=()=>{gUf=gMun='';render()}}document.querySelectorAll('svg.gmap[data-zf]').forEach(sv=>{try{const p=sv.querySelector('path'),b=p.getBBox(),m=Math.max(b.width,b.height)*.06;sv.setAttribute('viewBox',[b.x-m,b.y-m,b.width+2*m,b.height+2*m].join(' '))}catch(e){}});
   document.querySelectorAll('[data-gsub]').forEach(b=>b.onclick=()=>{gSub=b.dataset.gsub;render()});
   document.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{const[a,c]=b.dataset.gk.split('|');gTab=a;if(c)gSub=c;render()});
   document.querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{const k=b.dataset.cc;CC.has(k)?CC.delete(k):CC.add(k);render()});
@@ -1765,11 +1781,11 @@ function gMapHtml(T0){
   const mx=Math.max(1,...Object.values(cnt)),semUf=F.filter(g=>!g.uf).length,tot=F.length-semUf;
   const op=(id,l,cur,o)=>`<label class="gfi"><span>${l}</span><select class="fsel" id="${id}"><option value="">Todos</option>${o.map(([v,t])=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
   gMapFl=op('gfuf','UF',gUf,ufs.map(u=>[u,u+' · '+UFN[u]]))+op('gfmun','Município',gMun,muns.map(([k,e])=>[k,e.n]));
-  const sv=`<svg class="gsv gmap" viewBox="${BRVB}" role="img" aria-label="Mapa do Brasil por UF">${Object.keys(BRMAP).map(u=>{const v=cnt[u]||0;return`<path data-guf="${u}" class="${gUf===u?'on':''}" d="${BRMAP[u]}" fill="${v?gRamp(mx>1?(v-1)/(mx-1):1):'var(--s2)'}"><title>${esc(UFN[u])}: ${v} tarefa(s)</title></path>`}).join('')}</svg>`;
+  const sv=`<svg class="gsv gmap"${gUf?` data-zf="${gUf}"`:''} viewBox="${BRVB}" role="img" aria-label="Mapa do Brasil por UF">${Object.keys(BRMAP).filter(u=>!gUf||u===gUf).map(u=>{const v=cnt[u]||0;return`<path data-guf="${u}" class="${gUf===u?'on':''}" d="${BRMAP[u]}" fill="${v?gRamp(mx>1?(v-1)/(mx-1):1):'var(--s2)'}"><title>${esc(UFN[u])}: ${v} tarefa(s)</title></path>`}).join('')}</svg>`;
   const lg=`<div class="gml"><span>${mx>1?1:0}</span><i style="background:linear-gradient(90deg,${gRamp(0)},${gRamp(.5)},${gRamp(1)})"></i><span>${mx}</span></div>`;
-  const ML=[...MM.values()].filter(e=>!gMun||gNorm(e.n)===gMun).sort((a,b)=>b.c-a.c).slice(0,12),mm=Math.max(1,...ML.map(e=>e.c));
+  const ML=[...MM.values()].filter(e=>!gMun||gNorm(e.n)===gMun).sort((a,b)=>b.c-a.c).slice(0,gUf?80:12),mm=Math.max(1,...ML.map(e=>e.c));
   const rk=ML.length?`<div class="gmr"><h4>Municípios${gUf?' de '+esc(UFN[gUf]):''}</h4>${ML.map(e=>`<button type="button" class="gmrow" data-gmun="${esc(gNorm(e.n))}"><span>${esc(e.n)}</span><i><u style="--p:${Math.round(e.c/mm*100)}%;background:${gRamp(mm>1?(e.c-1)/(mm-1):1)}"></u></i><b>${e.c}</b></button>`).join('')}</div>`:`<div class="gmr"><p class="hint">${fm?'Nenhum município preenchido nas tarefas.':'Não encontrei o campo “Município” nas tarefas.'}</p></div>`;
-  return`<div class="gmw"><div>${sv}${lg}</div>${rk}</div><p class="hint">${tot} tarefa(s) com UF${semUf?' · '+semUf+' sem UF':''}. Azul = menos tarefas, vermelho = mais. Clique em um estado para filtrar.</p>`;
+  return`<div class="gmw${gUf?' zf':''}"><div>${sv}${lg}</div>${rk}</div><p class="hint">${tot} tarefa(s) com UF${semUf?' · '+semUf+' sem UF':''}. Azul = menos tarefas, vermelho = mais. ${gUf?'Clique no estado para voltar ao Brasil inteiro.':'Clique em um estado para filtrar e aproximar.'}</p>`;
 }
 const dias=(a,b)=>Math.round((new Date(a+'T12:00:00')-new Date(b+'T12:00:00'))/864e5);
 function lastMove(t){const ts=[...(t.fluxo||[]).map(f=>f.ok||0),...(t.ev||[]).map(e=>e.t||0),...(t.notas||[]).map(n=>n.t||0),...(t.anot||[]).map(n=>n.t||0)],c=+String(t.id).replace(/\D/g,'');if(c>1e12)ts.push(c);return Math.max(0,...ts)}
@@ -1815,7 +1831,8 @@ function gestaoView(){
   if(!GT.some(x=>x[0]===gTab))gTab='graf';
   const gcp=(()=>{
     const ST=[['todo','A iniciar','#8ea4cf'],['doing','Em andamento','#f2c14e'],['wait','Aguardando','#c4a5f5'],['done','Concluídas','#2fb59f']],
-      V=S.tasks.filter(vis),T0=V.filter(t=>ST.some(x=>x[0]===t.status)&&gOk(t,0)),T=gSel?T0.filter(t=>medMatch(t,gSel)):T0,
+      V=S.tasks.filter(vis),T00=V.filter(t=>ST.some(x=>x[0]===t.status)&&gOk(t,0)),MP=gMapHtml(gSel?T00.filter(t=>medMatch(t,gSel)):T00),FU=gFld(/^(UF|ESTADO)$/),FM=gFld(/MUNIC|CIDADE/),
+      T0=(gUf&&FU)||(gMun&&FM)?T00.filter(t=>(!gUf||!FU||UFK[gNorm(t[FU.id])]===gUf)&&(!gMun||!FM||gNorm(String(t[FM.id]||'').trim())===gMun)):T00,T=gSel?T0.filter(t=>medMatch(t,gSel)):T0,
       ms=[...(S.medicoes||[])].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>({id:m.id,nome:m.nome}));
     if(V.some(t=>medMatch(t,'_')))ms.push({id:'_',nome:'Sem medição'});
     const C=ms.map(m=>{const L=T0.filter(t=>medMatch(t,m.id)),c=ST.map(([k,l,cl])=>({k,l,cl,n:L.filter(t=>t.status===k).length})).filter(x=>x.n);return{m,c,n:L.length}}),
@@ -1825,8 +1842,8 @@ function gestaoView(){
     const leg=`<div class="gleg">${ST.map(([k,l,c])=>`<span style="--c:${c}"><i></i>${l} <b>${T.filter(t=>t.status===k).length}</b></span>`).join('')}</div>`;
     const cols=C.length?`<div class="gcols">${C.map(({m,c,n})=>`<div class="gg${gSel&&gSel!==m.id?' dim':''}" style="flex-grow:${Math.max(1,c.length)}"><div class="gbs">${c.map(({l,cl,n:v})=>{const h=v/mx*PH;return `<u style="--c:${cl};--h:${h.toFixed(1)}px" class="${h<20?'sm':''}" title="${esc(m.nome)} · ${l}: ${v}"><b>${v}</b></u>`}).join('')||'<span class="gz">0</span>'}</div><button type="button" class="gnm${gSel===m.id?' on':''}" data-gmed="${esc(m.id)}" aria-pressed="${gSel===m.id}" title="Filtrar por ${esc(m.nome)} (${n} tarefas)">${esc(m.nome)}</button></div>`).join('')}</div>`:'<div class="empty">Nenhuma medição cadastrada.</div>';
     const chBar=`<div class="gch" role="group" aria-label="Tipo de gráfico">${GCH.map(([k,l])=>`<button type="button" class="btn${gCh===k?' pri':''}" data-gch="${k}" aria-pressed="${gCh===k}">${l}</button>`).join('')}</div>`;
-    const gBody=gCh==='map'?gMapHtml(T0):cols+'<p class="hint">Colunas por medição e status. Clique no nome da medição para filtrar a Gestão.</p>';
-    const flt=`<div class="gfl">${fs('gfmed','Medição',gSel,ms.map(m=>[m.id,m.nome]))}${fs('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]))}${fs('gfvt','Medição V.tal',gVt,vo.map(v=>[v,v]))}${gCh==='map'?gMapFl:''}${gSel||gLog||gVt||gUf||gMun?'<button type="button" class="btn" id="gfx">Limpar filtros</button>':''}</div>`;
+    const gBody=gCh==='map'?MP:cols+'<p class="hint">Colunas por medição e status. Clique no nome da medição para filtrar a Gestão.</p>';
+    const flt=`<div class="gfl">${fs('gfmed','Medição',gSel,ms.map(m=>[m.id,m.nome]))}${fs('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]))}${fs('gfvt','Medição V.tal',gVt,vo.map(v=>[v,v]))}${gMapFl}${gSel||gLog||gVt||gUf||gMun?'<button type="button" class="btn" id="gfx">Limpar filtros</button>':''}</div>`;
     const PB=(S.concessionarias||[]).filter(m=>(m.itens||[]).length).map(m=>{const c=concItens(m),tt2=m.itens.length,d=c.ok.filter(x=>x.t.every(t=>t.status==='done')).length;return{m,d,tt:tt2}}).sort((a,b)=>(a.m.prazo||'9999').localeCompare(b.m.prazo||'9999')).slice(0,6);
     const bars=PB.length?`<div class="gbars"><h4>Andamento por concessionária</h4>${PB.map(({m,d,tt:t2})=>`<div class="gb" style="--c:${corConc(m)}"><span title="${esc(concLbl(m))}">${esc(concLbl(m))}</span><i><u style="--p:${Math.round(d/t2*100)}%"></u></i><b>${d}/${t2}</b></div>`).join('')}</div>`:'';
     const valCampos=campos().filter(c=>c.tipo==='valor');
