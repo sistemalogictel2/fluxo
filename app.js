@@ -273,7 +273,6 @@ function render(){fxView();
   if(_msT){const e=document.querySelector('.msb .msc');if(e){e.scrollLeft=_msT.l;e.querySelectorAll('.msl').forEach((x,i)=>x.scrollTop=_msT.c[i]||0)}}
   if(_xp&&!window._xpLock){const h=document.querySelector('header.sb');if(h)h.classList.add('xp')}
   if(_fv){const b=document.querySelector('header.sb nav [data-v="'+_fv+'"]');if(b)b.focus({preventScroll:true})}
-  if(_xp)setTimeout(()=>{const x=document.querySelector('header.sb.xp');if(x&&!x.matches(':hover')&&!x.contains(document.activeElement))x.classList.remove('xp')},800);
   bind();setHH();titulo();if(view==='guia')bindGuia();if(view==='admin')bindAdmin();
   if(focoKpi){focoKpi=false;focaAtividades()}
 }
@@ -1460,13 +1459,11 @@ setInterval(()=>{if(user&&Date.now()-_act>120*60*1000){sessionStorage.removeItem
  document.addEventListener('click',first,true);document.addEventListener('keydown',first,true);
  ['fullscreenchange','webkitfullscreenchange','resize'].forEach(ev=>addEventListener(ev,sync));sync()})();
 
-/* Menu lateral: expande se o mouse ficar parado 0,45 s sobre ele; recolhe 0,3 s depois de sair (teclado expande na hora) */
-(function(){let t=0,c=0;const D=450,sb=e=>e&&e.closest?e.closest('header.sb'):null,clr=()=>{clearTimeout(t);t=0},clc=()=>{clearTimeout(c);c=0};
- const arm=h=>{clr();t=setTimeout(()=>{t=0;const x=document.querySelector('header.sb');if(x&&!window._xpLock&&x.matches(':hover'))x.classList.add('xp')},D)};
- document.addEventListener('mousemove',e=>{const h=sb(e.target);if(!h)return;clc();if(!h.classList.contains('xp')&&!window._xpLock)arm(h)},{passive:true});
- document.addEventListener('mouseout',e=>{const h=sb(e.target);if(!h||sb(e.relatedTarget))return;clr();window._xpLock=false;clc();c=setTimeout(()=>{c=0;const x=document.querySelector('header.sb');if(x&&!x.matches(':hover')&&!x.querySelector(':focus-visible'))x.classList.remove('xp')},300)});
- document.addEventListener('focusin',e=>{const h=sb(e.target);if(h&&e.target.matches(':focus-visible')){clc();h.classList.add('xp')}});
- document.addEventListener('focusout',e=>{const h=sb(e.target);if(h&&!sb(e.relatedTarget)&&!h.matches(':hover'))h.classList.remove('xp')});
- document.addEventListener('click',e=>{if(!matchMedia('(hover:none)').matches||!e.target.closest)return;const h=document.querySelector('header.sb');if(!h)return;if(e.target.closest('header.sb .logo')){h.classList.toggle('xp');return}if(!e.target.closest('header.sb'))h.classList.remove('xp');else if(e.target.closest('nav'))setTimeout(()=>{const x=document.querySelector('header.sb');if(x)x.classList.remove('xp')},0)});
+/* Menu lateral: sempre recolhido; expande/recolhe com o botão direito (ou tecla Menu) sobre ele. Fecha ao clicar fora, Esc ou escolher uma tela. Em toque: tocar no logo */
+(function(){const hd=()=>document.querySelector('header.sb');
+ document.addEventListener('contextmenu',e=>{const h=e.target.closest&&e.target.closest('header.sb');if(!h||innerWidth<761)return;e.preventDefault();window._xpLock=false;h.classList.toggle('xp')});
+ document.addEventListener('click',e=>{const h=hd();if(!h||!e.target.closest)return;const dentro=e.target.closest('header.sb');
+  if(matchMedia('(hover:none)').matches&&e.target.closest('header.sb .logo')){h.classList.toggle('xp');return}
+  if(h.classList.contains('xp')&&(!dentro||e.target.closest('nav button')))h.classList.remove('xp')});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!MEDOPEN){const h=document.querySelector('header.sb.xp');if(h)h.classList.remove('xp')}});
 })();

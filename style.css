@@ -852,7 +852,7 @@ html[data-view=gestao] .top,html.cmp .top{display:none}
 
 /* ===== Alinhamento: Colunas/Mapa/Limpar na mesma reta dos filtros ===== */
 .gcc>.gfl{margin-bottom:0}.gcp>.gch{align-self:end}
-/* ===== Menu lateral glass (recolhido: só ícones; expande ao passar o mouse) ===== */
+/* ===== Menu lateral glass (recolhido: só ícones; expande com o botão direito) ===== */
 :root{--sbw:72px}
 header.sb{--gl:color-mix(in srgb,var(--tx) 8%,transparent);--gb:color-mix(in srgb,var(--tx) 14%,transparent)}
 @media(min-width:761px){
