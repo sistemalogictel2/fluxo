@@ -336,6 +336,7 @@ function bind(){
    const bindMultiFilter=(w,sep,apply)=>{const id=w.dataset.mf,all=w.querySelector('input[data-all]'),items=[...w.querySelectorAll('input:not([data-all])')];w.querySelector('.gmb').onclick=e=>{e.stopPropagation();gMfOpen=gMfOpen===id?'':id;render()};w.querySelectorAll('input').forEach(i=>i.onchange=()=>{if(i.dataset.all){if(i.checked){items.forEach(x=>{if(x.value!=='__n')x.checked=true;else x.checked=false});apply('')}else{items.forEach(x=>x.checked=false);apply(sep+'__empty_selection__')}render();return}if(i.value==='__n'){if(i.checked)items.filter(x=>x!==i).forEach(x=>x.checked=false)}else{const none=items.find(x=>x.value==='__n');if(none)none.checked=false}const chosen=items.filter(x=>x.checked).map(x=>x.value),nonN=items.filter(x=>x.value!=='__n');if(all)all.checked=false;apply(chosen.length&&chosen.every(v=>v!=='__n')&&chosen.length===nonN.length?'':chosen.join(sep));render()})};
   document.querySelectorAll('.gfl .gmf').forEach(w=>{const id=w.dataset.mf;bindMultiFilter(w,GSEP,v=>{if(id==='gfmed')gSel=v;else if(id==='gflog')gLog=v;else if(id==='gfvt')gVt=v;else if(id==='gfuf'){gUf=v;gMun=''}else if(id==='gfmun')gMun=v})});
   document.querySelectorAll('.bar .gmf').forEach(w=>{const id=w.dataset.mf;bindMultiFilter(w,FSEP,v=>{if(id==='fl-c')fMed=v;else if(id==='fl-t')fTipo=v;else if(id==='fl-p')fPessoa=v;else if(id==='fl-u')fUf=v})});
+  const fbt=$('#fbt');if(fbt)fbt.onclick=()=>{fbOpen=!fbOpen;render()};
   const fx=$('#fl-x');if(fx)fx.onclick=()=>{fTipo=fPessoa=fKpi=fMed=fUf=fQ=fFunc='';render()};
   const fq=$('#fq');if(fq)fq.oninput=()=>{clearTimeout(fq._t);fq._t=setTimeout(()=>{fQ=fq.value;const p=fq.selectionStart;render();const n=$('#fq');if(n){n.focus();n.setSelectionRange(p,p)}},180)};
   document.querySelectorAll('button.kpi').forEach(b=>b.onclick=()=>kpiGo(b.dataset.k));
@@ -438,7 +439,8 @@ function bar(){
     const n={cls:(S.medicoes||[]).length,med:(S.concessionarias||[]).length,tipos:S.tipos.length,campos:campos().filter(c=>!c.fixo).length,func:(S.contatos||[]).length,usr:USR?USR.length:'·'};
     extra=`<div class="amenu-bar" role="group" aria-label="Cadastros">${ASEC.map(([k,l],i)=>`<button type="button" data-sec="${k}" ${adminSec===k?'aria-current="page"':''}><span>${i+1}. ${l}</span><em>${n[k]}</em></button>`).join('')}</div>`;
   }
-  return `<div class="bar" role="group" aria-label="Filtros">${['painel','tarefa','equipe'].includes(view)?`<div class="fg"><label for="fq">Buscar</label><input type="search" id="fq" class="cs" placeholder="Título, protocolo, pessoa…  ( / )" value="${esc(fQ)}" autocomplete="off"></div>`:''}${sel('fl-c','Medição',fMed,'Todas',C)}${sel('fl-t','Tipo',fTipo,'Todos',Y)}${sel('fl-p','Funcionário',fPessoa,'Todos',P)}${ufV()?sel('fl-u','UF',fUf,'Todas',[...new Set([...ufIds,...fvals(fUf).filter(u=>UFN[u])])].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR')).map(u=>[u,u]),'fu'):''}<span class="fsp"></span>`
+  const nF=[fQ,fMed,fTipo,fPessoa,fKpi,fFunc,ufV()&&fUf].filter(Boolean).length;
+  return `<div class="bar${fbOpen?'':' fc'}" role="group" aria-label="Filtros"><button type="button" class="btn fbt" id="fbt" aria-expanded="${fbOpen}">Filtros${nF?` <em>${nF}</em>`:''}<span aria-hidden="true">${fbOpen?'▴':'▾'}</span></button>${['painel','tarefa','equipe'].includes(view)?`<div class="fg"><label for="fq">Buscar</label><input type="search" id="fq" class="cs" placeholder="Título, protocolo, pessoa…  ( / )" value="${esc(fQ)}" autocomplete="off"></div>`:''}${sel('fl-c','Medição',fMed,'Todas',C)}${sel('fl-t','Tipo',fTipo,'Todos',Y)}${sel('fl-p','Funcionário',fPessoa,'Todos',P)}${ufV()?sel('fl-u','UF',fUf,'Todas',[...new Set([...ufIds,...fvals(fUf).filter(u=>UFN[u])])].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR')).map(u=>[u,u]),'fu'):''}<span class="fsp"></span>`
    +(f?`<span class="fcount">${fKpi?'Mostrando '+KPI_TXT[fKpi]+' · ':''}${base().filter(kpiOk).length} de ${S.tasks.filter(vis).length} tarefa(s)</span><button type="button" class="btn clr" id="fl-x">${ICO_BROOM} Limpar filtros</button>`:'')+extra+`</div>`;
 }
 async function copyText(txt){
@@ -1044,7 +1046,7 @@ function openView(id,tab0){
 /* ---------- Gestão: o que o gestor precisa cobrar ---------- */
 const GSEP='\u0001',gMt=(f,v)=>!f||f.split(GSEP).includes(v||'__n'),gLk=t=>{const k=String(t.vmc||'').slice(0,7);return /^\d{4}-\d{2}$/.test(k)?k:''},gVk=t=>String(t.vmg||'').trim(),
   gTg=(f,v)=>{const a=f?f.split(GSEP):[],i=a.indexOf(v);i<0?a.push(v):a.splice(i,1);return a.join(GSEP)},gLb=(f,fn=x=>x)=>f.split(GSEP).map(x=>x==='__n'||x===EMP?'Nenhuma':fn(x)).join(', ');
-let gMfOpen='';document.addEventListener('click',e=>{if(gMfOpen&&!e.target.closest('.gmf')){gMfOpen='';render()}});
+let gMfOpen='',fbOpen=false;document.addEventListener('click',e=>{if(gMfOpen&&!e.target.closest('.gmf')){gMfOpen='';render()}});
 /* ---------- Relatório XLSX da Gestão (sem bibliotecas) ---------- */
 let gRep=null;
 const xZip=(files)=>{const E=new TextEncoder(),tb=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t.push(c>>>0)}return t})(),
@@ -1532,3 +1534,6 @@ setInterval(()=>{if(user&&Date.now()-_act>120*60*1000){sessionStorage.removeItem
   if(h.classList.contains('xp')&&(!dentro||e.target.closest('nav button')))h.classList.remove('xp')});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!MEDOPEN){const h=document.querySelector('header.sb.xp');if(h)h.classList.remove('xp')}});
 })();
+
+/* Esc fecha a lista de filtro aberta */
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&gMfOpen&&!document.querySelector('dialog[open]')){gMfOpen='';render()}});

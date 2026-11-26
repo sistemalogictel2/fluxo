@@ -1015,6 +1015,8 @@ dialog .db,dialog .vb{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .kpi{padding:6px 6px;flex-wrap:wrap;gap:2px 6px}
 .msb.min{width:36px!important;padding:10px 3px!important;overflow:hidden}
 .msb.min .msx{padding:4px 0}
+/* menu de medições fechado (invisível) não pode reservar espaço em branco */
+.msb:not(.open):not(.min){display:none}
 }
 
 /* Fluidez: menu lateral e aba de medições */
@@ -1393,3 +1395,12 @@ main{scrollbar-gutter:stable;min-width:0}
 /* Todos os filtros compartilham altura, espaçamento e alinhamento de base */
 .gfl .gfi,.bar .gmf{align-self:flex-end;min-width:0}
 .gfl .gmb,.bar .gmf .gmb{display:flex;align-items:center;justify-content:flex-start;box-sizing:border-box}
+
+/* Filtros recolhíveis no celular */
+.fbt{display:none}
+@media(max-width:760px){
+.fbt{display:inline-flex;align-items:center;gap:8px;align-self:center}
+.fbt em{font-style:normal;font-size:12px;font-weight:700;min-width:20px;padding:1px 6px;border-radius:999px;background:var(--ac);color:#1b1608;text-align:center}
+.stk .bar.fc>.fg,.stk .bar.fc>.fsp{display:none}
+.stk .bar{align-items:center}
+}
