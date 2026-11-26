@@ -388,7 +388,7 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,v
 .splash{margin:auto;display:flex;align-items:center;gap:12px;color:var(--mu);font-size:16px}
 .spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--ac);animation:giro .8s linear infinite}
 @keyframes giro{to{transform:rotate(360deg)}}
-#fq{min-width:230px}
+#fq{min-width:0}
 @media print{header,.bar,.kpis,.toast,nav,.btn,.skip{display:none!important}body{background:#fff!important;color:#000!important}.card,.col{box-shadow:none!important;break-inside:avoid}.stk{position:static;box-shadow:none}}
 /* ===== Menu lateral de concessionárias ===== */
 .shell{flex:1;display:flex;min-width:0}
@@ -1034,3 +1034,7 @@ header.sb nav button,header.sb .btn,.msb.min{transition:background-color .15s,bo
 header.sb.xp :is(.nl,.sbl,.clk small,.status:not(:empty)){animation:sbfade .3s ease both}
 @keyframes sbfade{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.msb,.msbk,header.sb{transition:none!important}header.sb.xp .nl{animation:none!important}}
+
+/* Busca: o campo ocupa só a própria coluna, sem passar por cima do filtro vizinho */
+.bar .fg:has(#fq){flex:1 1 230px;min-width:230px;max-width:300px}
+.bar .fg input.cs{max-width:100%}
