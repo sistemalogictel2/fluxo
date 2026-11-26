@@ -858,6 +858,13 @@ html[data-view=gestao] .top,html.cmp .top{display:none}
 .gmmu{display:block;width:100%;text-align:left;font:inherit;font-size:13.5px;color:var(--mc);background:none;border:1px solid transparent;border-radius:6px;padding:2px 6px;cursor:pointer}
 .gmmu:hover{background:var(--ov)}.gmmu.on{border-color:var(--mc);background:var(--ov);font-weight:700}.gmmu small{opacity:.8}
 .gmgh span{color:var(--mc)}
+/* painel lateral do mapa mais compacto */
+.gcp .gmr2{padding:8px 10px}
+.gcp .gmr2 .gmhd small{font-size:11px}.gcp .gmr2 .gmbig b{font-size:30px}.gcp .gmr2 .gmbig span{font-size:12px}
+.gcp .gmr2 .gmst{gap:6px}.gcp .gmr2 .gmst>div{padding:3px 6px;border-radius:8px}.gcp .gmr2 .gmst b{font-size:15px}.gcp .gmr2 .gmst span{font-size:10px}
+.gcp .gmr2 h4{font-size:10.5px;margin:4px 0 2px}
+.gcp .gmr2 .gmrow{font-size:12px;padding:2px 6px}.gcp .gmr2 .gmls.g2 .gmrow{font-size:12px;padding:2px 5px}.gcp .gmr2 .gmgh{font-size:11.5px}
+.gmh2{font-size:12px;margin:2px 0 0;line-height:1.3}.gmh2 b{color:var(--tx)}
 </style>
 </head>
 <body>
@@ -1193,7 +1200,7 @@ function bind(){
   document.querySelectorAll('[data-rcap]').forEach(b=>b.onclick=()=>{const v=parseInt(prompt('Limite de tarefas por pessoa (linha do gráfico):',rCap()),10);if(v>0){try{localStorage.setItem('fl_cap',v)}catch(e){}render()}});
   {let tp=document.getElementById('rtip');if(!tp){tp=document.createElement('div');tp.id='rtip';document.body.appendChild(tp);document.addEventListener('mouseover',e=>{const x=e.target.closest&&e.target.closest('[data-tip]'),t=document.getElementById('rtip');if(!x){t.hidden=true;return}t.textContent=x.dataset.tip;t.hidden=false});document.addEventListener('mousemove',e=>{const t=document.getElementById('rtip');if(t.hidden)return;t.style.left=Math.max(4,Math.min(innerWidth-t.offsetWidth-8,e.clientX+14))+'px';t.style.top=Math.min(innerHeight-t.offsetHeight-8,e.clientY+18)+'px'})}tp.hidden=true}
 
-  document.querySelectorAll('[data-gch]').forEach(b=>b.onclick=()=>{gCh=b.dataset.gch;render()});document.querySelectorAll('[data-guf]').forEach(b=>b.onclick=()=>{gUf=gUf===b.dataset.guf?'':b.dataset.guf;gMun='';render()});document.querySelectorAll('[data-gmun]').forEach(b=>b.onclick=()=>{if(b._t){clearTimeout(b._t);b._t=0;if(b.dataset.tid)openTask(b.dataset.tid);return}b._t=setTimeout(()=>{b._t=0;gMun=gMun===b.dataset.gmun?'':b.dataset.gmun;render()},250)});{const x=$('#gfx2');if(x)x.onclick=()=>{gUf=gMun='';render()}}document.querySelectorAll('svg.gmap[data-zf]').forEach(sv=>{try{const p=sv.querySelector('path'),b=p.getBBox(),m=Math.max(b.width,b.height)*.06;sv.setAttribute('viewBox',[b.x-m,b.y-m,b.width+2*m,b.height+2*m].join(' '))}catch(e){}});gFit();gMapInit();
+  document.querySelectorAll('[data-gch]').forEach(b=>b.onclick=()=>{gCh=b.dataset.gch;render()});document.querySelectorAll('[data-guf]').forEach(b=>b.onclick=()=>{gUf=gUf===b.dataset.guf?'':b.dataset.guf;gMun='';render()});document.querySelectorAll('[data-gmun]').forEach(b=>b.onclick=()=>{if(b._t){clearTimeout(b._t);b._t=0;if(b.dataset.tid)openTask(b.dataset.tid);return}b._t=setTimeout(()=>{b._t=0;gMun=gMun===b.dataset.gmun?'':b.dataset.gmun;render()},250)});{const x=$('#gfx2');if(x)x.onclick=()=>{gUf=gMun='';render()}}document.querySelectorAll('svg.gmap[data-zf]').forEach(sv=>{try{const p=sv.querySelector('path'),b=p.getBBox(),m=Math.max(b.width,b.height)*.06;sv.setAttribute('viewBox',[b.x-m,b.y-m,b.width+2*m,b.height+2*m].join(' '))}catch(e){}});gFit();gMapInit();requestAnimationFrame(gFit);setTimeout(gFit,250);{const gp=document.querySelector('.gcp .gmp');if(window._gRO){window._gRO.disconnect()}if(gp&&window.ResizeObserver){window._gRO=new ResizeObserver(()=>{clearTimeout(window._gRT);window._gRT=setTimeout(()=>{window._gRe&&window._gRe()},70)});window._gRO.observe(gp)}}
   document.querySelectorAll('[data-gsub]').forEach(b=>b.onclick=()=>{gSub=b.dataset.gsub;render()});
   document.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{const[a,c]=b.dataset.gk.split('|');gTab=a;if(c)gSub=c;render()});
   document.querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{const k=b.dataset.cc;CC.has(k)?CC.delete(k):CC.add(k);render()});
@@ -1976,13 +1983,13 @@ function gMapHtml(T0){
   const lst=gUf?(gOrd.length?gOrd.map(([mi,o])=>{const L=[...o.m.values()];return`<div class="gmgh" style="--mc:${mcol(mi)}"><span>${esc(o.n)}</span><em>${L.length} município(s) · ${L.reduce((a,e)=>a+e.c,0)} tarefa(s)</em></div>`}).join('')+'<p class="hint">Dê 2 cliques no nome do município (no mapa) para abrir o card.</p>':`<p class="hint">Nenhuma tarefa nesta UF.</p>`):U.map(([u,c])=>row(`data-guf="${u}" data-h="${u}" title="${esc(UFN[u])}"`,u,c,um,col(c))).join('');
   const top=U[0];
   const side=`<aside class="gmr2"><div class="gmhd"><small>${gUf?esc(UFN[gUf]):'Brasil'}${gMun?' · '+esc((MM.get(gMun)||{}).n||''):''}</small>${gUf||gMun?'<button type="button" class="btn" id="gfx2">← Brasil</button>':''}</div><div class="gmbig"><b>${tot}</b><span>tarefa(s)</span></div><div class="gmst"><div><b>${gUf?1:U.length}</b><span>UF(s)</span></div><div><b>${gUf?MM.size:new Set(G.filter(g=>g.mun).map(g=>gNorm(g.mun))).size}</b><span>município(s)</span></div><div><b>${top?top[0]:'–'}</b><span>líder${top?' · '+top[1]:''}</span></div></div><h4>${gUf?'Medições nesta UF':'Estados'}</h4><div class="gmls${gUf?'':' g2'}">${lst}</div></aside>`;
-  return`<div class="gme"><div class="gmp"><div class="gmtb"><button type="button" data-z="in" aria-label="Aproximar">+</button><button type="button" data-z="out" aria-label="Afastar">−</button><button type="button" data-z="0" aria-label="Centralizar">⟲</button></div>${sv}${ov}<div class="gmtip" hidden></div>${lg}</div>${side}</div><p class="hint">${tot} tarefa(s) com UF${semUf?' · '+semUf+' sem UF':''}. Passe o mouse para ver os números · clique num estado para dar zoom e filtrar · clique fora dele para voltar ao Brasil · 2 cliques num município abrem o card · Esc volta ao Brasil · roda do mouse = zoom · arraste = mover.</p>`;
+  return`<div class="gme"><div class="gmp"><div class="gmtb"><button type="button" data-z="in" aria-label="Aproximar">+</button><button type="button" data-z="out" aria-label="Afastar">−</button><button type="button" data-z="0" aria-label="Centralizar">⟲</button></div>${sv}${ov}<div class="gmtip" hidden></div>${lg}</div>${side}</div><p class="hint gmh2"><b>${tot}</b> com UF${semUf?` · ${semUf} sem UF`:''} · clique num estado: zoom e filtro · 2 cliques num município: abre o card · Esc: volta ao Brasil</p>`;
 }
 function gMapInit(){
   const sv=document.querySelector('svg.gmap');if(!sv)return;
   const pn=sv.closest('.gmp'),tip=pn.querySelector('.gmtip'),lb=sv.querySelector('.gmlb'),wrap=pn.parentNode,NS='http://www.w3.org/2000/svg';
   const v0=sv.viewBox.baseVal,B={x:v0.x,y:v0.y,w:v0.width,h:v0.height};
-  {const r0=sv.getBoundingClientRect();if(r0.width>20&&r0.height>20){const asp=Math.max(1.5,r0.width/r0.height);if(B.w/B.h<asp){const nw=B.h*asp;B.x-=(nw-B.w)/2;B.w=nw}else{const nh=B.w/asp;B.y-=(nh-B.h)/2;B.h=nh}}}
+  const B0={...B},fitB=()=>{Object.assign(B,B0);const r0=sv.getBoundingClientRect();if(r0.width>20&&r0.height>20){const asp=Math.max(1.5,r0.width/r0.height);if(B.w/B.h<asp){const nw=B.h*asp;B.x-=(nw-B.w)/2;B.w=nw}else{const nh=B.w/asp;B.y-=(nh-B.h)/2;B.h=nh}}};fitB();
   let V={...B},drag=null,moved=0;
   const paths=[...sv.querySelectorAll('path')],bb=new Map();paths.forEach(p=>{try{bb.set(p,p.getBBox())}catch(e){}});
   const mk=(n,o)=>{const e=document.createElementNS(NS,n);for(const k in o)e.setAttribute(k,o[k]);return e};
@@ -2042,6 +2049,7 @@ function gMapInit(){
   const anim=T=>{const A={...V},t0=performance.now(),D=550,ez=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;lb.style.opacity=0;
     const step=now=>{if(!sv.isConnected)return;const u=Math.min(1,(now-t0)/D),e=ez(u);V={x:A.x+(T.x-A.x)*e,y:A.y+(T.y-A.y)*e,w:A.w+(T.w-A.w)*e,h:A.h+(T.h-A.h)*e};window._gPrev={...V};
       if(u<1){sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));requestAnimationFrame(step)}else{V={...T};set(1)}};requestAnimationFrame(step)};
+  window._gRe=()=>{if(!sv.isConnected)return;fitB();V=tgt();set(1)};
   {const T=tgt(),P0=window._gPrev;if(P0&&(Math.abs(P0.w-T.w)>.5||Math.abs(P0.x-T.x)>.5||Math.abs(P0.y-T.y)>.5)){V={...P0};sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));anim(T)}else{V=T;set(1)}}
 }
 function gFit(){
@@ -2053,7 +2061,7 @@ function gFit(){
     PH=Math.max(80,Math.min(300,gb.clientHeight-(lg?lg.offsetHeight+12:0)-(hn?hn.offsetHeight+8:0)-nm-6-34));
     p.querySelectorAll('.gbs u[data-v]').forEach(u=>{const h=+u.dataset.v/mx*PH;u.style.setProperty('--h',h.toFixed(1)+'px');u.classList.toggle('sm',h<20)})}
 }
-if(!window._gFitR){window._gFitR=1;addEventListener('resize',()=>{clearTimeout(gFit.t);gFit.t=setTimeout(()=>{gFit();window._gLab&&document.querySelector('svg.gmap')&&window._gLab()},80)})}
+if(!window._gFitR){window._gFitR=1;addEventListener('resize',()=>{clearTimeout(gFit.t);gFit.t=setTimeout(()=>{gFit();window._gRe&&document.querySelector('svg.gmap')&&window._gRe()},80)})}
 const dias=(a,b)=>Math.round((new Date(a+'T12:00:00')-new Date(b+'T12:00:00'))/864e5);
 function lastMove(t){const ts=[...(t.fluxo||[]).map(f=>f.ok||0),...(t.ev||[]).map(e=>e.t||0),...(t.notas||[]).map(n=>n.t||0),...(t.anot||[]).map(n=>n.t||0)],c=+String(t.id).replace(/\D/g,'');if(c>1e12)ts.push(c);return Math.max(0,...ts)}
 const paradaDias=t=>{const l=lastMove(t);return l?Math.floor((Date.now()-l)/864e5):0};
