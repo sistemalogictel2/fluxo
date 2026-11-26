@@ -1404,3 +1404,15 @@ main{scrollbar-gutter:stable;min-width:0}
 .stk .bar.fc>.fg,.stk .bar.fc>.fsp{display:none}
 .stk .bar{align-items:center}
 }
+
+/* Barra de filtros: posições fixas; contagem e "Limpar filtros" ficam numa linha reservada */
+.fsb[aria-pressed=true]{background:var(--ac);color:#1b1608;border-color:transparent}
+.fsb em{font-style:normal;font-size:12px;font-weight:700;min-width:20px;padding:1px 6px;border-radius:999px;background:var(--line);text-align:center}
+.fsb[aria-pressed=true] em{background:#1b160822}
+@media(min-width:761px){
+.stk .bar .fst{flex:0 0 100%;display:flex;justify-content:flex-end;align-items:center;gap:12px;height:38px;margin-top:-4px}
+.stk .bar .fsm{flex:0 0 auto;max-width:none}
+.stk .bar .fg:first-of-type{flex:1 1 170px;min-width:170px}
+}
+@media(max-width:760px){.stk .bar .fst{display:contents}}
+.fsb{height:40px;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}

@@ -9,7 +9,7 @@ function cycZoom(){PREF.z=((PREF.z||0)+1)%ZOOMS.length;applyPref();render()}
 const COLORS=['#fde68a','#fbcfe8','#bfdbfe','#bbf7d0','#ddd6fe','#fed7aa','#a5f3fc','#e5e7eb'];
 const COLS=[['todo','A iniciar'],['doing','Em andamento'],['wait','Aguardando'],['done','Concluídas'],['fixo','Fixo']];
 const ACT=['painel','tarefa','equipe'];let lastAct='painel',focoKpi=false;
-const EMP='__empty_selection__';const EX=new Set();let colOpen,colNow,fQ='';let S={users:[],tasks:[]},view='gestao',fFunc='',fTipo='',fMed='',fPessoa='',fKpi='',fUf='',ME=(()=>{try{const m=JSON.parse(sessionStorage.getItem('me'));return m&&m.tk?m:null}catch(e){return null}})(),user=ME&&ME.n;
+const EMP='__empty_selection__';const EX=new Set();let colOpen,colNow,fQ='';let S={users:[],tasks:[]},view='gestao',fFunc='',fTipo='',fMed='',fPessoa='',fKpi='',fUf='',fSemF=false,ME=(()=>{try{const m=JSON.parse(sessionStorage.getItem('me'));return m&&m.tk?m:null}catch(e){return null}})(),user=ME&&ME.n;
 const $=s=>document.querySelector(s);
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=d=>d?d.split('-').reverse().join('/'):'—';
@@ -337,7 +337,8 @@ function bind(){
   document.querySelectorAll('.gfl .gmf').forEach(w=>{const id=w.dataset.mf;bindMultiFilter(w,GSEP,v=>{if(id==='gfmed')gSel=v;else if(id==='gflog')gLog=v;else if(id==='gfvt')gVt=v;else if(id==='gfuf'){gUf=v;gMun=''}else if(id==='gfmun')gMun=v})});
   document.querySelectorAll('.bar .gmf').forEach(w=>{const id=w.dataset.mf;bindMultiFilter(w,FSEP,v=>{if(id==='fl-c')fMed=v;else if(id==='fl-t')fTipo=v;else if(id==='fl-p')fPessoa=v;else if(id==='fl-u')fUf=v})});
   const fbt=$('#fbt');if(fbt)fbt.onclick=()=>{fbOpen=!fbOpen;render()};
-  const fx=$('#fl-x');if(fx)fx.onclick=()=>{fTipo=fPessoa=fKpi=fMed=fUf=fQ=fFunc='';render()};
+  const fsem=$('#fsem');if(fsem)fsem.onclick=()=>{fSemF=!fSemF;render()};
+  const fx=$('#fl-x');if(fx)fx.onclick=()=>{fTipo=fPessoa=fKpi=fMed=fUf=fQ=fFunc='';fSemF=false;render()};
   const fq=$('#fq');if(fq)fq.oninput=()=>{clearTimeout(fq._t);fq._t=setTimeout(()=>{fQ=fq.value;const p=fq.selectionStart;render();const n=$('#fq');if(n){n.focus();n.setSelectionRange(p,p)}},180)};
   document.querySelectorAll('button.kpi').forEach(b=>b.onclick=()=>kpiGo(b.dataset.k));
   $('#bo').onclick=()=>{sessionStorage.removeItem('me');ME=user=null;USR=null;view='gestao';render()};
@@ -420,18 +421,19 @@ function flowPeople(){const m=new Map();S.tasks.forEach(t=>t.fluxo.forEach(f=>{i
 const personOpts=()=>{const m=new Map(flowPeople());(S.contatos||[]).forEach(c=>m.set('c:'+c.id,chipName(c)));return[...m].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'))};
 const qOk=t=>{const hay=nk([nome(t),t.tarefa,t.protocolo,...holders(t).map(h=>h.pessoa),...t.fluxo.flatMap(f=>[f.etapa,f.pessoa])].join(' '));return nk(fQ).split(' ').every(w=>hay.includes(w))};
 const ufV=()=>view==='painel'||view==='tarefa'||view==='equipe';
+const semF=t=>!holders(t).some(h=>h&&String(h.pessoa||'').trim()),semOn=()=>fSemF&&(view==='painel'||view==='tarefa');
 const ufOf=t=>{try{const f=gFld(/^(UF|ESTADO)$/);return f?(UFK[gNorm(t[f.id])]||''):''}catch(e){return''}};
 const ufList=()=>{try{return[...new Set(S.tasks.filter(vis).map(ufOf).filter(Boolean))].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR'))}catch(e){return[]}};
 const FSEP='¦', fvals=v=>v?String(v).split(FSEP).filter(Boolean):[], fhas=(v,x)=>!v||fvals(v).includes(String(x)), fcount=v=>fvals(v).length;
-const baseSkip=(skip='')=>S.tasks.filter(t=>vis(t)&&(!skip.includes('uf')&&(!fUf||!ufV()||fhas(fUf,ufOf(t)))||skip.includes('uf'))&&(!skip.includes('q')&&!fQ||skip.includes('q')||qOk(t))&&(!skip.includes('tipo')&&fhas(fTipo,t.tipo||'')||skip.includes('tipo'))&&(!skip.includes('med')&&fhas(fMed,medId(tipoOf(t)))||skip.includes('med'))&&(!skip.includes('pessoa')&&(!fPessoa||holders(t).some(h=>fhas(fPessoa,pkey(h.pessoa))))||skip.includes('pessoa')));
+const baseSkip=(skip='')=>S.tasks.filter(t=>vis(t)&&(skip.includes('sem')||!semOn()||semF(t))&&(!skip.includes('uf')&&(!fUf||!ufV()||fhas(fUf,ufOf(t)))||skip.includes('uf'))&&(!skip.includes('q')&&!fQ||skip.includes('q')||qOk(t))&&(!skip.includes('tipo')&&fhas(fTipo,t.tipo||'')||skip.includes('tipo'))&&(!skip.includes('med')&&fhas(fMed,medId(tipoOf(t)))||skip.includes('med'))&&(!skip.includes('pessoa')&&(!fPessoa||holders(t).some(h=>fhas(fPessoa,pkey(h.pessoa))))||skip.includes('pessoa')));
 const base=()=>baseSkip();
 const kpiOk=t=>!fKpi||(fKpi==='open'?t.status!=='done':fKpi==='late'?late(t):t.status==='done');
-const anyF=()=>!!(fTipo||fPessoa||fKpi||fQ||fMed||fFunc||(fUf&&ufV()));
+const anyF=()=>!!(fTipo||fPessoa||fKpi||fQ||fMed||fFunc||semOn()||(fUf&&ufV()));
 const KPI_TXT={open:'em aberto',late:'atrasadas',done:'concluídas'};
 function bar(){
   const ZE=[[fMed,'med'],[fTipo,'tipo'],[fPessoa,'pessoa'],[fUf,'uf']].filter(([v])=>fvals(v).includes(EMP)).map(x=>x[1]).join(' '),medRows=baseSkip('med '+ZE),typeRows=baseSkip('tipo '+ZE),peopleRows=baseSkip('pessoa '+ZE),ufRows=baseSkip('uf '+ZE);
   const medIds=new Set(medRows.map(t=>medId(tipoOf(t)))),typeIds=new Set(typeRows.map(t=>t.tipo||'')),personIds=new Set(peopleRows.flatMap(t=>holders(t).map(h=>pkey(h.pessoa)))),ufIds=new Set(ufRows.map(ufOf).filter(Boolean));
-  const AC={q:!!fQ,med:fvals(fMed).some(v=>v!==EMP),tipo:fvals(fTipo).some(v=>v!==EMP),pessoa:fvals(fPessoa).some(v=>v!==EMP),uf:!!ufV()&&fvals(fUf).some(v=>v!==EMP)},oth=k=>Object.keys(AC).some(n=>n!==k&&AC[n]);
+  const AC={q:!!fQ,med:fvals(fMed).some(v=>v!==EMP),tipo:fvals(fTipo).some(v=>v!==EMP),pessoa:fvals(fPessoa).some(v=>v!==EMP),uf:!!ufV()&&fvals(fUf).some(v=>v!==EMP),sem:semOn()},oth=k=>Object.keys(AC).some(n=>n!==k&&AC[n]);
   const Y=(S.tipos||[]).filter(y=>!oth('tipo')||typeIds.has(y.id)||fvals(fTipo).includes(y.id)).map(y=>[y.id,tipoLbl(y)]),P=isAdm()?personOpts().filter(([k])=>!oth('pessoa')||personIds.has(k)||fvals(fPessoa).includes(k)):[],C=(S.medicoes||[]).filter(c=>!oth('med')||medIds.has(c.id)||fvals(fMed).includes(c.id)).map(c=>[c.id,c.nome]).sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'));
   const sel=(id,l,cur,all,o,cls)=>(id!=='fl-p'||isAdm())?(()=>{const raw=fvals(cur),none=raw.includes(EMP),chosen=raw.filter(v=>v!==EMP),open=gMfOpen===id,tx=none&&!chosen.length?'Nenhum':chosen.length===0?all:chosen.length===1?(o.find(x=>x[0]===chosen[0])||[0,chosen[0]])[1]:chosen.length+' selecionados',item=(v,t,c,a)=>`<label class="gmi"><input type="checkbox" value="${esc(v)}" ${a?'data-all="1" ':''}${c?'checked':''}><span>${esc(t)}</span></label>`;return `<div class="fg gfi gmf" data-mf="${id}"><span>${l}</span><button type="button" class="gmb" aria-haspopup="true" aria-expanded="${open}"><em>${esc(tx)}</em></button><div class="gmdp"${open?'':' hidden'}>${item('','Todas',!chosen.length&&!none,1)}${o.map(([v,t])=>item(v,t,none?false:(!chosen.length||chosen.includes(v)))).join('')}</div></div>`})():'';
   const f=anyF();
@@ -440,9 +442,9 @@ function bar(){
     const n={cls:(S.medicoes||[]).length,med:(S.concessionarias||[]).length,tipos:S.tipos.length,campos:campos().filter(c=>!c.fixo).length,func:(S.contatos||[]).length,usr:USR?USR.length:'·'};
     extra=`<div class="amenu-bar" role="group" aria-label="Cadastros">${ASEC.map(([k,l],i)=>`<button type="button" data-sec="${k}" ${adminSec===k?'aria-current="page"':''}><span>${i+1}. ${l}</span><em>${n[k]}</em></button>`).join('')}</div>`;
   }
-  const nF=[fQ,fMed,fTipo,fPessoa,fKpi,fFunc,ufV()&&fUf].filter(Boolean).length;
-  return `<div class="bar${fbOpen?'':' fc'}" role="group" aria-label="Filtros"><button type="button" class="btn fbt" id="fbt" aria-expanded="${fbOpen}">Filtros${nF?` <em>${nF}</em>`:''}<span aria-hidden="true">${fbOpen?'▴':'▾'}</span></button>${['painel','tarefa','equipe'].includes(view)?`<div class="fg"><label for="fq">Buscar</label><input type="search" id="fq" class="cs" placeholder="Título, protocolo, pessoa…  ( / )" value="${esc(fQ)}" autocomplete="off"></div>`:''}${sel('fl-c','Medição',fMed,'Todas',C)}${sel('fl-t','Tipo',fTipo,'Todos',Y)}${sel('fl-p','Funcionário',fPessoa,'Todos',P)}${ufV()?sel('fl-u','UF',fUf,'Todas',[...new Set([...ufIds,...fvals(fUf).filter(u=>UFN[u])])].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR')).map(u=>[u,u]),'fu'):''}<span class="fsp"></span>`
-   +(f?`<span class="fcount">${fKpi?'Mostrando '+KPI_TXT[fKpi]+' · ':''}${base().filter(kpiOk).length} de ${S.tasks.filter(vis).length} tarefa(s)</span><button type="button" class="btn clr" id="fl-x">${ICO_BROOM} Limpar filtros</button>`:'')+extra+`</div>`;
+  const nF=[fQ,fMed,fTipo,fPessoa,fKpi,fFunc,ufV()&&fUf,semOn()].filter(Boolean).length,nSem=baseSkip('sem').filter(t=>t.status!=='done'&&semF(t)).length;
+  return `<div class="bar${fbOpen?'':' fc'}" role="group" aria-label="Filtros"><button type="button" class="btn fbt" id="fbt" aria-expanded="${fbOpen}">Filtros${nF?` <em>${nF}</em>`:''}<span aria-hidden="true">${fbOpen?'▴':'▾'}</span></button>${['painel','tarefa','equipe'].includes(view)?`<div class="fg"><label for="fq">Buscar</label><input type="search" id="fq" class="cs" placeholder="Título, protocolo, pessoa…  ( / )" value="${esc(fQ)}" autocomplete="off"></div>`:''}${sel('fl-c','Medição',fMed,'Todas',C)}${sel('fl-t','Tipo',fTipo,'Todos',Y)}${sel('fl-p','Funcionário',fPessoa,'Todos',P)}${ufV()?sel('fl-u','UF',fUf,'Todas',[...new Set([...ufIds,...fvals(fUf).filter(u=>UFN[u])])].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR')).map(u=>[u,u]),'fu'):''}${view==='painel'||view==='tarefa'?`<div class="fg fsm"><span aria-hidden="true">&nbsp;</span><button type="button" class="btn fsb" id="fsem" aria-pressed="${!!fSemF}" title="Mostrar só as tarefas que não têm funcionário">Sem funcionário${nSem?` <em>${nSem}</em>`:''}</button></div>`:''}<div class="fst">`
+   +(f?`<span class="fcount">${fKpi?'Mostrando '+KPI_TXT[fKpi]+' · ':''}${base().filter(kpiOk).length} de ${S.tasks.filter(vis).length} tarefa(s)</span><button type="button" class="btn clr" id="fl-x">${ICO_BROOM} Limpar filtros</button>`:'')+`</div>`+extra+`</div>`;
 }
 async function copyText(txt){
   try{await navigator.clipboard.writeText(txt);return true}catch(e){}
@@ -456,14 +458,14 @@ function tarefaView(TF){
   const cols=S.tipos.filter(y=>fhas(fTipo,y.id)).map(y=>({id:y.id,nome:tipoLbl(y),cor:y.cor,sub:metaTxt(y)}));
   if(!fTipo)cols.push({id:'',nome:'Sem tipo',cor:'#9aa4b8',sub:'Sem meta'});
   const h=cols.map(c=>{const m=new Map();
-    L.filter(t=>tpTipo(t)===c.id).forEach(t=>{const seen=new Set();holders(t).forEach(w=>{const k=pkey(w.pessoa);if(seen.has(k))return;seen.add(k);if(!m.has(k))m.set(k,{k,n:nm.get(k)||w.pessoa,q:0,mv:0});m.get(k).q++;if(movNew(t))m.get(k).mv++})});
-    const P=[...m.values()].sort((x,y)=>y.q-x.q||x.n.localeCompare(y.n,'pt-BR'));
+    L.filter(t=>tpTipo(t)===c.id).forEach(t=>{const seen=new Set();holders(t).forEach(w=>{if(!String(w.pessoa||'').trim())return;const k=pkey(w.pessoa);if(seen.has(k))return;seen.add(k);if(!m.has(k))m.set(k,{k,n:nm.get(k)||w.pessoa,q:0,mv:0});m.get(k).q++;if(movNew(t))m.get(k).mv++});if(semF(t)){const k='__sem';if(!m.has(k))m.set(k,{k,n:'Sem funcionário',q:0,mv:0});m.get(k).q++;if(movNew(t))m.get(k).mv++}});
+    const P=[...m.values()].sort((x,y)=>(x.k==='__sem')-(y.k==='__sem')||y.q-x.q||x.n.localeCompare(y.n,'pt-BR'));
     return P.length||!anyF()?`<section class="col" aria-label="${esc(c.nome)}"><h2><span><i class="dotc" style="background:${c.cor}"></i>${esc(c.nome)}</span><span>${(mvc=>mvc?`<span class="tag mv" title="${mvc} tarefa(s) mudaram de posto">🔔 ${mvc}</span> `:'')(P.reduce((a,p)=>a+p.mv,0))}<em>${P.length}</em></span></h2><div class="hint" style="margin:-6px 6px 8px">${esc(c.sub)}</div><div class="list">${P.map(p=>`<button type="button" class="pcap" data-pk="${esc(p.k)}" data-tp="${esc(c.id)}" style="--k:${c.cor}" aria-label="${esc(p.n)}: ${p.q} tarefa(s) em ${esc(c.nome)}. Ver tarefas"><span class="pn"><span>${esc(p.n)}</span><span class="pct2">${p.q}</span></span><small>${p.q} tarefa(s) neste tipo</small>${p.mv?`<small><span class="tag mv">🔔 ${p.mv} mudou(aram) de posto</span></small>`:''}</button>`).join('')||'<div class="empty">Sem tarefas</div>'}</div></section>`:''}).join('');
   return mvSec(5)+(h?`<div class="hsb" id="hsb" hidden aria-hidden="true"><div></div></div><div class="board" id="bdp">${h}</div>`:'<div class="empty">Nenhuma tarefa com funcionário neste filtro.</div>')}
 function openTP(pk,tid){
   const nm=new Map(flowPeople()),y=S.tipos.find(x=>x.id===tid);
-  const L=srt(base().filter(kpiOk).filter(tpOpen).filter(t=>tpTipo(t)===tid&&holders(t).some(h=>pkey(h.pessoa)===pk)));
-  const [d,close]=dlg(`<div class="dh"><div><h2>${esc(nm.get(pk)||'Funcionário')}</h2><div class="hint">${L.length} tarefa(s) em ${esc(y?y.nome:'Sem tipo')}</div></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
+  const L=srt(base().filter(kpiOk).filter(tpOpen).filter(t=>tpTipo(t)===tid&&(pk==='__sem'?semF(t):holders(t).some(h=>pkey(h.pessoa)===pk))));
+  const [d,close]=dlg(`<div class="dh"><div><h2>${esc(pk==='__sem'?'Sem funcionário':nm.get(pk)||'Funcionário')}</h2><div class="hint">${L.length} tarefa(s) em ${esc(y?y.nome:'Sem tipo')}</div></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
   <div class="vb"><div class="capc">${L.map(t=>card(t,'p').replace('class="card co"','class="card"')).join('')||'<div class="empty">Nenhuma tarefa.</div>'}</div></div>`,y?y.cor:'#9aa4b8');
   d.classList.add('view');
   d.querySelectorAll('.card').forEach(c=>{c.onclick=()=>{close();openView(c.dataset.id)};c.onkeydown=e=>{if(e.target===c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();close();openView(c.dataset.id)}}});
