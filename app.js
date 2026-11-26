@@ -218,7 +218,9 @@ function migTask(t){if(!Array.isArray(t.fluxo))t.fluxo=[];if(t.dag&&t.fluxo.ever
 function migTipo(y){if(!Array.isArray(y.steps)){y.steps=(y.passos||[]).map((e,i)=>({id:'p'+(i+1),etapa:e,campos:[...((y.pc||[])[i]||[])],dep:i?['p'+i]:[],con:[]}));delete y.passos;delete y.pc}
   y.steps.forEach((s,i)=>{if(!s.id)s.id='p'+(i+1);if(!Array.isArray(s.dep))s.dep=[];if(!Array.isArray(s.con))s.con=[];if(!Array.isArray(s.campos))s.campos=[]})}
 
-const nome=t=>t.fx&&tipoOf(t)?tipoOf(t).nome+' '+t.tarefa:t.tarefa;
+const nome0=t=>t.fx&&tipoOf(t)?tipoOf(t).nome+' '+t.tarefa:t.tarefa;
+let NMC=null;
+const nome=t=>{const L=S.tasks||[];if(!NMC||NMC.r!==L||NMC.n!==L.length){const c=new Map(),sf=new Map();L.forEach(x=>{const k=nk(nome0(x));c.set(k,(c.get(k)||0)+1)});const seen=new Map();L.forEach(x=>{const k=nk(nome0(x));if(c.get(k)>1){const i=(seen.get(k)||0)+1;seen.set(k,i);sf.set(x.id,i)}});NMC={r:L,n:L.length,sf}}const i=NMC.sf.get(t.id);return i?nome0(t)+' - '+i:nome0(t)};
 const taskUF=t=>{
   const norm=s=>String(s||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').trim().toLowerCase();
   const c=campos().find(x=>norm(x.nome)==='uf'||norm(x.nome)==='estado'||norm(x.nome)==='unidade federativa');
@@ -240,7 +242,7 @@ function card(t,mode){
 
 let FXK='';
 function fxView(){try{const k=[view,typeof adminSec==='undefined'?'':adminSec,gTab].join('|');if(k===FXK)return;FXK=k;const h=document.documentElement;h.dataset.anim=1;setTimeout(()=>{document.querySelectorAll('.gs-k,.gcp,.tcard,.col,.mdc,.gs-row,.gs-p,.kpi,.gbars .gb').forEach((e,i)=>e.style.setProperty('--d',Math.min(i,14)*35+'ms'));document.querySelectorAll('[data-cu]').forEach(e=>{const n=+e.textContent;if(!n)return;const t0=performance.now(),f=now=>{const p=Math.min(1,(now-t0)/700);e.textContent=Math.round(n*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)})},0);clearTimeout(fxView.t);fxView.t=setTimeout(()=>delete h.dataset.anim,1200)}catch(e){}}
-function render(){fxView();
+function render(){NMC=null;fxView();
   if(!user){loginScreen();return}
   if(view==='func'){view='admin';adminSec='func'}if(!allowed(view))view='painel';
   if(ACT.includes(view))lastAct=view;
