@@ -1041,12 +1041,9 @@ header.sb.xp :is(.nl,.sbl,.clk small,.status:not(:empty)){animation:sbfade .3s e
 .bar .fg.fu{flex:0 1 90px;min-width:80px;max-width:110px}
 
 
-/* Mapa viário OpenStreetMap */
-.groad{margin:16px 0 8px;background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
-.groad-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
-.groad-head h3{font-size:14px;margin:0;color:var(--tx)}
-.groad-head p{font-size:12px;color:var(--mu);margin:3px 0 0}
-.groad-status{font-size:11px;color:var(--mu);background:var(--s2);border:1px solid var(--line);border-radius:20px;padding:4px 9px}
-.groad-map{height:440px;min-height:320px;width:100%;border-radius:10px;overflow:hidden;background:var(--s2);z-index:0}
-.groad-map .leaflet-control-attribution{font-size:10px}
-@media(max-width:700px){.groad{padding:10px}.groad-map{height:360px;min-height:280px}}
+/* Mapa OpenStreetMap do município selecionado — mantém o mapa original do Brasil/UF. */
+.gmun-osm{margin:12px 10px 4px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--s1)}
+.gmun-osm-head{padding:8px 11px;font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--tx);background:var(--s2);border-bottom:1px solid var(--line)}
+.gmun-osm-map{height:300px;width:100%;background:var(--s2);z-index:0}
+.gmun-osm-status{margin:0;padding:7px 11px;color:var(--mu);font-size:12px}
+@media(max-width:700px){.gmun-osm{margin:10px 4px}.gmun-osm-map{height:240px}}
