@@ -1039,11 +1039,3 @@ header.sb.xp :is(.nl,.sbl,.clk small,.status:not(:empty)){animation:sbfade .3s e
 .bar .fg input.cs,.bar .fg select.fsel{font-size:13px;height:38px;min-height:38px;padding:0 8px}
 .bar .fg{min-width:110px}
 .bar .fg.fu{flex:0 1 90px;min-width:80px;max-width:110px}
-
-
-/* Mapa OpenStreetMap do município selecionado — mantém o mapa original do Brasil/UF. */
-.gmun-osm{margin:12px 10px 4px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--s1)}
-.gmun-osm-head{padding:8px 11px;font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--tx);background:var(--s2);border-bottom:1px solid var(--line)}
-.gmun-osm-map{height:300px;width:100%;background:var(--s2);z-index:0}
-.gmun-osm-status{margin:0;padding:7px 11px;color:var(--mu);font-size:12px}
-@media(max-width:700px){.gmun-osm{margin:10px 4px}.gmun-osm-map{height:240px}}
