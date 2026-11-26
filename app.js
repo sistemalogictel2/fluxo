@@ -672,13 +672,14 @@ function openConc(id){
   if(!(S.medicoes||[]).length){toast('Cadastre uma medição primeiro');view='admin';adminSec='cls';render();return}
   const m=(S.concessionarias||[]).find(x=>x.id===id)||{nome:'',dir:'',itens:[],medicao:''},isNew=!id;
   const [d,close]=dlg(`<form method="dialog"><div class="dh"><h2>${isNew?'Nova concessionária':'Editar concessionária'}</h2><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
-  <div class="db"><div class="full"><label for="mk">Medição *</label><select id="mk" required><option value="">— escolha a medição —</option>${[...S.medicoes].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(c=>`<option value="${c.id}" ${c.id===m.medicao?'selected':''}>${esc(c.nome)}</option>`).join('')}</select><div class="hint">A concessionária fica dentro da medição. Ex.: Regularização Postes.</div></div>
+  <div class="db">${isNew&&(S.concessionarias||[]).length?'<div class="full"><button type="button" class="btn" id="cclone">Clonar</button></div>':''}<div class="full"><label for="mk">Medição *</label><select id="mk" required><option value="">— escolha a medição —</option>${[...S.medicoes].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(c=>`<option value="${c.id}" ${c.id===m.medicao?'selected':''}>${esc(c.nome)}</option>`).join('')}</select><div class="hint">A concessionária fica dentro da medição. Ex.: Regularização Postes.</div></div>
   <div class="full"><label for="mn">Nome da concessionária *</label><input type="text" id="mn" required value="${esc(m.nome)}"><div class="hint">É o nome que o fluxo e as tarefas vão usar. Ex.: CPFL</div></div>
   <div class="full"><label for="mi">Itens (um por linha) *</label><textarea id="mi" rows="6" required placeholder="Engenho Novo&#10;Engenho de Dentro&#10;Cachambi">${esc(m.itens.join('\n'))}</textarea><div class="hint">Cada item é uma tarefa da concessionária: o total de itens é o total de tarefas, e cada um vira uma opção de título ao criar a tarefa.</div></div>
   <div class="full"><label for="md">Diretório pai (caminho na rede)</label><input type="text" id="md" placeholder="\\\\servidor\\projetos\\CPFL" value="${esc(m.dir)}"><div class="hint">O botão “Copiar caminho na rede” da tarefa copia este caminho + o título do item (mesmo nome da pasta).</div></div>
   <div class="full"><label id="mcl">Cor da concessionária</label><div class="hint">É a única cor que você escolhe: o fluxo, as tarefas e os cards seguem esta cor.</div><div class="sw" role="radiogroup" aria-labelledby="mcl">${COLORS.map(c=>`<label><input type="radio" name="mc" value="${c}" ${c===(m.cor||COLORS[0])?'checked':''}><span style="--c:${c}"></span><span class="sr">Cor ${c}</span></label>`).join('')}</div></div>
   <div class="full"><label for="mp">Prazo de entrega</label><input type="date" id="mp" value="${esc(m.prazo||'')}"><div class="hint">Aparece sempre no card da concessionária, no menu lateral.</div></div></div>
   <div class="df"><button class="btn pri">Salvar concessionária</button>${isNew?'':'<span class="sp"></span><button type="button" class="btn dan" id="dl">Excluir</button>'}</div></form>`,m.cor||COLORS[0]);
+  {const cb=d.querySelector('#cclone');if(cb)cb.onclick=()=>{close();cloneConcPick()}}
   d.querySelectorAll('[name=mc]').forEach(r=>r.onchange=()=>d.style.setProperty('--c',r.value));
   d.querySelector('form').onsubmit=async e=>{e.preventDefault();const nm=d.querySelector('#mn').value.trim();
     if(S.concessionarias.some(x=>x.id!==id&&nk(x.nome)===nk(nm))){toast('Já existe uma concessionária com este nome');return}
@@ -736,24 +737,39 @@ function openCampo(id){
   d.querySelector('#cnm').focus();
 }
 function cloneTipoPick(){
-  const [d,close]=dlg(`<div class="dh"><div><h2>Clonar fluxo</h2><div class="hint">Escolha o fluxo que será copiado.</div></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
+  const [d,close]=dlg(`<div class="dh"><div><h2>Clonar fluxo</h2><div class="hint">Escolha o fluxo que será copiado (com a concessionária dele).</div></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
   <div class="db"><div class="full">${S.tipos.map(y=>`<button type="button" class="btn" data-cl="${y.id}" style="display:block;width:100%;text-align:left;margin:0 0 8px">${esc(tipoLbl(y))} <span class="hint">· ${(y.steps||[]).length} passo(s)</span></button>`).join('')}</div></div>`,COLORS[0]);
   d.querySelector('#x').onclick=close;
-  d.querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>{close();cloneTipoName(b.dataset.cl)});
+  d.querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>{close();cloneAsk(null,b.dataset.cl)});
 }
-function cloneTipoName(id){
-  const y=S.tipos.find(x=>x.id===id);if(!y)return;
-  const livres=(S.concessionarias||[]).filter(m=>!S.tipos.some(z=>z.conc===m.id));
-  if(!livres.length){toast('Todas as concessionárias já têm fluxo. Cadastre uma nova concessionária para clonar.');return}
-  const [d,close]=dlg(`<form method="dialog"><div class="dh"><div><h2>Clonar “${esc(y.nome)}”</h2><div class="hint">Será criado um fluxo idêntico.</div></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
-  <div class="db"><div class="full"><label for="cln">Nome do novo fluxo (concessionária) *</label><select id="cln" required><option value="">— escolha —</option>${livres.map(m=>`<option value="${m.id}">${esc(concLbl(m))}</option>`).join('')}</select></div></div>
-  <div class="df"><button class="btn pri">Clonar</button></div></form>`,y.cor);
+function cloneConcPick(){
+  const L=(S.concessionarias||[]);
+  const [d,close]=dlg(`<div class="dh"><div><h2>Clonar concessionária</h2><div class="hint">Escolha a concessionária que será copiada, com itens, cor e fluxo.</div></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
+  <div class="db"><div class="full">${L.map(m=>`<button type="button" class="btn" data-cl="${m.id}" style="display:block;width:100%;text-align:left;margin:0 0 8px">${esc(concLbl(m))} <span class="hint">· ${(m.itens||[]).length} item(ns)${S.tipos.some(y=>y.conc===m.id)?' · com fluxo':''}</span></button>`).join('')||'<div class="empty">Nenhuma concessionária cadastrada.</div>'}</div></div>`,COLORS[0]);
   d.querySelector('#x').onclick=close;
-  d.querySelector('form').onsubmit=async e=>{e.preventDefault();const m=S.concessionarias.find(x=>x.id===d.querySelector('#cln').value);if(!m){toast('Escolha o nome do novo fluxo');return}
-    const t=Date.now(),mp=new Map((y.steps||[]).map((p,i)=>[p.id,'s'+t+'_'+i])),
-      o={id:'ty'+t,conc:m.id,nome:m.nome,cor:m.cor||y.cor||COLORS[0],campos:[...(y.campos||[])],meta:{...(y.meta||{v:0,u:'dias'})},
-        steps:(y.steps||[]).map(p=>({...JSON.parse(JSON.stringify(p)),id:mp.get(p.id),dep:(p.dep||[]).map(k=>mp.get(k)).filter(Boolean),con:(p.con||[]).map(k=>mp.get(k)).filter(Boolean)}))};
-    S.tipos.push(o);await save();close();render();toast('Fluxo clonado')};
+  d.querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>{close();cloneAsk(b.dataset.cl,null)});
+}
+function cloneAsk(mid,yid){
+  const y0=yid?S.tipos.find(x=>x.id===yid):null;
+  const m0=(S.concessionarias||[]).find(x=>x.id===(mid||(y0&&y0.conc)))||(y0?(S.concessionarias||[]).find(x=>nk(x.nome)===nk(y0.nome)):null);
+  const y=y0||(m0?S.tipos.find(z=>z.conc===m0.id):null);
+  if(!m0&&!y){toast('Nada para clonar');return}
+  const base=m0?m0.nome:y.nome;
+  const [d,close]=dlg(`<form method="dialog"><div class="dh"><div><h2>Clonar “${esc(base)}”</h2><div class="hint">Será criada uma cópia idêntica${y?', com todo o fluxo':''}.</div></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
+  <div class="db"><div class="full"><label for="cln">Nome para salvar *</label><input type="text" id="cln" required autocomplete="off" value="${esc(base)} (cópia)"></div></div>
+  <div class="df"><button class="btn pri">Clonar</button></div></form>`,(m0&&m0.cor)||(y&&y.cor)||COLORS[0]);
+  d.querySelector('#x').onclick=close;
+  const inp=d.querySelector('#cln');inp.focus();inp.select();
+  d.querySelector('form').onsubmit=async e=>{e.preventDefault();const nm=inp.value.trim();
+    if(!nm){toast('Informe o nome');return}
+    if((S.concessionarias||[]).some(x=>nk(x.nome)===nk(nm))||S.tipos.some(z=>nk(z.nome)===nk(nm))){toast('Já existe uma concessionária ou fluxo com este nome');return}
+    const t=Date.now(),J=o=>JSON.parse(JSON.stringify(o));
+    const nm0=m0?{...J(m0),id:'m'+t,nome:nm}:{id:'m'+t,nome:nm,medicao:((S.medicoes||[])[0]||{}).id||'',itens:[],dir:'',prazo:'',cor:y.cor||COLORS[0]};
+    if(!S.concessionarias)S.concessionarias=[];S.concessionarias.push(nm0);
+    if(y){const mp=new Map((y.steps||[]).map((p,i)=>[p.id,'s'+t+'_'+i]));
+      S.tipos.push({...J(y),id:'ty'+t,conc:nm0.id,nome:nm,cor:nm0.cor||y.cor,
+        steps:(y.steps||[]).map(p=>({...J(p),id:mp.get(p.id),dep:(p.dep||[]).map(k=>mp.get(k)).filter(Boolean),con:(p.con||[]).map(k=>mp.get(k)).filter(Boolean)}))})}
+    await save();close();render();toast('Clonado: '+nm)};
 }
 function openTipo(id){
   if(!id&&!(S.concessionarias||[]).length){toast('Cadastre uma concessionária primeiro');adminSec='med';render();return}
