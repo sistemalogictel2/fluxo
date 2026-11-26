@@ -1267,7 +1267,7 @@ main{scrollbar-gutter:stable;min-width:0}
 
 /* Ajuste de altura da pilha de cards: aproveitar a área vertical disponível */
 .board.postit{
-  height:calc(100dvh - 145px);
+  height:calc(100vh / var(--z,1) - 185px);
   min-height:320px;
   align-items:stretch;
   box-sizing:border-box;
