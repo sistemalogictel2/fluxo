@@ -92,11 +92,19 @@ function mvSec(max){const L=S.tasks.filter(movNew).sort((a,b)=>b.mov.t-a.mov.t);
   return `<section class="gs-sec mvbar" aria-label="Tarefas que mudaram de posto"><h3>🔔 Mudaram de posto <em>${L.length}</em></h3>${mvRows(L,max)}<button type="button" class="btn" data-mvall>✓ Marcar todas como vistas</button></section>`}
 document.addEventListener('click',e=>{if(e.target.closest('[data-mvall]')){setVisto(S.tasks.filter(movNew).map(t=>t.id));render()}});
 const _sv=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
-const NI={gestao:_sv('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'),painel:_sv('<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/>'),tarefa:_sv('<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m8 12 3 3 5-6"/>'),equipe:_sv('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.3c2.2.7 3.5 2.6 3.5 5.7"/>'),med:_sv('<path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/>'),admin:_sv('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>'),guia:_sv('<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5Z"/><path d="M4 21.5V4.5M9 7h7"/>')};
+const NI={gestao:_sv('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'),painel:_sv('<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/>'),tarefa:_sv('<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m8 12 3 3 5-6"/>'),equipe:_sv('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.3c2.2.7 3.5 2.6 3.5 5.7"/>'),medicao:_sv('<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12.5 9 5 9-5M3 17l9 5 9-5"/>'),med:_sv('<path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/>'),admin:_sv('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>'),guia:_sv('<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5Z"/><path d="M4 21.5V4.5M9 7h7"/>')};
 function clkH(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `<b>${p(d.getHours())}<i>:</i>${p(d.getMinutes())}</b><small>${d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'}).replace(/\./g,'')}</small>`}
 if(!window._clkT)window._clkT=setInterval(()=>{const e=document.getElementById('clk');if(e)e.innerHTML=clkH()},15000);
-let MEDOPEN=false,MEDANI=false;if(!window._mEsc){window._mEsc=1;addEventListener('keydown',e=>{if(e.key==='Escape'&&MEDOPEN){MEDOPEN=false;render()}})}
-const NAV=[['gestao','Gestão'],['painel','Todas as tarefas'],['tarefa','Por tarefa'],['equipe','Por funcionário'],['med','Concessionárias'],['admin','Administração'],['guia','Passo a passo']];
+let MEDOPEN=false,MEDANI=false;
+function setMed(on,back){
+  on=!!on;MEDOPEN=on;
+  document.querySelectorAll('.msb').forEach(p=>{p.classList.toggle('open',on);p.setAttribute('aria-hidden',on?'false':'true');p.inert=!on});
+  document.querySelectorAll('.msbk').forEach(p=>p.classList.toggle('open',on));
+  document.querySelectorAll('nav button[data-v="medicao"]').forEach(b=>{b.setAttribute('aria-expanded',on);b.classList.toggle('on',on)});
+  if(on){const p=document.querySelector('.msb .msx');if(p)try{p.focus({preventScroll:true})}catch(e){}}
+  else if(back){const b=document.querySelector('nav button[data-v="medicao"]');if(b)try{b.focus({preventScroll:true})}catch(e){}}
+}if(!window._mEsc){window._mEsc=1;addEventListener('keydown',e=>{if(e.key==='Escape'&&MEDOPEN&&!document.querySelector('dialog[open]')){setMed(false,1)}})}
+const NAV=[['gestao','Gestão'],['medicao','Medições'],['painel','Todas as tarefas'],['tarefa','Por tarefa'],['equipe','Por funcionário'],['med','Concessionárias'],['admin','Administração'],['guia','Passo a passo']];
 const allowed=v=>isAdm()||v==='painel';
 let USR=null;const MX=new Set(),CC=new Set();
 async function rpc(fn,args){const r=await fetch(sbU('rpc/'+fn),{method:'POST',headers:sbH(),body:JSON.stringify(args)}),t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
@@ -183,9 +191,8 @@ function medSide(){
   const cardM=({m,t,n,d,cor,v})=>{const lt=!!m.prazo&&m.prazo<today()&&d<(t||n),o=MX.has(m.id);
     return `<article class="mdc${lt?' late':''}${o?' open':''}" style="--c:${cor}"><button type="button" class="mdh" data-mx="${esc(m.id)}" aria-expanded="${o}" title="${o?'Recolher':'Ver informações'}"><span class="mdn">${esc(m.nome)}${lt?' ⚠':''}</span><span class="mdg" aria-hidden="true">${o?'▴':'▾'}</span></button><div class="mdb"><div class="mdr"><span>Medição</span><b>${esc(medNm(m.medicao))||'—'}</b></div><div class="mdr"><span>Tarefas</span><b>${t}</b></div><div class="mdr"><span>Cadastradas</span><b>${n}</b></div><div class="mdr"><span>Concluídas</span><b>${d}</b></div><div class="mdr mdp"><span>Prazo de entrega</span><b>${m.prazo?fmt(m.prazo)+(lt?' ⚠':''):'Sem prazo'}</b></div></div></article>`};
   const G=byMed(L).filter(g=>g.L.length||g.c.id);
-  const nM=(S.medicoes||[]).length,an=MEDANI?' ani':'';MEDANI=false;
-  if(!MEDOPEN)return `<aside class="msb min" aria-label="Medições (recolhido)"><button type="button" class="msx" data-sbt aria-expanded="false" title="Mostrar o menu de medições"><span aria-hidden="true">▸</span><em>${nM}</em><b>Medições</b></button></aside>`;
-  return `<div class="msbk${an}" data-sbt></div><aside class="msb${an}" aria-label="Medições e concessionárias cadastradas"><div class="msh2"><button type="button" class="msx" data-sbt aria-expanded="true" title="Recolher o menu de medições"><b>Medições</b><em>${nM}</em><span aria-hidden="true">◂</span></button><button type="button" class="btn msr" data-sbc title="Recolher todas as classes e medições abertas">Recolher tudo</button></div><div class="msc">${G.map(g=>{const cl=!CC.has(g.c.id||'_');return `<section class="mcg"><button type="button" class="mch" data-cc="${esc(g.c.id||'_')}" aria-expanded="${!cl}" title="${cl?'Expandir':'Recolher'} ${esc(g.c.nome)}"><span class="mcn">${esc(g.c.nome)}</span><span class="mdg" aria-hidden="true">${cl?'▸':'▾'}</span></button>${cl?'':`<div class="msl">${g.L.map(cardM).join('')||'<div class="empty">Nenhuma concessionária.</div>'}</div>`}</section>`}).join('')||'<div class="empty">Nenhuma medição cadastrada.</div>'}</div></aside>`}
+  const nM=(S.medicoes||[]).length,op=MEDOPEN?' open':'';
+  return `<div class="msbk${op}" data-sbt></div><aside class="msb${op}" aria-hidden="${!MEDOPEN}"${MEDOPEN?'':' inert'} aria-label="Medições e concessionárias cadastradas"><div class="msh2"><button type="button" class="msx" data-sbt aria-expanded="${MEDOPEN}" title="Recolher o menu de medições"><b>Medições</b><em>${nM}</em><span aria-hidden="true">◂</span></button><button type="button" class="btn msr" data-sbc title="Recolher todas as classes e medições abertas">Recolher tudo</button></div><div class="msc">${G.map(g=>{const cl=!CC.has(g.c.id||'_');return `<section class="mcg"><button type="button" class="mch" data-cc="${esc(g.c.id||'_')}" aria-expanded="${!cl}" title="${cl?'Expandir':'Recolher'} ${esc(g.c.nome)}"><span class="mcn">${esc(g.c.nome)}</span><span class="mdg" aria-hidden="true">${cl?'▸':'▾'}</span></button>${cl?'':`<div class="msl">${g.L.map(cardM).join('')||'<div class="empty">Nenhuma concessionária.</div>'}</div>`}</section>`}).join('')||'<div class="empty">Nenhuma medição cadastrada.</div>'}</div></aside>`}
 /* ---------- Usuários (definidos no banco) ---------- */
 function usrPane(){
   const cn=id=>{const c=(S.contatos||[]).find(x=>x.id===id);return c?c.nome:''};
@@ -283,16 +290,17 @@ function render(){fxView();
     body=(isAdm()?'<p class="hint" style="margin:0 0 8px">Arraste um card para a coluna de outro funcionário para passar a ele o passo liberado.</p>':'')+`<div class="hsb" id="hsb" hidden aria-hidden="true"><div></div></div><div class="board postit" id="bdp">${P.map(([pk,p],i)=>{const L=srt(TF.filter(t=>holders(t).some(h=>pkey(h.pessoa)===pk)&&(t.status!=='done'||fKpi==='done')));
       return `<section class="col" data-p="${esc(pk)}" data-pn="${esc(p)}" aria-label="${esc(p)}"><h2><span><span class="avatar" aria-hidden="true">${esc(p[0])}</span>${esc(p)}</span><span><button type="button" class="xa" data-xa title="Expandir/recolher todos" aria-label="Expandir ou recolher todos">⇕</button><em>${L.length}</em></span></h2><div class="list">${L.map((t,j)=>card(t,'p').replace('class="card"',`class="card" style="--rot:${(j%2?1:-1)*(0.6+j%3*0.4)}deg;--c:${corOf(t)}"`)).join('')||'<div class="empty">Sem atividades</div>'}</div></section>`}).join('')||'<div class="empty" style="width:100%">Crie uma tarefa com fluxo para ver os funcionários aqui.</div>'}</div>`;
   }
-  const _mc=document.querySelector('.msb:not(.min) .msc'),_msT=_mc?{l:_mc.scrollLeft,c:[..._mc.querySelectorAll('.msl')].map(x=>x.scrollTop)}:null;
+  const _xp=!!document.querySelector('header.sb.xp'),_mc=document.querySelector('.msb .msc'),_msT=_mc?{l:_mc.scrollLeft,c:[..._mc.querySelectorAll('.msl')].map(x=>x.scrollTop)}:null;
   $('#app').innerHTML=`<header class="sb"><div class="logo">Flu<b>xo</b></div><span class="sbl">Menu</span>
-  <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" ${view===v?'aria-current="page"':''}><i class="ni" aria-hidden="true">${NI[v]||''}</i><span class="nl">${v==='painel'&&!isAdm()?'Minhas tarefas':l}</span>${v==='gestao'?gBadge():''}${v==='tarefa'?mvBadge():''}</button>`).join('')}</nav>
+  <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" ${v==='medicao'?`aria-haspopup="dialog" aria-expanded="${MEDOPEN}" class="${MEDOPEN?'on':''}"`:view===v?'aria-current="page"':''}><i class="ni" aria-hidden="true">${NI[v]||''}</i><span class="nl">${v==='painel'&&!isAdm()?'Minhas tarefas':l}</span>${v==='gestao'?gBadge():''}${v==='tarefa'?mvBadge():''}</button>`).join('')}</nav>
   <div class="sp"></div><span class="status" id="fs" role="status">${esc(stText())}</span>
   <span class="ap" role="group" aria-label="Aparência"><button class="btn" id="bt" title="Trocar tema (tecla T)" aria-label="Tema ${THEMES.find(x=>x[0]===themeOf())[1]}. Trocar tema">◐</button><button class="btn" id="bf" title="Tela cheia" aria-label="Alternar tela cheia">⛶</button><button class="btn" id="bc" title="Recolher ou expandir o cabeçalho" aria-label="Recolher ou expandir o cabeçalho">⇕</button><button class="btn" id="bz" title="Tamanho do texto" aria-label="Tamanho do texto ${Math.round(ZOOMS[PREF.z||0]*100)}%. Alterar">Aa</button></span>
   <button class="btn pri" id="bn" ${isAdm()?'':'hidden'} title="Nova tarefa (tecla N)">+ Nova tarefa</button><button class="btn" id="bo" aria-label="Sair de ${esc(user)}">Sair</button></header>
   <div class="stk"><div class="top">${hero()}
   <div class="kpis" role="group" aria-label="Segmentar por situação">${kp('open',open,'em aberto')}${kp('late',B.filter(late).length,'atrasadas')}${kp('done',B.filter(t=>t.status==='done').length,'concluídas')}</div></div>${['guia','med','gestao'].includes(view)?'':bar()}</div>
-  <div class="shell${isAdm()?(MEDOPEN?'':' mn'):' nosb'}">${medSide()}<main id="main" tabindex="-1">${body}</main></div>`;
-  if(_msT){const e=document.querySelector('.msb:not(.min) .msc');if(e){e.scrollLeft=_msT.l;e.querySelectorAll('.msl').forEach((x,i)=>x.scrollTop=_msT.c[i]||0)}}
+  <div class="shell${isAdm()?'':' nosb'}">${medSide()}<main id="main" tabindex="-1">${body}</main></div>`;
+  if(_msT){const e=document.querySelector('.msb .msc');if(e){e.scrollLeft=_msT.l;e.querySelectorAll('.msl').forEach((x,i)=>x.scrollTop=_msT.c[i]||0)}}
+  if(_xp&&!window._xpLock){const h=document.querySelector('header.sb');if(h)h.classList.add('xp')}
   bind();setHH();titulo();if(view==='guia')bindGuia();if(view==='admin')bindAdmin();
   if(focoKpi){focoKpi=false;focaAtividades()}
 }
@@ -337,12 +345,12 @@ function bind(){
   document.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{const[a,c]=b.dataset.gk.split('|');gTab=a;if(c)gSub=c;render()});
   document.querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{const k=b.dataset.cc;CC.has(k)?CC.delete(k):CC.add(k);render()});
   document.querySelectorAll('[data-vx]').forEach(b=>b.onclick=()=>{const x=VX(),k=b.dataset.vx;x[k]=!x[k];applyPref();render()});
-  document.querySelectorAll('[data-sbt]').forEach(b=>b.onclick=()=>{MEDOPEN=!MEDOPEN;MEDANI=true;render()});document.querySelectorAll('[data-sbc]').forEach(b=>b.onclick=()=>{CC.clear();MX.clear();render()});
+  document.querySelectorAll('[data-sbt]').forEach(b=>b.onclick=()=>setMed(!MEDOPEN,1));document.querySelectorAll('[data-sbc]').forEach(b=>b.onclick=()=>{CC.clear();MX.clear();render()});
   document.querySelectorAll('[data-gc]').forEach(b=>b.onclick=()=>copyText(GP.get(b.dataset.gc)||'').then(ok=>toast(ok?'Pauta copiada':'Não foi possível copiar')));
   if(isAdm())document.querySelectorAll('[data-mx]').forEach(b=>dbl(b,()=>{view='med';ANIM=true;render();openConcItens(b.dataset.mx)}));
   document.querySelectorAll('[data-cx]').forEach(b=>b.onclick=()=>{const k=b.dataset.cx;colOpen=colNow===k?null:k;ANIM=true;render()});
   document.querySelectorAll('.pcap[data-tp]').forEach(b=>b.onclick=()=>openTP(b.dataset.pk,b.dataset.tp));
-  document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{MEDOPEN=false;if(b.dataset.v==='gestao'&&view!=='gestao'){gTab='graf';gCh='map';gMore=false}view=b.dataset.v;ANIM=true;render()});
+  document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{if(b.dataset.v==='medicao'){window._xpLock=true;const h=b.closest('header.sb');if(h)h.classList.remove('xp');setMed(!MEDOPEN);return}MEDOPEN=false;if(b.dataset.v==='gestao'&&view!=='gestao'){gTab='graf';gCh='map';gMore=false}view=b.dataset.v;ANIM=true;render()});
   $('#bn').onclick=()=>openTask();$('#bt').onclick=cycTheme;$('#bz').onclick=cycZoom;[['fl-t',v=>fTipo=v],['fl-p',v=>fPessoa=v],['fl-c',v=>{fMed=v;if(fTipo&&!S.tipos.some(y=>y.id===fTipo&&(!fMed||medId(y)===fMed)))fTipo=''}]].forEach(([id,fn])=>{const e=$('#'+id);if(e)e.onchange=()=>{fn(e.value);render()}});
   const fx=$('#fl-x');if(fx)fx.onclick=()=>{fTipo=fPessoa=fKpi=fMed=fQ='';render()};
   const fq=$('#fq');if(fq)fq.oninput=()=>{clearTimeout(fq._t);fq._t=setTimeout(()=>{fQ=fq.value;const p=fq.selectionStart;render();const n=$('#fq');if(n){n.focus();n.setSelectionRange(p,p)}},180)};
@@ -1480,12 +1488,12 @@ setInterval(()=>{if(user&&Date.now()-_act>120*60*1000){sessionStorage.removeItem
   s.innerHTML='<div class="spl"><svg viewBox="0 0 64 64" width="64" height="64"><rect width="64" height="64" rx="14" fill="#0f141d"/><path d="M20 46V19h27M20 32h20" stroke="#f2c14e" stroke-width="7" fill="none" stroke-linecap="round"/></svg><b>Fluxo</b></div>';
   document.body.appendChild(s);setTimeout(()=>s.classList.add('go'),500);setTimeout(()=>s.remove(),900)})();
 
-/* Menu lateral: só expande se o mouse ficar parado 0,6 s sobre ele (teclado expande na hora) */
-(function(){let t=0;const D=600,sb=e=>e&&e.closest?e.closest('header.sb'):null,clr=()=>{clearTimeout(t);t=0};
- const arm=h=>{clr();t=setTimeout(()=>{t=0;if(h.isConnected&&h.matches(':hover'))h.classList.add('xp')},D)};
- document.addEventListener('mousemove',e=>{const h=sb(e.target);if(h&&!h.classList.contains('xp'))arm(h)},{passive:true});
- document.addEventListener('mouseout',e=>{const h=sb(e.target);if(!h||sb(e.relatedTarget))return;clr();if(!h.matches(':focus-within')||!h.querySelector(':focus-visible'))h.classList.remove('xp')});
- document.addEventListener('focusin',e=>{const h=sb(e.target);if(h&&e.target.matches(':focus-visible'))h.classList.add('xp')});
+/* Menu lateral: expande se o mouse ficar parado 0,45 s sobre ele; recolhe 0,3 s depois de sair (teclado expande na hora) */
+(function(){let t=0,c=0;const D=450,sb=e=>e&&e.closest?e.closest('header.sb'):null,clr=()=>{clearTimeout(t);t=0},clc=()=>{clearTimeout(c);c=0};
+ const arm=h=>{clr();t=setTimeout(()=>{t=0;const x=document.querySelector('header.sb');if(x&&!window._xpLock&&x.matches(':hover'))x.classList.add('xp')},D)};
+ document.addEventListener('mousemove',e=>{const h=sb(e.target);if(!h)return;clc();if(!h.classList.contains('xp')&&!window._xpLock)arm(h)},{passive:true});
+ document.addEventListener('mouseout',e=>{const h=sb(e.target);if(!h||sb(e.relatedTarget))return;clr();window._xpLock=false;clc();c=setTimeout(()=>{c=0;const x=document.querySelector('header.sb');if(x&&!x.matches(':hover')&&!x.querySelector(':focus-visible'))x.classList.remove('xp')},300)});
+ document.addEventListener('focusin',e=>{const h=sb(e.target);if(h&&e.target.matches(':focus-visible')){clc();h.classList.add('xp')}});
  document.addEventListener('focusout',e=>{const h=sb(e.target);if(h&&!sb(e.relatedTarget)&&!h.matches(':hover'))h.classList.remove('xp')});
- document.addEventListener('keydown',e=>{if(e.key==='Escape'){const h=document.querySelector('header.sb.xp');if(h)h.classList.remove('xp')}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!MEDOPEN){const h=document.querySelector('header.sb.xp');if(h)h.classList.remove('xp')}});
 })();

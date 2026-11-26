@@ -392,7 +392,7 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,v
 @media print{header,.bar,.kpis,.toast,nav,.btn,.skip{display:none!important}body{background:#fff!important;color:#000!important}.card,.col{box-shadow:none!important;break-inside:avoid}.stk{position:static;box-shadow:none}}
 /* ===== Menu lateral de concessionárias ===== */
 .shell{flex:1;display:flex;min-width:0}
-.shell>main{flex:1;min-width:0;border-left:1px solid var(--line)}
+.shell>main{flex:1;min-width:0}
 .msb{flex:0 0 240px;width:240px;align-self:flex-start;padding:10px 16px 24px 24px}
 .msh{margin:0 0 10px;font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
 .msh em{font-style:normal;font-size:12px;font-weight:600;background:var(--ov);border-radius:99px;padding:0 9px}
@@ -882,7 +882,7 @@ header.sb.xp nav button{justify-content:flex-start;padding:9px 12px}
 header.sb nav button>:not(.ni):not(.nl){position:absolute;top:1px;right:3px;transform:scale(.8)}
 header.sb.xp nav button>:not(.ni):not(.nl){position:static;transform:none}
 header.sb nav button:hover{color:var(--tx);background:var(--gl);border-color:var(--gb);transform:none}
-header.sb nav button[aria-current=page]{color:var(--tx);font-weight:700;background:color-mix(in srgb,var(--ac) 24%,transparent);border-color:color-mix(in srgb,var(--ac) 55%,transparent);box-shadow:0 0 14px color-mix(in srgb,var(--ac) 25%,transparent)}
+header.sb nav button[aria-current=page],header.sb nav button.on{color:var(--tx);font-weight:700;background:color-mix(in srgb,var(--ac) 24%,transparent);border-color:color-mix(in srgb,var(--ac) 55%,transparent);box-shadow:0 0 14px color-mix(in srgb,var(--ac) 25%,transparent)}
 header.sb .ni{display:inline-flex;flex:none;color:inherit}header.sb .ni svg{width:20px;height:20px}header.sb nav button[aria-current=page] .ni{color:var(--act)}
 header.sb .nl{flex:1;min-width:0}
 header.sb .clk{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:14px;background:var(--gl);border:1px solid var(--gb)}
@@ -1010,8 +1010,6 @@ dialog .db,dialog .vb{overflow-y:auto;-webkit-overflow-scrolling:touch}
 /* ===== Conteúdo começa depois da aba Medições (linha da medição) ===== */
 @media(min-width:761px){
 :root{--tabw:40px;--gut:8px}
-#app:has(.shell:not(.nosb)){margin-left:calc(var(--sbw) + var(--tabw) + var(--gut))}
-#app:has(.shell:not(.nosb)) .stk{margin-left:9px}
 .msb.min{width:var(--tabw)!important;padding:10px 4px!important;overflow:hidden}
 .msb.min .msx{justify-content:center;padding:4px 0;gap:8px}
 .msb.min .msx em{padding:0 6px}
@@ -1025,5 +1023,14 @@ dialog .db,dialog .vb{overflow-y:auto;-webkit-overflow-scrolling:touch}
 }
 
 /* Fluidez: menu lateral e aba de medições */
-header.sb{transition:width .22s ease,padding .22s ease}
+header.sb{transition:width .3s cubic-bezier(.22,1,.36,1),padding .3s cubic-bezier(.22,1,.36,1)}
 header.sb nav button,header.sb .btn,.msb.min{transition:background-color .15s,border-color .15s,color .15s,box-shadow .2s}
+
+/* Medições: painel aberto pelo menu; abre/fecha por classe, com transição suave */
+.msbk{background:#0003!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,visibility 0s linear .25s}
+.msbk.open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .25s ease}
+.msb{opacity:0;visibility:hidden;pointer-events:none;transform:translateX(-14px);transform-origin:left center;transition:opacity .22s ease,transform .3s cubic-bezier(.22,1,.36,1),visibility 0s linear .3s}
+.msb.open{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .22s ease,transform .3s cubic-bezier(.22,1,.36,1),visibility 0s}
+header.sb.xp :is(.nl,.sbl,.clk small,.status:not(:empty)){animation:sbfade .3s ease both}
+@keyframes sbfade{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.msb,.msbk,header.sb{transition:none!important}header.sb.xp .nl{animation:none!important}}
