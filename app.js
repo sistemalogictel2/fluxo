@@ -312,7 +312,7 @@ function bind(){
   document.querySelectorAll('[data-rcap]').forEach(b=>b.onclick=()=>{const v=parseInt(prompt('Limite de tarefas por pessoa (linha do gráfico):',rCap()),10);if(v>0){try{localStorage.setItem('fl_cap',v)}catch(e){}render()}});
   {let tp=document.getElementById('rtip');if(!tp){tp=document.createElement('div');tp.id='rtip';document.body.appendChild(tp);document.addEventListener('mouseover',e=>{const x=e.target.closest&&e.target.closest('[data-tip]'),t=document.getElementById('rtip');if(!x){t.hidden=true;return}t.textContent=x.dataset.tip;t.hidden=false});document.addEventListener('mousemove',e=>{const t=document.getElementById('rtip');if(t.hidden)return;t.style.left=Math.max(4,Math.min(innerWidth-t.offsetWidth-8,e.clientX+14))+'px';t.style.top=Math.min(innerHeight-t.offsetHeight-8,e.clientY+18)+'px'})}tp.hidden=true}
 
-  document.querySelectorAll('[data-gch]').forEach(b=>b.onclick=()=>{gCh=b.dataset.gch;render()});document.querySelectorAll('[data-guf]').forEach(b=>b.onclick=()=>{gUf=gUf===b.dataset.guf?'':b.dataset.guf;gMun='';render()});document.querySelectorAll('[data-gmun]').forEach(b=>b.onclick=()=>{if(b._t){clearTimeout(b._t);b._t=0;if(b.dataset.tid)openTask(b.dataset.tid);return}b._t=setTimeout(()=>{b._t=0;gMun=gMun===b.dataset.gmun?'':b.dataset.gmun;render()},250)});{const x=$('#gfx2');if(x)x.onclick=()=>{gUf=gMun='';render()}}document.querySelectorAll('svg.gmap[data-zf]').forEach(sv=>{try{const p=sv.querySelector('path'),b=p.getBBox(),m=Math.max(b.width,b.height)*.06;sv.setAttribute('viewBox',[b.x-m,b.y-m,b.width+2*m,b.height+2*m].join(' '))}catch(e){}});gFit();gMapInit();requestAnimationFrame(gFit);setTimeout(gFit,250);{const sk=document.querySelector('.stk');if(window._gRS)window._gRS.disconnect();if(sk&&window.ResizeObserver){window._gRS=new ResizeObserver(()=>{clearTimeout(window._gRT2);window._gRT2=setTimeout(()=>{setHH();gFit()},40)});window._gRS.observe(sk)}}{const gp=document.querySelector('.gcp .gmp');if(window._gRO){window._gRO.disconnect()}if(gp&&window.ResizeObserver){window._gRO=new ResizeObserver(()=>{clearTimeout(window._gRT);window._gRT=setTimeout(()=>{window._gRe&&window._gRe()},70)});window._gRO.observe(gp)}}
+  document.querySelectorAll('[data-gch]').forEach(b=>b.onclick=()=>{gCh=b.dataset.gch;render()});document.querySelectorAll('[data-guf]').forEach(b=>b.onclick=()=>{gUf=gUf===b.dataset.guf?'':b.dataset.guf;gMun='';render()});document.querySelectorAll('[data-gmun]').forEach(b=>b.onclick=()=>{if(b._t){clearTimeout(b._t);b._t=0;if(b.dataset.tid)openTask(b.dataset.tid);return}b._t=setTimeout(()=>{b._t=0;gMun=gMun===b.dataset.gmun?'':b.dataset.gmun;render()},250)});{const x=$('#gfx2');if(x)x.onclick=()=>{gUf=gMun='';render()}}document.querySelectorAll('svg.gmap[data-zf]').forEach(sv=>{try{const p=sv.querySelector('path'),b=p.getBBox(),m=Math.max(b.width,b.height)*.06;sv.setAttribute('viewBox',[b.x-m,b.y-m,b.width+2*m,b.height+2*m].join(' '))}catch(e){}});gFit();gMapInit();gRoadInit();requestAnimationFrame(gFit);setTimeout(gFit,250);{const sk=document.querySelector('.stk');if(window._gRS)window._gRS.disconnect();if(sk&&window.ResizeObserver){window._gRS=new ResizeObserver(()=>{clearTimeout(window._gRT2);window._gRT2=setTimeout(()=>{setHH();gFit()},40)});window._gRS.observe(sk)}}{const gp=document.querySelector('.gcp .gmp');if(window._gRO){window._gRO.disconnect()}if(gp&&window.ResizeObserver){window._gRO=new ResizeObserver(()=>{clearTimeout(window._gRT);window._gRT=setTimeout(()=>{window._gRe&&window._gRe()},70)});window._gRO.observe(gp)}}
   document.querySelectorAll('[data-gsub]').forEach(b=>b.onclick=()=>{gSub=b.dataset.gsub;render()});
   document.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{const[a,c]=b.dataset.gk.split('|');gTab=a;if(c)gSub=c;render()});
   document.querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{const k=b.dataset.cc;CC.has(k)?CC.delete(k):CC.add(k);render()});
@@ -1100,7 +1100,7 @@ function gMapHtml(T0){
   const lst=gUf?(gOrd.length?gOrd.map(([mi,o])=>{const L=[...o.m.values()];return`<div class="gmgh" style="--mc:${mcol(mi)}"><span>${esc(o.n)}</span><em>${L.length} município(s) · ${L.reduce((a,e)=>a+e.c,0)} tarefa(s)</em></div>`}).join('')+'<p class="hint">Dê 2 cliques no nome do município (no mapa) para abrir o card.</p>':`<p class="hint">Nenhuma tarefa nesta UF.</p>`):U.map(([u,c])=>row(`data-guf="${u}" data-h="${u}" title="${esc(UFN[u])}"`,u,c,um,col(c))).join('');
   const top=U[0];
   const side=`<aside class="gmr2"><div class="gmhd"><small>${gUf?esc(UFN[gUf]):'Brasil'}${gMun?' · '+esc((MM.get(gMun)||{}).n||''):''}</small>${gUf||gMun?'<button type="button" class="btn" id="gfx2">← Brasil</button>':''}</div><div class="gmbig"><b>${tot}</b><span>tarefa(s)</span></div><div class="gmst"><div><b>${gUf?1:U.length}</b><span>UF(s)</span></div><div><b>${gUf?MM.size:new Set(G.filter(g=>g.mun).map(g=>gNorm(g.mun))).size}</b><span>município(s)</span></div><div><b>${top?top[0]:'–'}</b><span>líder${top?' · '+top[1]:''}</span></div></div><h4>${gUf?'Medições nesta UF':'Estados'}</h4><div class="gmls${gUf?'':' g2'}">${lst}</div></aside>`;
-  return`<div class="gme"><div class="gmp"><div class="gmtb"><button type="button" data-z="in" aria-label="Aproximar">+</button><button type="button" data-z="out" aria-label="Afastar">−</button><button type="button" data-z="0" aria-label="Centralizar">⟲</button></div>${sv}${ov}<div class="gmtip" hidden></div>${lg}</div>${side}</div><p class="hint gmh2"><b>${tot}</b> com UF${semUf?` · ${semUf} sem UF`:''} · clique num estado: zoom e filtro · 2 cliques num município: abre o card · Esc: volta ao Brasil</p>`;
+  return`<div class="gme"><div class="gmp"><div class="gmtb"><button type="button" data-z="in" aria-label="Aproximar">+</button><button type="button" data-z="out" aria-label="Afastar">−</button><button type="button" data-z="0" aria-label="Centralizar">⟲</button></div>${sv}${ov}<div class="gmtip" hidden></div>${lg}</div>${side}</div><section class="groad"><div class="groad-head"><div><h3>Mapa viário · OpenStreetMap</h3><p>${gMun?`Município selecionado: <b>${esc((MM.get(gMun)||{}).n||gMun)}</b>`:"Selecione um município no filtro acima para destacar seus limites."}</p></div><span class="groad-status" id="gRoadStatus">${gMun?"Carregando mapa…":"Aguardando município"}</span></div><div id="gRoadMap" class="groad-map" role="region" aria-label="Mapa viário OpenStreetMap"></div></section><p class="hint gmh2"><b>${tot}</b> com UF${semUf?` · ${semUf} sem UF`:''} · clique num estado: zoom e filtro · 2 cliques num município: abre o card · Esc: volta ao Brasil</p>`;
 }
 function gMapInit(){
   const sv=document.querySelector('svg.gmap');if(!sv)return;
@@ -1168,6 +1168,59 @@ function gMapInit(){
       if(u<1){sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));requestAnimationFrame(step)}else{V={...T};set(1)}};requestAnimationFrame(step)};
   window._gRe=()=>{if(!sv.isConnected)return;fitB();V=tgt();set(1)};
   {const T=tgt(),P0=window._gPrev;if(P0&&(Math.abs(P0.w-T.w)>.5||Math.abs(P0.x-T.x)>.5||Math.abs(P0.y-T.y)>.5)){V={...P0};sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));anim(T)}else{V=T;set(1)}}
+}
+
+/* ===== Mapa viário OpenStreetMap + limite municipal ===== */
+function gRoadInit(){
+  const el=document.getElementById('gRoadMap');if(!el)return;
+  const status=document.getElementById('gRoadStatus');
+  const setStatus=t=>{if(status)status.textContent=t};
+  const load=(url,tag,attrs={})=>new Promise((resolve,reject)=>{
+    const found=document.querySelector(tag+'[data-fluxo-leaflet]');
+    if(found){if(tag==='script'&&window.L)resolve();else if(tag==='link')resolve();else found.addEventListener('load',resolve,{once:true});return}
+    const n=document.createElement(tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));n.dataset.fluxoLeaflet='1';
+    n.onload=resolve;n.onerror=reject;document.head.appendChild(n);
+  });
+  if(window._gRoadMap){try{window._gRoadMap.remove()}catch(e){}window._gRoadMap=null}
+  const start=async()=>{
+    try{
+      await load('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css','link',{rel:'stylesheet',href:'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'});
+      if(!window.L)await load('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js','script',{src:'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'});
+      if(!el.isConnected)return;
+      const map=L.map(el,{scrollWheelZoom:true}).setView([-14.2,-51.9],4);
+      window._gRoadMap=map;
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+      }).addTo(map);
+      if(!gMun){setStatus('Selecione um município para destacar a área');setTimeout(()=>map.invalidateSize(),100);return}
+      const select=document.getElementById('gfmun'),label=select?.selectedOptions?.[0]?.textContent||gMun;
+      const ufField=gFld(/^(UF|ESTADO)$/),munField=gFld(/MUNIC|CIDADE/);
+      const matchingTask=(S.tasks||[]).find(t=>munField&&gNorm(String(t[munField.id]||'').trim())===gMun);
+      const roadUf=gUf||(ufField&&matchingTask?(UFK[gNorm(matchingTask[ufField.id])]||''):'');
+      const ufName=typeof UFN!=='undefined'?(UFN[roadUf]||roadUf):roadUf;
+      const key=[label,ufName].join('|').toLocaleLowerCase('pt-BR');
+      window._gRoadCache=window._gRoadCache||{};
+      let geo=window._gRoadCache[key];
+      if(!geo){
+        setStatus('Localizando município…');
+        const q=encodeURIComponent([label,ufName,'Brasil'].filter(Boolean).join(', '));
+        const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&polygon_geojson=1&q='+q;
+        const resp=await fetch(url,{headers:{'Accept-Language':'pt-BR'}});
+        if(!resp.ok)throw new Error('Serviço de localização indisponível ('+resp.status+')');
+        const rows=await resp.json();geo=rows&&rows[0]&&rows[0].geojson;
+        if(!geo)throw new Error('Não foi possível localizar o limite desse município.');
+        window._gRoadCache[key]=geo;
+      }
+      if(!el.isConnected)return;
+      const layer=L.geoJSON(geo,{style:{color:'#ffca55',weight:4,opacity:1,fillColor:'#f2c14e',fillOpacity:.18}});
+      layer.addTo(map);
+      const bounds=layer.getBounds();
+      if(bounds.isValid())map.fitBounds(bounds,{padding:[24,24],maxZoom:12});
+      setStatus('Limite municipal destacado · vias do OpenStreetMap');
+      setTimeout(()=>map.invalidateSize(),120);
+    }catch(err){setStatus(err.message||'Não foi possível carregar o mapa.');}
+  };
+  start();
 }
 function gFit(){
   const p=document.querySelector('.gcp');if(!p)return;
