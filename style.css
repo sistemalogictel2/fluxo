@@ -1050,3 +1050,18 @@ header.sb.xp :is(.nl,.sbl,.clk small,.status:not(:empty)){animation:sbfade .3s e
 .groad-map{height:440px;min-height:320px;width:100%;border-radius:10px;overflow:hidden;background:var(--s2);z-index:0}
 .groad-map .leaflet-control-attribution{font-size:10px}
 @media(max-width:700px){.groad{padding:10px}.groad-map{height:360px;min-height:280px}}
+
+/* ===== Ajustes do menu lateral compacto ===== */
+@media(min-width:761px){
+  /* Controles de cabeçalho e fonte ficam disponíveis apenas no menu expandido */
+  header.sb:not(.xp) #bc,
+  header.sb:not(.xp) #bz{display:none!important}
+
+  /* No modo compacto, Sair usa um ícone para caber integralmente na barra */
+  header.sb:not(.xp) #bo{font-size:0;min-width:0;width:100%;padding:7px 0;overflow:hidden}
+  header.sb:not(.xp) #bo::before{content:"↪";display:block;font-size:21px;line-height:1}
+
+  /* No modo expandido, mantém o botão Sair com texto */
+  header.sb.xp #bo{font-size:14px}
+  header.sb.xp #bo::before{content:none}
+}
