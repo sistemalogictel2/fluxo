@@ -930,13 +930,14 @@ header.sb #bo:hover{color:var(--tx);background:color-mix(in srgb,#e5493d 45%,tra
 .msb.ani:not(.min){animation:cort .38s cubic-bezier(.2,.8,.2,1)}
 .msbk.ani{animation:cfade .25s}
 .msb:not(.min){width:min(980px,calc(100vw - var(--sbw) - 20px))!important;display:flex;flex-direction:column;overflow:hidden!important}
+.msb:not(.min){bottom:auto!important;height:calc(100vh/var(--z,1) - 16px)!important;height:calc(100dvh/var(--z,1) - 16px)!important;max-height:calc(100vh/var(--z,1) - 16px)!important}
 .msb:not(.min) .msh2{flex:none}
 .msc{flex:1;min-height:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior:contain;display:flex;flex-wrap:nowrap;gap:0;align-items:stretch;padding:2px 0 6px}
-.msc .mcg{flex:1 0 260px;min-width:260px;margin-bottom:0;min-height:0;padding:0 12px}
+.msc .mcg{flex:1 0 260px;min-width:260px;margin-bottom:0;min-height:0;height:100%;overflow:hidden;padding:0 12px}
 .msc .mcg:first-child{padding-left:0}.msc .mcg:last-child{padding-right:0}
 .msc .mcg+.mcg{border-left:1px solid var(--line2)}
 .msc .mcg .mch{flex:none}
-.msc .msl{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 4px 6px 0;scrollbar-width:thin}
+.msc .msl{flex:1 1 0;min-height:0;overflow-y:scroll;overscroll-behavior:contain;padding:2px 4px 6px 0;scrollbar-width:thin}
 .msc .empty{flex:1 1 100%}
 .msb .mdc,.msb .mcg{animation:none!important}
 .shell.mn{padding-left:52px}
