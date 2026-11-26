@@ -1017,6 +1017,9 @@ html[data-view=gestao] .stk{display:none}
 html:has(dialog[open]){overflow:hidden}
 dialog,dialog *{overscroll-behavior:contain}
 dialog .db,dialog .vb{overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ===== Conteúdo começa depois da aba Medições (linha da medição) ===== */
+@media(min-width:761px){#app:has(.shell:not(.nosb)){margin-left:calc(var(--sbw) + 60px)}}
 </style>
 </head>
 <body>
@@ -1306,7 +1309,7 @@ function render(){fxView();
   }else if(view==='gestao'){body=gestaoView()
   }else if(view==='admin'){body=adminView()
   }else{
-    const P=flowPeople().filter(([k])=>!fPessoa||k===fPessoa);
+    const _me=meC(),_mk=_me?'c:'+_me.id:'',P=flowPeople().filter(([k])=>!fPessoa||k===fPessoa).sort((x,y)=>(y[0]===_mk)-(x[0]===_mk));
     body=(isAdm()?'<p class="hint" style="margin:0 0 8px">Arraste um card para a coluna de outro funcionário para passar a ele o passo liberado.</p>':'')+`<div class="hsb" id="hsb" hidden aria-hidden="true"><div></div></div><div class="board postit" id="bdp">${P.map(([pk,p],i)=>{const L=srt(TF.filter(t=>holders(t).some(h=>pkey(h.pessoa)===pk)&&(t.status!=='done'||fKpi==='done')));
       return `<section class="col" data-p="${esc(pk)}" data-pn="${esc(p)}" aria-label="${esc(p)}"><h2><span><span class="avatar" aria-hidden="true">${esc(p[0])}</span>${esc(p)}</span><span><button type="button" class="xa" data-xa title="Expandir/recolher todos" aria-label="Expandir ou recolher todos">⇕</button><em>${L.length}</em></span></h2><div class="list">${L.map((t,j)=>card(t,'p').replace('class="card"',`class="card" style="--rot:${(j%2?1:-1)*(0.6+j%3*0.4)}deg;--c:${corOf(t)}"`)).join('')||'<div class="empty">Sem atividades</div>'}</div></section>`}).join('')||'<div class="empty" style="width:100%">Crie uma tarefa com fluxo para ver os funcionários aqui.</div>'}</div>`;
   }
