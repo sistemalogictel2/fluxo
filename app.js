@@ -421,20 +421,23 @@ const ufV=()=>view==='painel'||view==='tarefa'||view==='equipe';
 const ufOf=t=>{try{const f=gFld(/^(UF|ESTADO)$/);return f?(UFK[gNorm(t[f.id])]||''):''}catch(e){return''}};
 const ufList=()=>{try{return[...new Set(S.tasks.filter(vis).map(ufOf).filter(Boolean))].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR'))}catch(e){return[]}};
 const FSEP='¦', fvals=v=>v?String(v).split(FSEP).filter(Boolean):[], fhas=(v,x)=>!v||fvals(v).includes(String(x)), fcount=v=>fvals(v).length;
-const base=()=>S.tasks.filter(t=>vis(t)&&(!fUf||!ufV()||fhas(fUf,ufOf(t)))&&(!fQ||qOk(t))&&fhas(fTipo,t.tipo||'')&&fhas(fMed,medId(tipoOf(t)))&&(!fPessoa||holders(t).some(h=>fhas(fPessoa,pkey(h.pessoa)))));
+const baseSkip=(skip='')=>S.tasks.filter(t=>vis(t)&&(!skip.includes('uf')&&(!fUf||!ufV()||fhas(fUf,ufOf(t)))||skip.includes('uf'))&&(!skip.includes('q')&&!fQ||skip.includes('q')||qOk(t))&&(!skip.includes('tipo')&&fhas(fTipo,t.tipo||'')||skip.includes('tipo'))&&(!skip.includes('med')&&fhas(fMed,medId(tipoOf(t)))||skip.includes('med'))&&(!skip.includes('pessoa')&&(!fPessoa||holders(t).some(h=>fhas(fPessoa,pkey(h.pessoa))))||skip.includes('pessoa')));
+const base=()=>baseSkip();
 const kpiOk=t=>!fKpi||(fKpi==='open'?t.status!=='done':fKpi==='late'?late(t):t.status==='done');
 const anyF=()=>!!(fTipo||fPessoa||fKpi||fQ||fMed||(fUf&&ufV()));
 const KPI_TXT={open:'em aberto',late:'atrasadas',done:'concluídas'};
 function bar(){
-  const Y=(S.tipos||[]).filter(y=>fhas(fMed,medId(y))).map(y=>[y.id,tipoLbl(y)]),P=isAdm()?personOpts():[],C=(S.medicoes||[]).map(c=>[c.id,c.nome]).sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'));
-  const sel=(id,l,cur,all,o,cls)=>o.length?(()=>{const chosen=fvals(cur),open=gMfOpen===id,tx=chosen.length===0?all:chosen.length===1?(o.find(x=>x[0]===chosen[0])||[0,chosen[0]])[1]:chosen.length+' selecionados',item=(v,t,c,a)=>`<label class="gmi"><input type="checkbox" value="${esc(v)}" ${a?'data-all="1" ':''}${c?'checked':''}><span>${esc(t)}</span></label>`;return `<div class="fg gfi gmf" data-mf="${id}"><span>${l}</span><button type="button" class="gmb" aria-haspopup="true" aria-expanded="${open}"><em>${esc(tx)}</em></button><div class="gmdp"${open?'':' hidden'}>${item('','Nenhuma',!chosen.length,1)}${o.map(([v,t])=>item(v,t,chosen.includes(v))).join('')}</div></div>`})():'';
+  const medRows=baseSkip('med'),typeRows=baseSkip('tipo'),peopleRows=baseSkip('pessoa'),ufRows=baseSkip('uf');
+  const medIds=new Set(medRows.map(t=>medId(tipoOf(t)))),typeIds=new Set(typeRows.map(t=>t.tipo||'')),personIds=new Set(peopleRows.flatMap(t=>holders(t).map(h=>pkey(h.pessoa)))),ufIds=new Set(ufRows.map(ufOf).filter(Boolean));
+  const Y=(S.tipos||[]).filter(y=>typeIds.has(y.id)).map(y=>[y.id,tipoLbl(y)]),P=isAdm()?personOpts().filter(([k])=>personIds.has(k)):[],C=(S.medicoes||[]).filter(c=>medIds.has(c.id)).map(c=>[c.id,c.nome]).sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'));
+  const sel=(id,l,cur,all,o,cls)=>o.length?(()=>{const chosen=fvals(cur),open=gMfOpen===id,tx=chosen.length===0?all:chosen.length===1?(o.find(x=>x[0]===chosen[0])||[0,chosen[0]])[1]:chosen.length+' selecionados',item=(v,t,c,a)=>`<label class="gmi"><input type="checkbox" value="${esc(v)}" ${a?'data-all="1" ':''}${c?'checked':''}><span>${esc(t)}</span></label>`;return `<div class="fg gfi gmf" data-mf="${id}"><span>${l}</span><button type="button" class="gmb" aria-haspopup="true" aria-expanded="${open}"><em>${esc(tx)}</em></button><div class="gmdp"${open?'':' hidden'}>${item('','Todas',!chosen.length,1)}${o.map(([v,t])=>item(v,t,!chosen.length||chosen.includes(v))).join('')}</div></div>`})():'';
   const f=anyF();
   let extra='';
   if(view==='admin'){
     const n={cls:(S.medicoes||[]).length,med:(S.concessionarias||[]).length,tipos:S.tipos.length,campos:campos().filter(c=>!c.fixo).length,func:(S.contatos||[]).length,usr:USR?USR.length:'·'};
     extra=`<div class="amenu-bar" role="group" aria-label="Cadastros">${ASEC.map(([k,l],i)=>`<button type="button" data-sec="${k}" ${adminSec===k?'aria-current="page"':''}><span>${i+1}. ${l}</span><em>${n[k]}</em></button>`).join('')}</div>`;
   }
-  return `<div class="bar" role="group" aria-label="Filtros">${['painel','tarefa','equipe'].includes(view)?`<div class="fg"><label for="fq">Buscar</label><input type="search" id="fq" class="cs" placeholder="Título, protocolo, pessoa…  ( / )" value="${esc(fQ)}" autocomplete="off"></div>`:''}${sel('fl-c','Medição',fMed,'Todas',C)}${sel('fl-t','Tipo',fTipo,'Todos',Y)}${sel('fl-p','Funcionário',fPessoa,'Todos',P)}${ufV()?sel('fl-u','UF',fUf,'Todas',ufList().map(u=>[u,u]),'fu'):''}<span class="fsp"></span>`
+  return `<div class="bar" role="group" aria-label="Filtros">${['painel','tarefa','equipe'].includes(view)?`<div class="fg"><label for="fq">Buscar</label><input type="search" id="fq" class="cs" placeholder="Título, protocolo, pessoa…  ( / )" value="${esc(fQ)}" autocomplete="off"></div>`:''}${sel('fl-c','Medição',fMed,'Todas',C)}${sel('fl-t','Tipo',fTipo,'Todos',Y)}${sel('fl-p','Funcionário',fPessoa,'Todos',P)}${ufV()?sel('fl-u','UF',fUf,'Todas',[...ufIds].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR')).map(u=>[u,u]),'fu'):''}<span class="fsp"></span>`
    +(f?`<span class="fcount">${fKpi?'Mostrando '+KPI_TXT[fKpi]+' · ':''}${base().filter(kpiOk).length} de ${S.tasks.filter(vis).length} tarefa(s)</span><button type="button" class="btn clr" id="fl-x">${ICO_BROOM} Limpar filtros</button>`:'')+extra+`</div>`;
 }
 async function copyText(txt){
@@ -1126,7 +1129,7 @@ function gMapHtml(T0){
   const fu=gFld(/^(UF|ESTADO)$/),fm=gFld(/MUNIC|CIDADE/);
   if(!fu)return'<div class="empty">Não encontrei o campo “UF” nas tarefas. Cadastre um campo chamado UF para ver o mapa.</div>';
   const G=T0.map(t=>({uf:UFK[gNorm(t[fu.id])]||'',mun:(fm?String(t[fm.id]||'').trim():'')||String(t.tarefa||'').trim(),t}));
-  const ufs=[...new Set(G.map(g=>g.uf).filter(Boolean))].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR'));
+  const ufs=[...new Set(G.filter(g=>!gMun||gHas(gMun,gNorm(g.mun))).map(g=>g.uf).filter(Boolean))].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR'));
   if(gUf&&!gVals(gUf).some(u=>ufs.includes(u)))gUf='';
   const MM=new Map();G.filter(g=>g.mun&&(!gUf||gHas(gUf,g.uf))).forEach(g=>{const k=gNorm(g.mun);const e=MM.get(k)||{n:g.mun,c:0};e.c++;MM.set(k,e)});
   const muns=[...MM.entries()].sort((a,b)=>a[1].n.localeCompare(b[1].n,'pt-BR'));
@@ -1360,10 +1363,10 @@ function gestaoView(){
     const ST=[['todo','A iniciar','#8ea4cf'],['doing','Em andamento','#f2c14e'],['wait','Aguardando','#c4a5f5'],['done','Concluídas','#2fb59f']],
       V=S.tasks.filter(vis),T00=V.filter(t=>ST.some(x=>x[0]===t.status)&&gOk(t,0)),
       medBase=V.filter(t=>ST.some(x=>x[0]===t.status)),
-      medOpts=[...(S.medicoes||[])].filter(m=>medBase.some(t=>medMatch(t,m.id))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>({id:m.id,nome:m.nome})),
-      medSem=medBase.some(t=>medMatch(t,'_')),
-      logBase=medBase.filter(t=>!gSel||gVals(gSel).some(v=>medMatch(t,v))),
-      vtBase=logBase.filter(t=>gMt(gLog,gLk(t))),
+      medOptBase=medBase.filter(t=>gMt(gLog,gLk(t))&&gMt(gVt,gVk(t))),medOpts=[...(S.medicoes||[])].filter(m=>medOptBase.some(t=>medMatch(t,m.id))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>({id:m.id,nome:m.nome})),
+      medSem=medOptBase.some(t=>medMatch(t,'_')),
+      logBase=medBase.filter(t=>(!gSel||gVals(gSel).some(v=>medMatch(t,v)))&&gMt(gVt,gVk(t))),
+      vtBase=medBase.filter(t=>(!gSel||gVals(gSel).some(v=>medMatch(t,v)))&&gMt(gLog,gLk(t))),
       ufBase=vtBase.filter(t=>gMt(gVt,gVk(t))),
       MP=gMapHtml(T00.filter(t=>(!gSel||gVals(gSel).some(v=>medMatch(t,v)))&&(gMt(gLog,gLk(t)))&&(gMt(gVt,gVk(t))))),
       FU=gFld(/^(UF|ESTADO)$/),FM=gFld(/MUNIC|CIDADE/),
@@ -1375,8 +1378,8 @@ function gestaoView(){
     const lo=[...new Set(logBase.map(t=>String(t.vmc||'').slice(0,7)).filter(k=>/^\d{4}-\d{2}$/.test(k)))].sort(),
       logSem=logBase.some(t=>!gLk(t)),vtSem=vtBase.some(t=>!gVk(t)),
       vo=[...new Set(vtBase.map(t=>String(t.vmg||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
-    const fs=(id,l,cur,o)=>{const all=[['_','Sem medição'],...o],sel=gVals(cur),tx=!sel.length?'Todas':sel.length===1?(all.find(x=>x[0]===sel[0])||[0,sel[0]])[1]:sel.length+' selecionadas',open=gMfOpen===id,it=(v,t,c,a)=>`<label class="gmi"><input type="checkbox" value="${esc(v)}" ${a?'data-all="1" ':''}${c?'checked':''}><span>${esc(t)}</span></label>`;return `<div class="gfi gmf" data-mf="${id}"><span>${l}</span><button type="button" class="gmb" aria-haspopup="true" aria-expanded="${open}"><em>${esc(tx)}</em></button><div class="gmdp"${open?'':' hidden'}>${it('','Todas',!sel.length,1)}${all.map(([v,t])=>it(v,t,sel.includes(v))).join('')}</div></div>`};
-    const fm=(id,l,cur,o,sem)=>{const sel=gVals(cur),all=[['_','Nenhuma'],...o],tx=sel.length?(sel.length===1?(all.find(x=>x[0]===sel[0])||[0,sel[0]])[1]:sel.length+' selecionadas'):'Todas',open=gMfOpen===id,it=(v,t,c,a)=>`<label class="gmi"><input type="checkbox" value="${esc(v)}" ${a?'data-all="1" ':''}${c?'checked':''}><span>${esc(t)}</span></label>`;return `<div class="gfi gmf" data-mf="${id}"><span>${l}</span><button type="button" class="gmb" aria-haspopup="true" aria-expanded="${open}"><em>${esc(tx)}</em></button><div class="gmdp"${open?'':' hidden'}>${it('','Todas',!sel.length,1)}${all.map(([v,t])=>it(v,t,sel.includes(v))).join('')}</div></div>`};
+    const fs=(id,l,cur,o)=>{const all=[['_','Sem medição'],...o],sel=gVals(cur),tx=!sel.length?'Todas':sel.length===1?(all.find(x=>x[0]===sel[0])||[0,sel[0]])[1]:sel.length+' selecionadas',open=gMfOpen===id,it=(v,t,c,a)=>`<label class="gmi"><input type="checkbox" value="${esc(v)}" ${a?'data-all="1" ':''}${c?'checked':''}><span>${esc(t)}</span></label>`;return `<div class="gfi gmf" data-mf="${id}"><span>${l}</span><button type="button" class="gmb" aria-haspopup="true" aria-expanded="${open}"><em>${esc(tx)}</em></button><div class="gmdp"${open?'':' hidden'}>${it('','Todas',!sel.length,1)}${all.map(([v,t])=>it(v,t,!sel.length||sel.includes(v))).join('')}</div></div>`};
+    const fm=(id,l,cur,o,sem)=>{const sel=gVals(cur),all=[['__n','Nenhuma'],...o],tx=sel.length?(sel.length===1?(all.find(x=>x[0]===sel[0])||[0,sel[0]])[1]:sel.length+' selecionadas'):'Todas',open=gMfOpen===id,it=(v,t,c,a)=>`<label class="gmi"><input type="checkbox" value="${esc(v)}" ${a?'data-all="1" ':''}${c?'checked':''}><span>${esc(t)}</span></label>`;return `<div class="gfi gmf" data-mf="${id}"><span>${l}</span><button type="button" class="gmb" aria-haspopup="true" aria-expanded="${open}"><em>${esc(tx)}</em></button><div class="gmdp"${open?'':' hidden'}>${it('','Todas',!sel.length,1)}${all.map(([v,t])=>it(v,t,!sel.length||sel.includes(v))).join('')}</div></div>`};
     const leg=`<div class="gleg">${ST.map(([k,l,c])=>`<span style="--c:${c}"><i></i>${l} <b>${T.filter(t=>t.status===k).length}</b></span>`).join('')}</div>`;
     const cols=C.length?`<div class="gcols" data-mx="${mx}">${C.map(({m,c,n})=>`<div class="gg${gSel&&!gHas(gSel,m.id)?' dim':''}" style="flex-grow:${Math.max(1,c.length)}"><div class="gbs">${c.map(({l,cl,n:v})=>{const h=v/mx*PH;return `<u data-v="${v}" style="--c:${cl};--h:${h.toFixed(1)}px" class="${h<20?'sm':''}" title="${esc(m.nome)} · ${l}: ${v}"><b>${v}</b></u>`}).join('')||'<span class="gz">0</span>'}</div><button type="button" class="gnm${gHas(gSel,m.id)&&gSel?' on':''}" data-gmed="${esc(m.id)}" aria-pressed="${gHas(gSel,m.id)&&!!gSel}" title="Filtrar por ${esc(m.nome)} (${n} tarefas)">${esc(m.nome)}</button></div>`).join('')}</div>`:'<div class="empty">Nenhuma medição cadastrada.</div>';
     gRep={T,f:[['Medição',gSel?gVals(gSel).map(v=>v==='_'?'Sem medição':medNm(v)||v).join(', '):'Todas'],['Medição Logictel',gLog?gLb(gLog,fmtMes):'Todas'],['Medição V.tal',gVt?gLb(gVt):'Todas'],['UF',(gUf?gVals(gUf).join(', '):'Todos')],['Município',gMun?gVals(gMun).join(', '):'Todos']]};
