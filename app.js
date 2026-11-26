@@ -421,7 +421,7 @@ function flowPeople(){const m=new Map();S.tasks.forEach(t=>t.fluxo.forEach(f=>{i
 const personOpts=()=>{const m=new Map(flowPeople());(S.contatos||[]).forEach(c=>m.set('c:'+c.id,chipName(c)));return[...m].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'))};
 const qOk=t=>{const hay=nk([nome(t),t.tarefa,t.protocolo,...holders(t).map(h=>h.pessoa),...t.fluxo.flatMap(f=>[f.etapa,f.pessoa])].join(' '));return nk(fQ).split(' ').every(w=>hay.includes(w))};
 const ufV=()=>view==='painel'||view==='tarefa'||view==='equipe';
-const semF=t=>t.fluxo.some(f=>!String(f.pessoa||'').trim()||f.pessoa==='Sem responsável'),semOn=()=>fSemF&&(view==='painel'||view==='tarefa');
+const semF=t=>act(t).some(f=>!String(f.pessoa||'').trim()||f.pessoa==='Sem responsável'),semOn=()=>fSemF&&(view==='painel'||view==='tarefa');
 const ufOf=t=>{try{const f=gFld(/^(UF|ESTADO)$/);return f?(UFK[gNorm(t[f.id])]||''):''}catch(e){return''}};
 const ufList=()=>{try{return[...new Set(S.tasks.filter(vis).map(ufOf).filter(Boolean))].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR'))}catch(e){return[]}};
 const FSEP='¦', fvals=v=>v?String(v).split(FSEP).filter(Boolean):[], fhas=(v,x)=>!v||fvals(v).includes(String(x)), fcount=v=>fvals(v).length;
