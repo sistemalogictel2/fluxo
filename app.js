@@ -245,8 +245,8 @@ function render(){fxView();
   if(view==='func'){view='admin';adminSec='func'}if(!allowed(view))view='painel';
   if(ACT.includes(view))lastAct=view;
   try{sessionStorage.setItem('ui',JSON.stringify({view,adminSec,gStep}))}catch(e){}
-  if(fTipo&&!S.tipos.some(y=>y.id===fTipo))fTipo='';
-  if(fMed&&!(S.medicoes||[]).some(c=>c.id===fMed))fMed='';
+  if(fTipo&&!fvals(fTipo).every(id=>S.tipos.some(y=>y.id===id)))fTipo='';
+  if(fMed&&!fvals(fMed).every(id=>(S.medicoes||[]).some(c=>c.id===id)))fMed='';
   if(fPessoa&&!personOpts().some(o=>o[0]===fPessoa))fPessoa='';
   if(fFunc&&!cargos().includes(fFunc))fFunc='';
   if(fUf&&!ufList().includes(fUf))fUf='';
@@ -310,7 +310,7 @@ function bind(){
   document.querySelectorAll('[data-mo],[data-gm]').forEach(b=>b.onclick=()=>openConcItens(b.dataset.mo||b.dataset.gm));
   document.querySelectorAll('[data-gv]').forEach(b=>b.onclick=()=>openView(b.dataset.gv));
   const xl=$('#gxl');if(xl)xl.onclick=gXlsx;
-  document.querySelectorAll('.gmf').forEach(w=>{const id=w.dataset.mf;w.querySelector('.gmb').onclick=e=>{e.stopPropagation();gMfOpen=gMfOpen===id?'':id;render()};w.querySelectorAll('input').forEach(i=>i.onchange=()=>{const v=i.dataset.all?'':[...w.querySelectorAll('input:not([data-all]):checked')].map(x=>x.value).join(GSEP);if(id==='gflog')gLog=v;else gVt=v;render()})});
+  document.querySelectorAll('.gmf[data-mf="gflog"],.gmf[data-mf="gfvt"]').forEach(w=>{const id=w.dataset.mf;w.querySelector('.gmb').onclick=e=>{e.stopPropagation();gMfOpen=gMfOpen===id?'':id;render()};w.querySelectorAll('input').forEach(i=>i.onchange=()=>{const v=i.dataset.all?'':[...w.querySelectorAll('input:not([data-all]):checked')].map(x=>x.value).join(GSEP);if(id==='gflog')gLog=v;else gVt=v;render()})});
   document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTab=b.dataset.gt;render()});
   document.querySelectorAll('[data-gmed]').forEach(b=>b.onclick=()=>{gSel=gSel===b.dataset.gmed?'':b.dataset.gmed;render()});
   [['gfmed',v=>gSel=v],['gfuf',v=>{gUf=v;gMun=''}],['gfmun',v=>gMun=v],['gflog',v=>gLog=v],['gfvt',v=>gVt=v]].forEach(([id,fn])=>{const e=$('#'+id);if(e)e.onchange=()=>{fn(e.value);render()}});window.gClr=()=>{gSel=gLog=gVt=gUf=gMun=gK='';gR={fu:'',st:'',pa:''};render()};const gClr=window.gClr;const gx=$('#gfx');if(gx)gx.onclick=gClr;const rx=$('#rx');if(rx)rx.onclick=gClr;
@@ -332,7 +332,8 @@ function bind(){
   document.querySelectorAll('[data-cx]').forEach(b=>b.onclick=()=>{const k=b.dataset.cx;colOpen=colNow===k?null:k;ANIM=true;render()});
   document.querySelectorAll('.pcap[data-tp]').forEach(b=>b.onclick=()=>openTP(b.dataset.pk,b.dataset.tp));
   document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{if(b.dataset.v==='medicao'){window._xpLock=true;const h=b.closest('header.sb');if(h)h.classList.remove('xp');setMed(!MEDOPEN);return}MEDOPEN=false;if(b.dataset.v==='gestao'&&view!=='gestao'){gTab='graf';gCh='map';gMore=false}view=b.dataset.v;ANIM=true;render()});
-  $('#bn').onclick=()=>openTask();$('#bt').onclick=cycTheme;$('#bz').onclick=cycZoom;[['fl-t',v=>fTipo=v],['fl-p',v=>fPessoa=v],['fl-u',v=>fUf=v],['fl-c',v=>{fMed=v;if(fTipo&&!S.tipos.some(y=>y.id===fTipo&&(!fMed||medId(y)===fMed)))fTipo=''}]].forEach(([id,fn])=>{const e=$('#'+id);if(e)e.onchange=()=>{fn(e.value);render()}});
+  $('#bn').onclick=()=>openTask();$('#bt').onclick=cycTheme;$('#bz').onclick=cycZoom;
+   document.querySelectorAll('.gmf').forEach(w=>{const id=w.dataset.mf;w.querySelector('.gmb').onclick=e=>{e.stopPropagation();gMfOpen=gMfOpen===id?'':id;render()};w.querySelectorAll('input').forEach(i=>i.onchange=()=>{const v=i.dataset.all?'':[...w.querySelectorAll('input:not([data-all]):checked')].map(x=>x.value).join(FSEP);if(id==='fl-c')fMed=v;else if(id==='fl-t')fTipo=v;else if(id==='fl-p')fPessoa=v;else if(id==='fl-u')fUf=v;render()})});
   const fx=$('#fl-x');if(fx)fx.onclick=()=>{fTipo=fPessoa=fKpi=fMed=fUf=fQ='';render()};
   const fq=$('#fq');if(fq)fq.oninput=()=>{clearTimeout(fq._t);fq._t=setTimeout(()=>{fQ=fq.value;const p=fq.selectionStart;render();const n=$('#fq');if(n){n.focus();n.setSelectionRange(p,p)}},180)};
   document.querySelectorAll('button.kpi').forEach(b=>b.onclick=()=>kpiGo(b.dataset.k));
@@ -418,13 +419,14 @@ const qOk=t=>{return nk([nome(t),t.tarefa,t.protocolo,...holders(t).map(h=>h.pes
 const ufV=()=>view==='painel'||view==='tarefa'||view==='equipe';
 const ufOf=t=>{try{const f=gFld(/^(UF|ESTADO)$/);return f?(UFK[gNorm(t[f.id])]||''):''}catch(e){return''}};
 const ufList=()=>{try{return[...new Set(S.tasks.filter(vis).map(ufOf).filter(Boolean))].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR'))}catch(e){return[]}};
-const base=()=>S.tasks.filter(t=>vis(t)&&(!fUf||!ufV()||ufOf(t)===fUf)&&(!fQ||qOk(t))&&(!fTipo||t.tipo===fTipo)&&(!fMed||medId(tipoOf(t))===fMed)&&(!fPessoa||holders(t).some(h=>pkey(h.pessoa)===fPessoa)));
+const FSEP='¦', fvals=v=>v?String(v).split(FSEP).filter(Boolean):[], fhas=(v,x)=>!v||fvals(v).includes(String(x)), fcount=v=>fvals(v).length;
+const base=()=>S.tasks.filter(t=>vis(t)&&(!fUf||!ufV()||fhas(fUf,ufOf(t)))&&(!fQ||qOk(t))&&fhas(fTipo,t.tipo||'')&&fhas(fMed,medId(tipoOf(t)))&&(!fPessoa||holders(t).some(h=>fhas(fPessoa,pkey(h.pessoa)))));
 const kpiOk=t=>!fKpi||(fKpi==='open'?t.status!=='done':fKpi==='late'?late(t):t.status==='done');
 const anyF=()=>!!(fTipo||fPessoa||fKpi||fQ||fMed||(fUf&&ufV()));
 const KPI_TXT={open:'em aberto',late:'atrasadas',done:'concluídas'};
 function bar(){
-  const Y=(S.tipos||[]).filter(y=>!fMed||medId(y)===fMed).map(y=>[y.id,tipoLbl(y)]),P=isAdm()?personOpts():[],C=(S.medicoes||[]).map(c=>[c.id,c.nome]).sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'));
-  const sel=(id,l,cur,all,o,cls)=>o.length?`<div class="fg${cls?' '+cls:''}"><label for="${id}">${l}</label><select class="fsel" id="${id}"><option value="">${all}</option>${o.map(([v,t])=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(t)}</option>`).join('')}</select></div>`:'';
+  const Y=(S.tipos||[]).filter(y=>fhas(fMed,medId(y))).map(y=>[y.id,tipoLbl(y)]),P=isAdm()?personOpts():[],C=(S.medicoes||[]).map(c=>[c.id,c.nome]).sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'));
+  const sel=(id,l,cur,all,o,cls)=>o.length?(()=>{const chosen=fvals(cur),open=gMfOpen===id,tx=chosen.length===0?all:chosen.length===1?(o.find(x=>x[0]===chosen[0])||[0,chosen[0]])[1]:chosen.length+' selecionados',item=(v,t,c,a)=>`<label class="gmi"><input type="checkbox" value="${esc(v)}" ${a?'data-all="1" ':''}${c?'checked':''}><span>${esc(t)}</span></label>`;return `<div class="fg gfi gmf" data-mf="${id}"><span>${l}</span><button type="button" class="gmb" aria-haspopup="true" aria-expanded="${open}"><em>${esc(tx)}</em></button><div class="gmdp"${open?'':' hidden'}>${item('','Nenhuma',!chosen.length,1)}${o.map(([v,t])=>item(v,t,chosen.includes(v))).join('')}</div></div>`})():'';
   const f=anyF();
   let extra='';
   if(view==='admin'){
@@ -443,7 +445,7 @@ const tpOpen=t=>t.status!=='done'||fKpi==='done';
 const tpTipo=t=>tipoOf(t)?t.tipo:'';
 function tarefaView(TF){
   const nm=new Map(flowPeople()),L=TF.filter(tpOpen);
-  const cols=S.tipos.filter(y=>!fTipo||y.id===fTipo).map(y=>({id:y.id,nome:tipoLbl(y),cor:y.cor,sub:metaTxt(y)}));
+  const cols=S.tipos.filter(y=>fhas(fTipo,y.id)).map(y=>({id:y.id,nome:tipoLbl(y),cor:y.cor,sub:metaTxt(y)}));
   if(!fTipo)cols.push({id:'',nome:'Sem tipo',cor:'#9aa4b8',sub:'Sem meta'});
   const h=cols.map(c=>{const m=new Map();
     L.filter(t=>tpTipo(t)===c.id).forEach(t=>{const seen=new Set();holders(t).forEach(w=>{const k=pkey(w.pessoa);if(seen.has(k))return;seen.add(k);if(!m.has(k))m.set(k,{k,n:nm.get(k)||w.pessoa,q:0,mv:0});m.get(k).q++;if(movNew(t))m.get(k).mv++})});
@@ -679,7 +681,7 @@ function openFluxoTipo(id){const y=S.tipos.find(x=>x.id===id);if(!y)return;const
 function tiposPane(){
   const TF=base().filter(kpiOk),filt=!!(fPessoa||fKpi);
   const uso=y=>TF.filter(t=>t.tipo===y.id).length;
-  const lista=S.tipos.filter(y=>(!fTipo||y.id===fTipo)&&(!filt||uso(y)>0));
+  const lista=S.tipos.filter(y=>fhas(fTipo,y.id)&&(!filt||uso(y)>0));
   return `<div class="admin"><div class="ahead"><div><h2>Tipos de fluxo</h2><p class="hint">Aparecem como lista pronta ao criar uma tarefa.</p></div><button class="btn pri" id="nt">+ Novo tipo</button></div>
   <div class="tgrid">${lista.map(y=>`<article class="tcard${AX.has('t:'+y.id)?' open':''}" style="--c:${y.cor}">${axHead('t:'+y.id,y.nome,`<button class="btn" data-ed="${y.id}" aria-label="Editar tipo ${esc(y.nome)}">Editar</button>`)}<div class="tb"><dl>
   <dt>Passos do fluxo</dt><dd>${(y.steps||[]).map((p,i)=>`<span class="tag">${i+1}. ${esc(p.etapa)}${p.dep.length?' ← '+p.dep.map(d=>y.steps.findIndex(z=>z.id===d)+1).join(','):' · livre'}${p.con.length?' ⇄':''}${p.campos.length?' · '+p.campos.map(fname).join(', '):''}</span>`).join('')||'<span class="hint">Sem passos</span>'}${(y.steps||[]).length?`<button type="button" class="btn" data-fv="${y.id}" style="min-height:34px;padding:4px 10px">Ver diagrama</button>`:''}</dd>
@@ -755,8 +757,8 @@ function funcView(){
   const PF=Object.fromEntries((S.tipos||[]).map(y=>[y.id,perf(y.id)]));
   const TF=base().filter(kpiOk),filt=!!(fTipo||fKpi);
   const nTar=c=>TF.filter(t=>{return (t.status!=='done'||fKpi==='done')&&holders(t).some(h=>contactFor(h.pessoa)?.id===c.id)}).length;
-  const lista=S.contatos.filter(c=>(!fPessoa||fPessoa==='c:'+c.id)&&(!fFunc||c.cargo===fFunc)&&(!filt||nTar(c)>0));
-  const sem=people().filter(p=>!fFunc&&!contactFor(p)&&(!fPessoa||pkey(p)===fPessoa)),cg=cargos();
+  const lista=S.contatos.filter(c=>(!fPessoa||fhas(fPessoa,'c:'+c.id))&&(!fFunc||c.cargo===fFunc)&&(!filt||nTar(c)>0));
+  const sem=people().filter(p=>!fFunc&&!contactFor(p)&&(!fPessoa||fhas(fPessoa,pkey(p)))),cg=cargos();
   return `<div class="admin"><div class="ahead"><div><h2>Funcionários</h2><p class="hint">No fluxo da tarefa, escolha o funcionário pela tag (Primeiro + Último nome).</p></div><button class="btn pri" id="nc">+ Novo funcionário</button></div>
   ${cg.length?`<div class="bar"><label for="fl-f">Função</label><select class="fsel" id="fl-f"><option value="">Todas</option>${cg.map(c=>`<option value="${esc(c)}" ${c===fFunc?'selected':''}>${esc(c)}</option>`).join('')}</select></div>`:''}
   ${sem.length?`<p class="hint" style="margin:-6px 0 16px">Aparecem em fluxos, mas sem cadastro: ${sem.map(p=>`<button class="btn" style="min-height:32px;padding:4px 10px;margin:2px" data-new="${esc(p)}">+ ${esc(p)}</button>`).join('')}</p>`:''}

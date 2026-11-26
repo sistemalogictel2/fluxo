@@ -1326,3 +1326,19 @@ main{scrollbar-gutter:stable;min-width:0}
 .gmdp .gmi:hover{background:var(--acbg)}
 @media(max-width:700px){.gcp>.gch{flex-wrap:wrap}.gcc>.gfl{flex-wrap:wrap}.gfl .gfi{flex:1 1 40%;max-width:none}}
 
+
+
+/* Filtros globais: mesmo componente visual e seleção múltipla em todas as telas */
+.bar .gmf{position:relative;display:flex;flex-direction:column;gap:3px;flex:1 1 150px;max-width:220px;min-width:130px}
+.bar .gmf>span{display:block;font-size:11px;line-height:16px;font-weight:600;color:var(--mu)}
+.bar .gmf .gmb{height:38px;min-height:38px;border-radius:10px;background:var(--bg);border-color:var(--line);padding:0 28px 0 12px}
+.bar .gmf .gmdp{top:calc(100% + 5px);z-index:5000}
+.bar .gmf .gmdp .gmi{margin:0}
+.bar .gmf .gmdp .gmi:first-child{border-bottom:1px solid var(--line)}
+@media(max-width:760px){.bar .gmf{max-width:none;flex:1 1 45%;min-width:135px}}
+/* Gestão: filtros e controles alinhados pela mesma base horizontal */
+.gcc>.gfl{align-items:flex-end!important}
+.gcc>.gfl .gfi{justify-content:flex-end;min-height:58px}
+.gcc>.gfl .gfi>span{height:18px;display:flex;align-items:flex-end;line-height:18px}
+.gcc>.gfl .gmb,.gcc>.gfl select{height:40px;min-height:40px}
+.gcc>.gfl .gfi .gmdp{top:calc(100% + 5px)}
