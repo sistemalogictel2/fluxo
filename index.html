@@ -838,6 +838,18 @@ html[data-anim] .gb u{animation:fxBar .8s cubic-bezier(.2,.8,.2,1) both;animatio
 .fxm{width:min(36vmin,320px);height:min(36vmin,320px);overflow:visible}
 .fxwm{font-size:min(10vmin,92px);line-height:1;letter-spacing:-.02em;color:var(--tx);font-weight:300;white-space:nowrap}.fxwm .l{display:inline-block;font-style:normal}.fxwm .k{font-weight:800;color:var(--act)}
 .fxtg{font-size:min(2.1vmin,18px);text-transform:uppercase;letter-spacing:.32em;color:var(--mu);font-weight:600;padding-left:.32em}
+/* ===== Otimização de espaço (todas as abas) ===== */
+@media (pointer:fine){
+  header{padding:5px clamp(10px,1.3vw,20px);gap:8px 10px}header .btn{min-height:32px;padding:4px 9px}header nav button{padding:6px 9px}
+  .top{padding:6px clamp(10px,1.3vw,20px) 2px;gap:4px 16px}.btn{min-height:34px;padding:6px 12px}
+  main{padding:6px clamp(10px,1.3vw,20px) 12px}.admin{padding-top:2px}.gh{margin:2px 0 0;font-size:14px}
+}
+html[data-view=gestao] .top,html.cmp .top{display:none}
+.gcp{padding:10px;margin-bottom:6px;gap:12px}.gs-k4{margin-bottom:8px;gap:8px}.gs-sec{padding:10px 12px;gap:6px}.gs-col{gap:10px}
+.rs{height:calc(100vh/var(--z,1) - var(--hh,120px) - 66px)}
+.rc,.gmr2,.gs-sec{contain:layout style}
+.gmgh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;font-weight:700;color:var(--mu);padding:8px 4px 3px;position:sticky;top:0;background:var(--s1);z-index:1;border-bottom:1px solid var(--line);margin-top:4px}.gmgh em{font-style:normal;font-weight:500;font-size:11px}
+.gmrow.on{border-color:var(--tx);background:var(--ov)}
 </style>
 </head>
 <body>
@@ -1129,7 +1141,7 @@ function render(){fxView();
   $('#app').innerHTML=`<div class="stk"><header><div class="logo">Flu<b>xo</b></div>
   <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" ${view===v?'aria-current="page"':''}>${v==='painel'&&!isAdm()?'Minhas tarefas':l}${v==='gestao'?gBadge():''}${v==='tarefa'?mvBadge():''}</button>`).join('')}</nav>
   <div class="sp"></div><span class="status" id="fs" role="status">${esc(stText())}</span>
-  <span class="ap" role="group" aria-label="Aparência"><button class="btn" id="bt" title="Trocar tema (tecla T)" aria-label="Tema ${THEMES.find(x=>x[0]===themeOf())[1]}. Trocar tema">◐</button><button class="btn" id="bf" title="Tela cheia" aria-label="Alternar tela cheia">⛶</button><button class="btn" id="bz" title="Tamanho do texto" aria-label="Tamanho do texto ${Math.round(ZOOMS[PREF.z||0]*100)}%. Alterar">Aa</button></span>
+  <span class="ap" role="group" aria-label="Aparência"><button class="btn" id="bt" title="Trocar tema (tecla T)" aria-label="Tema ${THEMES.find(x=>x[0]===themeOf())[1]}. Trocar tema">◐</button><button class="btn" id="bf" title="Tela cheia" aria-label="Alternar tela cheia">⛶</button><button class="btn" id="bc" title="Recolher ou expandir o cabeçalho" aria-label="Recolher ou expandir o cabeçalho">⇕</button><button class="btn" id="bz" title="Tamanho do texto" aria-label="Tamanho do texto ${Math.round(ZOOMS[PREF.z||0]*100)}%. Alterar">Aa</button></span>
   <button class="btn pri" id="bn" ${isAdm()?'':'hidden'} title="Nova tarefa (tecla N)">+ Nova tarefa</button><button class="btn" id="bo" aria-label="Sair de ${esc(user)}">Sair</button></header>
   <div class="top">${hero()}
   <div class="kpis" role="group" aria-label="Segmentar por situação">${kp('open',open,'em aberto')}${kp('late',B.filter(late).length,'atrasadas')}${kp('done',B.filter(t=>t.status==='done').length,'concluídas')}</div></div>${['guia','med','gestao'].includes(view)?'':bar()}</div>
@@ -1153,6 +1165,9 @@ function kpiGo(k){
 function setHH(){const e=$('.stk');if(e)document.documentElement.style.setProperty('--hh',e.offsetHeight+'px')}
 addEventListener('resize',setHH);
 function bind(){
+  document.documentElement.dataset.view=view;try{document.documentElement.classList.toggle('cmp',!!localStorage.getItem('fl_cmp'))}catch(e){}
+  {const bc=document.getElementById('bc');if(bc)bc.onclick=()=>{const on=document.documentElement.classList.toggle('cmp');try{localStorage.setItem('fl_cmp',on?'1':'')}catch(e){}setHH();dispatchEvent(new Event('resize'))}}
+  setHH();
   {const hb=document.getElementById('hsb'),bd=document.getElementById('bdp');if(hb&&bd){const iw=hb.firstElementChild,upd=()=>{iw.style.width=bd.scrollWidth+'px';hb.hidden=bd.scrollWidth<=bd.clientWidth+2};
     hb.addEventListener('scroll',()=>{if(Math.abs(bd.scrollLeft-hb.scrollLeft)>1)bd.scrollLeft=hb.scrollLeft});bd.addEventListener('scroll',()=>{if(Math.abs(hb.scrollLeft-bd.scrollLeft)>1)hb.scrollLeft=bd.scrollLeft});
     upd();new ResizeObserver(upd).observe(bd);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(upd)}}
@@ -1162,7 +1177,7 @@ function bind(){
   document.querySelectorAll('[data-gv]').forEach(b=>b.onclick=()=>openView(b.dataset.gv));
   document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTab=b.dataset.gt;render()});
   document.querySelectorAll('[data-gmed]').forEach(b=>b.onclick=()=>{gSel=gSel===b.dataset.gmed?'':b.dataset.gmed;render()});
-  [['gfmed',v=>gSel=v],['gfuf',v=>{gUf=v;gMun=''}],['gfmun',v=>gMun=v],['gflog',v=>gLog=v],['gfvt',v=>gVt=v]].forEach(([id,fn])=>{const e=$('#'+id);if(e)e.onchange=()=>{fn(e.value);render()}});const gClr=()=>{gSel=gLog=gVt=gUf=gMun=gK='';gR={fu:'',st:'',pa:''};render()};const gx=$('#gfx');if(gx)gx.onclick=gClr;const rx=$('#rx');if(rx)rx.onclick=gClr;
+  [['gfmed',v=>gSel=v],['gfuf',v=>{gUf=v;gMun=''}],['gfmun',v=>gMun=v],['gflog',v=>gLog=v],['gfvt',v=>gVt=v]].forEach(([id,fn])=>{const e=$('#'+id);if(e)e.onchange=()=>{fn(e.value);render()}});window.gClr=()=>{gSel=gLog=gVt=gUf=gMun=gK='';gR={fu:'',st:'',pa:''};render()};const gClr=window.gClr;const gx=$('#gfx');if(gx)gx.onclick=gClr;const rx=$('#rx');if(rx)rx.onclick=gClr;
   document.querySelectorAll('[data-rk]').forEach(b=>b.onclick=()=>{gK=gK===b.dataset.rk?'':b.dataset.rk;render()});
   document.querySelectorAll('[data-rf]').forEach(b=>b.onclick=()=>{const[k,...r]=b.dataset.rf.split('|'),v=r.join('|');if(k==='uf'){gUf=gUf===v?'':v;gMun=''}else if(k==='med')gSel=gSel===v?'':v;else if(k==='log')gLog=gLog===v?'':v;else if(k==='vt')gVt=gVt===v?'':v;else gR[k]=gR[k]===v?'':v;render()});
   document.querySelectorAll('[data-rcx]').forEach(b=>b.onclick=()=>{const k=b.dataset.rcx;if(k==='k')gK='';else if(k==='med')gSel='';else if(k==='log')gLog='';else if(k==='vt')gVt='';else if(k==='uf'){gUf='';gMun=''}else if(k==='mun')gMun='';else gR[k]='';render()});
@@ -1170,7 +1185,7 @@ function bind(){
   document.querySelectorAll('[data-rcap]').forEach(b=>b.onclick=()=>{const v=parseInt(prompt('Limite de tarefas por pessoa (linha do gráfico):',rCap()),10);if(v>0){try{localStorage.setItem('fl_cap',v)}catch(e){}render()}});
   {let tp=document.getElementById('rtip');if(!tp){tp=document.createElement('div');tp.id='rtip';document.body.appendChild(tp);document.addEventListener('mouseover',e=>{const x=e.target.closest&&e.target.closest('[data-tip]'),t=document.getElementById('rtip');if(!x){t.hidden=true;return}t.textContent=x.dataset.tip;t.hidden=false});document.addEventListener('mousemove',e=>{const t=document.getElementById('rtip');if(t.hidden)return;t.style.left=Math.max(4,Math.min(innerWidth-t.offsetWidth-8,e.clientX+14))+'px';t.style.top=Math.min(innerHeight-t.offsetHeight-8,e.clientY+18)+'px'})}tp.hidden=true}
 
-  document.querySelectorAll('[data-gch]').forEach(b=>b.onclick=()=>{gCh=b.dataset.gch;render()});document.querySelectorAll('[data-guf]').forEach(b=>b.onclick=()=>{gUf=gUf===b.dataset.guf?'':b.dataset.guf;gMun='';render()});document.querySelectorAll('[data-gmun]').forEach(b=>b.onclick=()=>{gMun=gMun===b.dataset.gmun?'':b.dataset.gmun;render()});{const x=$('#gfx2');if(x)x.onclick=()=>{gUf=gMun='';render()}}document.querySelectorAll('svg.gmap[data-zf]').forEach(sv=>{try{const p=sv.querySelector('path'),b=p.getBBox(),m=Math.max(b.width,b.height)*.06;sv.setAttribute('viewBox',[b.x-m,b.y-m,b.width+2*m,b.height+2*m].join(' '))}catch(e){}});gFit();gMapInit();
+  document.querySelectorAll('[data-gch]').forEach(b=>b.onclick=()=>{gCh=b.dataset.gch;render()});document.querySelectorAll('[data-guf]').forEach(b=>b.onclick=()=>{gUf=gUf===b.dataset.guf?'':b.dataset.guf;gMun='';render()});document.querySelectorAll('[data-gmun]').forEach(b=>b.onclick=()=>{if(b._t){clearTimeout(b._t);b._t=0;if(b.dataset.tid)openTask(b.dataset.tid);return}b._t=setTimeout(()=>{b._t=0;gMun=gMun===b.dataset.gmun?'':b.dataset.gmun;render()},250)});{const x=$('#gfx2');if(x)x.onclick=()=>{gUf=gMun='';render()}}document.querySelectorAll('svg.gmap[data-zf]').forEach(sv=>{try{const p=sv.querySelector('path'),b=p.getBBox(),m=Math.max(b.width,b.height)*.06;sv.setAttribute('viewBox',[b.x-m,b.y-m,b.width+2*m,b.height+2*m].join(' '))}catch(e){}});gFit();gMapInit();
   document.querySelectorAll('[data-gsub]').forEach(b=>b.onclick=()=>{gSub=b.dataset.gsub;render()});
   document.querySelectorAll('[data-gk]').forEach(b=>b.onclick=()=>{const[a,c]=b.dataset.gk.split('|');gTab=a;if(c)gSub=c;render()});
   document.querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{const k=b.dataset.cc;CC.has(k)?CC.delete(k):CC.add(k);render()});
@@ -1929,7 +1944,7 @@ function gMapHtml(T0){
   gMapFl='';
   const fu=gFld(/^(UF|ESTADO)$/),fm=gFld(/MUNIC|CIDADE/);
   if(!fu)return'<div class="empty">Não encontrei o campo “UF” nas tarefas. Cadastre um campo chamado UF para ver o mapa.</div>';
-  const G=T0.map(t=>({uf:UFK[gNorm(t[fu.id])]||'',mun:fm?String(t[fm.id]||'').trim():''}));
+  const G=T0.map(t=>({uf:UFK[gNorm(t[fu.id])]||'',mun:fm?String(t[fm.id]||'').trim():'',t}));
   const ufs=[...new Set(G.map(g=>g.uf).filter(Boolean))].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR'));
   if(gUf&&!ufs.includes(gUf))gUf='';
   const MM=new Map();G.filter(g=>g.mun&&(!gUf||g.uf===gUf)).forEach(g=>{const k=gNorm(g.mun);const e=MM.get(k)||{n:g.mun,c:0};e.c++;MM.set(k,e)});
@@ -1945,10 +1960,14 @@ function gMapHtml(T0){
   const U=Object.entries(cnt).sort((a,b)=>b[1]-a[1]),um=Math.max(1,...U.map(x=>x[1]));
   const ML=[...MM.values()].filter(e=>!gMun||gNorm(e.n)===gMun).sort((a,b)=>b.c-a.c).slice(0,gUf?80:12),mm=Math.max(1,...ML.map(e=>e.c));
   const row=(at,nm,c,m,bg)=>`<button type="button" class="gmrow" ${at}><span>${esc(nm)}</span><i><u style="--p:${Math.round(c/m*100)}%;background:${bg}"></u></i><b>${c}</b></button>`;
-  const lst=gUf?(ML.length?ML.map(e=>row(`data-gmun="${esc(gNorm(e.n))}"`,e.n,e.c,mm,gRamp(mm>1?(e.c-1)/(mm-1):1))).join(''):`<p class="hint">${fm?'Nenhum município preenchido nas tarefas.':'Não encontrei o campo “Município” nas tarefas.'}</p>`):U.map(([u,c])=>row(`data-guf="${u}" data-h="${u}" title="${esc(UFN[u])}"`,u,c,um,col(c))).join('');
+  const medNm=t=>{const i=medId(tipoOf(t)),m=(S.medicoes||[]).find(c=>c.id===i);return[m?i:'_',m?m.nome:'Sem medição']},grp=new Map();
+  if(gUf)G.filter(g=>g.mun&&g.uf===gUf).forEach(g=>{const[mi,mn]=medNm(g.t);let o=grp.get(mi);if(!o)grp.set(mi,o={n:mn,m:new Map()});const k=gNorm(g.mun);let e=o.m.get(k);if(!e)o.m.set(k,e={n:g.mun,c:0,id:g.t.id});e.c++});
+  const gOrd=[...grp.entries()].sort((a,b)=>{const ix=i=>i==='_'?1e9:(S.medicoes||[]).findIndex(c=>c.id===i);return ix(a[0])-ix(b[0])}),mm2=Math.max(1,...gOrd.flatMap(([,o])=>[...o.m.values()].map(e=>e.c)));
+  const mrow=e=>`<button type="button" class="gmrow${gMun===gNorm(e.n)?' on':''}" data-gmun="${esc(gNorm(e.n))}" data-tid="${esc(e.id)}" title="1 clique filtra · 2 cliques abrem o card"><span>${esc(e.n)}</span><i><u style="--p:${Math.round(e.c/mm2*100)}%;background:${gRamp(mm2>1?(e.c-1)/(mm2-1):1)}"></u></i><b>${e.c}</b></button>`;
+  const lst=gUf?(gOrd.length?gOrd.map(([,o])=>{const L=[...o.m.values()].sort((a,b)=>b.c-a.c||a.n.localeCompare(b.n,'pt-BR'));return`<div class="gmgh"><span>${esc(o.n)}</span><em>${L.length} município(s) · ${L.reduce((a,e)=>a+e.c,0)} tarefa(s)</em></div>`+L.map(mrow).join('')}).join(''):`<p class="hint">${fm?'Nenhum município preenchido nas tarefas.':'Não encontrei o campo “Município” nas tarefas.'}</p>`):U.map(([u,c])=>row(`data-guf="${u}" data-h="${u}" title="${esc(UFN[u])}"`,u,c,um,col(c))).join('');
   const top=U[0];
-  const side=`<aside class="gmr2"><div class="gmhd"><small>${gUf?esc(UFN[gUf]):'Brasil'}${gMun?' · '+esc((MM.get(gMun)||{}).n||''):''}</small>${gUf||gMun?'<button type="button" class="btn" id="gfx2">← Brasil</button>':''}</div><div class="gmbig"><b>${tot}</b><span>tarefa(s)</span></div><div class="gmst"><div><b>${gUf?1:U.length}</b><span>UF(s)</span></div><div><b>${gUf?MM.size:new Set(G.filter(g=>g.mun).map(g=>gNorm(g.mun))).size}</b><span>município(s)</span></div><div><b>${top?top[0]:'–'}</b><span>líder${top?' · '+top[1]:''}</span></div></div><h4>${gUf?'Municípios':'Estados'}</h4><div class="gmls${gUf?'':' g2'}">${lst}</div></aside>`;
-  return`<div class="gme"><div class="gmp"><div class="gmtb"><button type="button" data-z="in" aria-label="Aproximar">+</button><button type="button" data-z="out" aria-label="Afastar">−</button><button type="button" data-z="0" aria-label="Centralizar">⟲</button></div>${sv}<div class="gmtip" hidden></div>${lg}</div>${side}</div><p class="hint">${tot} tarefa(s) com UF${semUf?' · '+semUf+' sem UF':''}. Passe o mouse para ver os números · clique num estado para dar zoom e filtrar · clique fora dele para voltar ao Brasil · roda do mouse = zoom · arraste = mover.</p>`;
+  const side=`<aside class="gmr2"><div class="gmhd"><small>${gUf?esc(UFN[gUf]):'Brasil'}${gMun?' · '+esc((MM.get(gMun)||{}).n||''):''}</small>${gUf||gMun?'<button type="button" class="btn" id="gfx2">← Brasil</button>':''}</div><div class="gmbig"><b>${tot}</b><span>tarefa(s)</span></div><div class="gmst"><div><b>${gUf?1:U.length}</b><span>UF(s)</span></div><div><b>${gUf?MM.size:new Set(G.filter(g=>g.mun).map(g=>gNorm(g.mun))).size}</b><span>município(s)</span></div><div><b>${top?top[0]:'–'}</b><span>líder${top?' · '+top[1]:''}</span></div></div><h4>${gUf?'Municípios por medição':'Estados'}</h4><div class="gmls${gUf?'':' g2'}">${lst}</div></aside>`;
+  return`<div class="gme"><div class="gmp"><div class="gmtb"><button type="button" data-z="in" aria-label="Aproximar">+</button><button type="button" data-z="out" aria-label="Afastar">−</button><button type="button" data-z="0" aria-label="Centralizar">⟲</button></div>${sv}<div class="gmtip" hidden></div>${lg}</div>${side}</div><p class="hint">${tot} tarefa(s) com UF${semUf?' · '+semUf+' sem UF':''}. Passe o mouse para ver os números · clique num estado para dar zoom e filtrar · clique fora dele para voltar ao Brasil · 2 cliques num município abrem o card · Esc volta ao Brasil · roda do mouse = zoom · arraste = mover.</p>`;
 }
 function gMapInit(){
   const sv=document.querySelector('svg.gmap');if(!sv)return;
@@ -1995,14 +2014,16 @@ function gMapInit(){
     });
   };
   window._gLab=lab;
-  const set=()=>{sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));lab()};
+  let lt=0;const set=now=>{sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));clearTimeout(lt);if(now){lab();lb.style.opacity=1}else{lb.style.opacity=0;lt=setTimeout(()=>{if(sv.isConnected){lab();lb.style.opacity=1}},120)}};
   const zoom=(f,cx,cy)=>{const w=Math.max(B.w/10,Math.min(B.w,V.w*f)),r=w/V.w;cx=cx==null?V.x+V.w/2:cx;cy=cy==null?V.y+V.h/2:cy;V={x:cx-(cx-V.x)*r,y:cy-(cy-V.y)*r,w,h:V.h*r};if(w>=B.w)V={...B};set()};
   const pt=e=>{const r=sv.getBoundingClientRect(),sc=Math.min(r.width/V.w,r.height/V.h),ox=(r.width-V.w*sc)/2,oy=(r.height-V.h*sc)/2;return[V.x+(e.clientX-r.left-ox)/sc,V.y+(e.clientY-r.top-oy)/sc,sc]};
   pn.querySelectorAll('[data-z]').forEach(b=>b.onclick=e=>{e.stopPropagation();b.dataset.z==='0'?(V={...B},set()):zoom(b.dataset.z==='in'?.7:1.4)});
   sv.addEventListener('wheel',e=>{e.preventDefault();const[x,y]=pt(e);zoom(e.deltaY<0?.8:1.25,x,y)},{passive:false});
   sv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,v:{...V},sc:pt(e)[2]};moved=0});
   const mv=e=>{if(!drag||!sv.isConnected)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>5)moved=1;if(moved){V.x=drag.v.x-dx/drag.sc;V.y=drag.v.y-dy/drag.sc;sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));tip.hidden=true}};
-  addEventListener('pointermove',mv);addEventListener('pointerup',()=>{const was=moved;drag=null;if(was&&sv.isConnected)lab();setTimeout(()=>moved=0,0)});
+  if(window._gMv){removeEventListener('pointermove',window._gMv);removeEventListener('pointerup',window._gUp);removeEventListener('keydown',window._gEsc)}
+  window._gMv=mv;window._gUp=()=>{const was=moved;drag=null;if(was&&sv.isConnected)lab();setTimeout(()=>moved=0,0)};window._gEsc=e=>{if(e.key==='Escape'&&sv.isConnected&&(gUf||gMun)&&!document.querySelector('dialog[open]'))gClr()};
+  addEventListener('pointermove',mv,{passive:true});addEventListener('pointerup',window._gUp);addEventListener('keydown',window._gEsc);
   pn.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault();return}if(!e.target.closest('path,button,.gmtip')&&(gUf||gMun)){gUf=gMun='';render()}},true);
   sv.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault()}},true);
   const hl=u=>{wrap.querySelectorAll('.hv').forEach(x=>x.classList.remove('hv'));if(u)wrap.querySelectorAll('[data-guf="'+u+'"]').forEach(x=>x.classList.add('hv'))};
@@ -2011,8 +2032,8 @@ function gMapInit(){
   const tgt=()=>{const p=gUf&&paths.find(q=>q.dataset.guf===gUf),b=p&&bb.get(p);if(!b)return{...B};const asp=B.w/B.h,m=.2;let w=Math.max(B.w/10,b.width*(1+2*m)),h=Math.max(B.h/10,b.height*(1+2*m));if(w/h<asp)w=h*asp;else h=w/asp;return{x:b.x+b.width/2-w/2,y:b.y+b.height/2-h/2,w,h}};
   const anim=T=>{const A={...V},t0=performance.now(),D=550,ez=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;lb.style.opacity=0;
     const step=now=>{if(!sv.isConnected)return;const u=Math.min(1,(now-t0)/D),e=ez(u);V={x:A.x+(T.x-A.x)*e,y:A.y+(T.y-A.y)*e,w:A.w+(T.w-A.w)*e,h:A.h+(T.h-A.h)*e};window._gPrev={...V};
-      if(u<1){sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));requestAnimationFrame(step)}else{V={...T};set();lb.style.opacity=1}};requestAnimationFrame(step)};
-  {const T=tgt(),P0=window._gPrev;if(P0&&(Math.abs(P0.w-T.w)>.5||Math.abs(P0.x-T.x)>.5||Math.abs(P0.y-T.y)>.5)){V={...P0};sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));anim(T)}else{V=T;set()}}
+      if(u<1){sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));requestAnimationFrame(step)}else{V={...T};set(1)}};requestAnimationFrame(step)};
+  {const T=tgt(),P0=window._gPrev;if(P0&&(Math.abs(P0.w-T.w)>.5||Math.abs(P0.x-T.x)>.5||Math.abs(P0.y-T.y)>.5)){V={...P0};sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));anim(T)}else{V=T;set(1)}}
 }
 function gFit(){
   const p=document.querySelector('.gcp');if(!p)return;
