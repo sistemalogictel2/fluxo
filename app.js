@@ -421,7 +421,7 @@ function flowPeople(){const m=new Map();S.tasks.forEach(t=>t.fluxo.forEach(f=>{i
 const personOpts=()=>{const m=new Map(flowPeople());(S.contatos||[]).forEach(c=>m.set('c:'+c.id,chipName(c)));return[...m].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'))};
 const qOk=t=>{const hay=nk([nome(t),t.tarefa,t.protocolo,...holders(t).map(h=>h.pessoa),...t.fluxo.flatMap(f=>[f.etapa,f.pessoa])].join(' '));return nk(fQ).split(' ').every(w=>hay.includes(w))};
 const ufV=()=>view==='painel'||view==='tarefa'||view==='equipe';
-const semF=t=>!holders(t).some(h=>h&&String(h.pessoa||'').trim()),semOn=()=>fSemF&&(view==='painel'||view==='tarefa');
+const semF=t=>t.fluxo.some(f=>!String(f.pessoa||'').trim()||f.pessoa==='Sem responsável'),semOn=()=>fSemF&&(view==='painel'||view==='tarefa');
 const ufOf=t=>{try{const f=gFld(/^(UF|ESTADO)$/);return f?(UFK[gNorm(t[f.id])]||''):''}catch(e){return''}};
 const ufList=()=>{try{return[...new Set(S.tasks.filter(vis).map(ufOf).filter(Boolean))].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR'))}catch(e){return[]}};
 const FSEP='¦', fvals=v=>v?String(v).split(FSEP).filter(Boolean):[], fhas=(v,x)=>!v||fvals(v).includes(String(x)), fcount=v=>fvals(v).length;
@@ -733,10 +733,31 @@ function openCampo(id){
   if(!isNew&&!c.fixo)d.querySelector('#dl').onclick=async()=>{if(confirm('Excluir este campo? Os valores já preenchidos nas tarefas ficam guardados, mas deixam de aparecer.')){S.campos=S.campos.filter(x=>x.id!==id);S.tipos.forEach(y=>y.campos=y.campos.filter(k=>k!==id));await save();close();render()}};
   d.querySelector('#cnm').focus();
 }
+function cloneTipoPick(){
+  const [d,close]=dlg(`<div class="dh"><div><h2>Clonar fluxo</h2><div class="hint">Escolha o fluxo que será copiado.</div></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
+  <div class="db"><div class="full">${S.tipos.map(y=>`<button type="button" class="btn" data-cl="${y.id}" style="display:block;width:100%;text-align:left;margin:0 0 8px">${esc(tipoLbl(y))} <span class="hint">· ${(y.steps||[]).length} passo(s)</span></button>`).join('')}</div></div>`,COLORS[0]);
+  d.querySelector('#x').onclick=close;
+  d.querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>{close();cloneTipoName(b.dataset.cl)});
+}
+function cloneTipoName(id){
+  const y=S.tipos.find(x=>x.id===id);if(!y)return;
+  const livres=(S.concessionarias||[]).filter(m=>!S.tipos.some(z=>z.conc===m.id));
+  if(!livres.length){toast('Todas as concessionárias já têm fluxo. Cadastre uma nova concessionária para clonar.');return}
+  const [d,close]=dlg(`<form method="dialog"><div class="dh"><div><h2>Clonar “${esc(y.nome)}”</h2><div class="hint">Será criado um fluxo idêntico.</div></div><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
+  <div class="db"><div class="full"><label for="cln">Nome do novo fluxo (concessionária) *</label><select id="cln" required><option value="">— escolha —</option>${livres.map(m=>`<option value="${m.id}">${esc(concLbl(m))}</option>`).join('')}</select></div></div>
+  <div class="df"><button class="btn pri">Clonar</button></div></form>`,y.cor);
+  d.querySelector('#x').onclick=close;
+  d.querySelector('form').onsubmit=async e=>{e.preventDefault();const m=S.concessionarias.find(x=>x.id===d.querySelector('#cln').value);if(!m){toast('Escolha o nome do novo fluxo');return}
+    const t=Date.now(),mp=new Map((y.steps||[]).map((p,i)=>[p.id,'s'+t+'_'+i])),
+      o={id:'ty'+t,conc:m.id,nome:m.nome,cor:m.cor||y.cor||COLORS[0],campos:[...(y.campos||[])],meta:{...(y.meta||{v:0,u:'dias'})},
+        steps:(y.steps||[]).map(p=>({...JSON.parse(JSON.stringify(p)),id:mp.get(p.id),dep:(p.dep||[]).map(k=>mp.get(k)).filter(Boolean),con:(p.con||[]).map(k=>mp.get(k)).filter(Boolean)}))};
+    S.tipos.push(o);await save();close();render();toast('Fluxo clonado')};
+}
 function openTipo(id){
   if(!id&&!(S.concessionarias||[]).length){toast('Cadastre uma concessionária primeiro');adminSec='med';render();return}
   const y=S.tipos.find(x=>x.id===id)||{nome:'',cor:COLORS[0],campos:['protocolo','portal','repasse','obs'],steps:[],meta:{v:0,u:'dias'}};const isNew=!id;
   const [d,close]=dlg(`<form method="dialog"><div class="dh"><h2>${isNew?'Novo tipo de fluxo':'Editar tipo'}</h2><button type="button" class="btn" id="x" aria-label="Fechar">✕</button></div>
+  ${isNew&&S.tipos.length?'<div style="margin:0 0 10px"><button type="button" class="btn" id="tclone">Clonar</button></div>':''}
   ${tabsH([['geral','Geral'],['passos','Passos'],['diagrama','Diagrama']],'geral','Seções do tipo')}
   <div class="db tp" data-tp="geral"><div class="full"><label for="tn">Concessionária (nome do fluxo) *</label><select id="tn" required><option value="">— escolha a concessionária —</option>${S.concessionarias.filter(m=>m.id===y.conc||(!y.conc&&nk(m.nome)===nk(y.nome))||!S.tipos.some(z=>z.conc===m.id&&z.id!==y.id)).map(m=>`<option value="${m.id}" ${m.id===y.conc||(!y.conc&&nk(m.nome)===nk(y.nome))?'selected':''}>${esc(concLbl(m))}</option>`).join('')}</select><div class="hint">Só aparecem concessionárias cadastradas que ainda não têm fluxo. A cor do fluxo e das tarefas vem da concessionária.</div></div>
     <div class="full"><label>Campos que aparecem ao criar a tarefa</label><div class="chk">${campos().map(c=>`<label><input type="checkbox" value="${c.id}" ${y.campos.includes(c.id)?'checked':''}>${esc(c.nome)}<span class="ct">${CT[c.tipo]}</span></label>`).join('')}</div>
@@ -747,6 +768,7 @@ function openTipo(id){
   <div class="db tp" data-tp="passos" hidden><div class="full"><div id="tpe"></div></div></div>
   <div class="db tp" data-tp="diagrama" hidden><div class="full"><div class="fdw" id="tdv"></div><div class="fleg">Cada seta liga um passo ao que depende dele. Passo sem seta chegando é livre; passo sem seta saindo não bloqueia ninguém. Caixa tracejada = passos concomitantes.</div></div></div>
   <div class="df"><button class="btn pri">Salvar tipo</button>${isNew?'':'<span class="sp"></span><button type="button" class="btn dan" id="dl">Excluir tipo</button>'}</div></form>`,y.cor);
+  {const cb=d.querySelector('#tclone');if(cb)cb.onclick=()=>{close();cloneTipoPick()}}
   bindTabs(d);const D=flowDesigner(d.querySelector('#tpe'),stepsOf(y),{people:false,pv:d.querySelector('#tdv')});
   d.querySelector('#mu').value=y.meta.u;
   {const tn=d.querySelector('#tn');tn.onchange=()=>{const m=S.concessionarias.find(x=>x.id===tn.value);if(m&&m.cor)d.style.setProperty('--c',m.cor)}}
