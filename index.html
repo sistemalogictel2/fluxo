@@ -968,6 +968,38 @@ header.sb .sbl,header.sb:is(:hover,:focus-within) .sbl{align-self:center}
 header.sb:is(:hover,:focus-within) nav button{justify-content:center}
 header.sb .status{text-align:center}
 header.sb .ap,header.sb:is(:hover,:focus-within) .ap{justify-content:center}
+
+/* ===== Unificação visual: todo o site no estilo do menu lateral (Glass escuro e Glass claro) ===== */
+:root{--gl:color-mix(in srgb,var(--tx) 8%,transparent);--gb:color-mix(in srgb,var(--tx) 14%,transparent);--gg:color-mix(in srgb,var(--ac) 25%,transparent);--gi:color-mix(in srgb,#fff 30%,transparent)}
+/* Cabeçalho (.stk) flutuante, vidro arredondado igual ao menu */
+:root[data-theme] .stk{margin:8px 8px 0 0;top:8px;border:1px solid var(--gb);border-radius:20px;background:color-mix(in srgb,var(--s1) 58%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7);box-shadow:0 12px 32px var(--sh),inset 0 1px 0 var(--gi)}
+:root[data-theme] .stk .top{background:none}
+:root[data-theme] .stk .bar{background:none;border-top:1px solid var(--gb);border-radius:0 0 20px 20px}
+html[data-view=gestao] .stk{display:none}
+@media(max-width:760px){:root[data-theme] .stk{margin:6px;top:6px;border-radius:16px}:root[data-theme] .stk .bar{border-radius:0 0 16px 16px}}
+/* Superfícies: cantos, brilho interno e borda (sem tocar nas bordas coloridas de destaque) */
+:root[data-theme] :is(.tcard,.gs-k,.gs-row,.mdc,.kpi,.gs-p,.gcp,.col,.mcd,.mpop,.toast){border-radius:18px;box-shadow:0 12px 32px var(--sh),inset 0 1px 0 var(--gi)}
+:root[data-theme] :is(.gs-k,.gs-row,.kpi,.gs-p,.gcp,.mpop,.toast){border-color:var(--gb)}
+:root[data-theme] .col{border-right-color:var(--gb);border-bottom-color:var(--gb);border-left-color:var(--gb)}
+:root[data-theme] .mdc{border-top-color:var(--gb);border-right-color:var(--gb);border-bottom-color:var(--gb)}
+/* Botões, abas e campos como no menu */
+:root[data-theme] .btn:not(.pri){background:var(--gl);border:1px solid var(--gb);border-radius:12px}
+:root[data-theme] .btn:not(.pri):hover{border-color:var(--act);color:var(--act)}
+:root[data-theme] .bar .amenu-bar button{background:none;border:1px solid transparent;border-radius:12px}
+:root[data-theme] .bar .amenu-bar button:hover{background:var(--gl);border-color:var(--gb);color:var(--tx)}
+:root[data-theme] :is(.bar .amenu-bar button[aria-current=page],.gch .btn.pri){background:color-mix(in srgb,var(--ac) 24%,transparent);border-color:color-mix(in srgb,var(--ac) 55%,transparent);color:var(--tx);font-weight:700;box-shadow:0 0 14px var(--gg)}
+:root[data-theme] :is(input,select,textarea):not([type=checkbox]):not([type=radio]):not([type=color]){background-color:var(--gl);border-color:var(--gb);border-radius:12px}
+/* Botão Mapa/Colunas: coluna larga o bastante e sem corte na borda */
+.gcp{grid-template-columns:minmax(260px,310px) minmax(0,1fr)}
+.gcp>.gch{flex-wrap:wrap;min-width:0;padding:2px}
+.gcp>.gch .btn{padding:0 14px}
+@media(max-width:700px){.gcp{grid-template-columns:1fr}}
+/* Aba Medições (recolhida) igual ao menu: vidro, cantos redondos, selo e brilho */
+:root[data-theme] .msb.min{left:var(--sbw);border:1px solid var(--gb);border-radius:16px;background:color-mix(in srgb,var(--s1) 58%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7);box-shadow:0 12px 32px var(--sh),inset 0 1px 0 var(--gi);transition:border-color .2s,box-shadow .2s}
+:root[data-theme] .msb.min:hover{border-color:color-mix(in srgb,var(--ac) 55%,transparent);box-shadow:0 12px 32px var(--sh),0 0 14px var(--gg),inset 0 1px 0 var(--gi)}
+:root[data-theme] .msb.min .msx em{background:var(--gl);border:1px solid var(--gb)}
+:root[data-theme] .msb:not(.min){border-color:var(--gb)}
+:root[data-theme] .msr{border-radius:12px}
 </style>
 </head>
 <body>
@@ -1287,7 +1319,7 @@ function kpiGo(k){
   view='painel';
   colOpen=undefined;focoKpi=true;ANIM=true;render();
 }
-function setHH(){const e=$('.stk');if(e)document.documentElement.style.setProperty('--hh',e.offsetHeight+'px');const h=$('header.sb');document.documentElement.style.setProperty('--hdh',(h?h.offsetHeight:0)+'px')}
+function setHH(){const e=$('.stk');if(e)document.documentElement.style.setProperty('--hh',(e.offsetHeight+(e.offsetParent?8:0))+'px');const h=$('header.sb');document.documentElement.style.setProperty('--hdh',(h?h.offsetHeight:0)+'px')}
 addEventListener('resize',setHH);
 function bind(){
   document.documentElement.dataset.view=view;try{document.documentElement.classList.toggle('cmp',!!localStorage.getItem('fl_cmp'))}catch(e){}
