@@ -867,6 +867,50 @@ html[data-view=gestao] .top,html.cmp .top{display:none}
 .gmh2{font-size:12px;margin:2px 0 0;line-height:1.3}.gmh2 b{color:var(--tx)}
 /* altura do painel do mapa por CSS: acompanha a janela na hora (tela cheia, zoom) */
 @media(min-width:821px){.gcp{height:max(400px,calc((100vh - var(--gt,130px) - 14px)/var(--z,1)))}}
+
+/* ===== Alinhamento: Colunas/Mapa/Limpar na mesma reta dos filtros ===== */
+.gcc>.gfl{margin-bottom:0}.gcp>.gch{align-self:end}
+/* ===== Menu lateral (estilo madeira + botões em relevo) ===== */
+:root{--sbw:232px}
+header.sb{position:fixed;left:8px;top:8px;bottom:8px;width:calc(var(--sbw) - 16px);z-index:35;display:flex;flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:10px;padding:12px 10px;border:1px solid #2b180a;border-radius:22px;overflow-y:auto;scrollbar-width:none;
+ background:repeating-linear-gradient(92deg,#0000001a 0 2px,#0000 2px 7px),linear-gradient(180deg,#704827,#4b2d15 50%,#5d3a1a);box-shadow:inset 0 0 0 2px #00000040,inset 0 1px 0 #ffffff26,0 10px 30px var(--sh)}
+header.sb::-webkit-scrollbar{display:none}
+header.sb [hidden]{display:none!important}
+header.sb .logo{margin:0;padding:12px 14px;border-radius:14px;color:#fff;font-size:22px;line-height:1.1;background:linear-gradient(180deg,#262932,#15171d);border:1px solid #ffffff12;box-shadow:0 4px 10px #0009,inset 0 1px 0 #ffffff14}
+header.sb .logo::after{content:"Organizador de tarefas";display:block;margin-top:3px;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#8d94a6}
+header.sb .sbl{align-self:flex-start;padding:3px 10px;border-radius:4px;font-size:9.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#3a2705;background:linear-gradient(#ecd081,#b88a2e);box-shadow:0 2px 4px #0006,inset 0 1px 0 #fff6}
+header.sb nav{flex-direction:column;gap:7px;margin:0;padding:8px;border:0;border-radius:16px;overflow:visible;background:#0b0d12b8;box-shadow:inset 0 2px 8px #000c}
+header.sb nav button{display:flex;align-items:center;gap:10px;width:100%;flex:none;padding:10px 12px;text-align:left;white-space:normal;font-size:13.5px;font-weight:600;color:#c9cfdd;border-radius:12px;border:1px solid #ffffff12;background:linear-gradient(180deg,#2b2e39,#1b1d26);box-shadow:0 3px 6px #0009,inset 0 1px 0 #ffffff14;position:relative;transition:transform .15s,filter .2s,color .2s}
+header.sb nav button::before{content:"";width:3px;height:16px;border-radius:2px;flex:none;background:#585e70;transition:background .2s,box-shadow .2s}
+header.sb nav button:hover{color:#fff;filter:brightness(1.18);transform:translateX(2px)}
+header.sb nav button:hover::before,header.sb nav button[aria-current=page]::before{background:var(--ac);box-shadow:0 0 8px var(--ac)}
+header.sb nav button[aria-current=page]{color:#fff;font-weight:700;background:linear-gradient(180deg,#38333c,#201c24);box-shadow:inset 0 2px 6px #000b,0 0 0 1px #ffffff10}
+header.sb .ni{display:inline-flex;flex:none;color:#8f96aa}header.sb .ni svg{width:18px;height:18px}header.sb nav button[aria-current=page] .ni,header.sb nav button:hover .ni{color:var(--ac)}
+header.sb .nl{flex:1;min-width:0}
+header.sb .clk{display:flex;flex-direction:column;gap:2px;padding:10px 14px;border-radius:14px;background:linear-gradient(#08090b,#15110a);border:1px solid #000;box-shadow:inset 0 2px 8px #000}
+header.sb .clk b{font:700 28px/1 ui-monospace,Consolas,monospace;letter-spacing:.06em;color:#f0a43a;text-shadow:0 0 10px #f0a43a66}
+header.sb .clk i{font-style:normal;animation:sbk 1.2s steps(2,start) infinite}
+header.sb .clk small{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#b98a45}
+@keyframes sbk{50%{opacity:.25}}@media(prefers-reduced-motion:reduce){header.sb .clk i{animation:none}}
+header.sb .sp{display:block;flex:1 1 auto;min-height:0}
+header.sb .status{text-align:center;font-size:11.5px;color:#ecdcc0}
+header.sb .ap{display:flex;gap:6px}
+header.sb .btn{width:100%;min-height:36px;padding:7px 10px;justify-content:center;text-align:center;white-space:nowrap;color:#e4e8f3;border:1px solid #ffffff14;background:linear-gradient(180deg,#2b2e39,#1b1d26);box-shadow:0 3px 6px #0009,inset 0 1px 0 #ffffff14}
+header.sb .ap .btn{width:auto;flex:1;padding:7px 0}
+header.sb .btn.pri{color:#241800;font-weight:700;background:linear-gradient(180deg,#f6cf6a,var(--ac))}
+header.sb #bo{color:#fff;font-weight:700;background:linear-gradient(180deg,#e5493d,#b52a21);border-color:#ff8f8655}
+header.sb .btn:hover{filter:brightness(1.15)}
+@media(min-width:761px){#app{margin-left:var(--sbw)}}
+@media(max-width:760px){
+ header.sb{position:sticky;top:0;left:auto;bottom:auto;width:auto;z-index:31;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border:0;border-radius:0;overflow:visible;background:var(--hd);box-shadow:0 4px 12px var(--sh)}
+ .stk{top:var(--hdh,0px)}
+ header.sb .logo{padding:0;background:none;border:0;box-shadow:none;color:var(--tx)}header.sb .logo::after,header.sb .sbl,header.sb .clk,header.sb .ni{display:none}
+ header.sb nav{flex-direction:row;order:5;width:100%;overflow-x:auto;gap:4px;padding:0 0 2px;background:none;box-shadow:none}
+ header.sb nav button{width:auto;flex:1;white-space:nowrap;padding:8px 14px;border-radius:999px;border:0;background:none;box-shadow:none;color:var(--mu)}
+ header.sb nav button::before{display:none}header.sb nav button[aria-current=page]{background:var(--ac);color:#241800}
+ header.sb .sp,header.sb .status{display:none}header.sb .btn{width:auto;min-height:40px;background:var(--s2);color:var(--tx);box-shadow:none}
+ header.sb .btn.pri{background:var(--ac);color:#241800}header.sb #bo{background:var(--s2);color:var(--tx);border-color:var(--line)}
+}
 </style>
 </head>
 <body>
@@ -968,6 +1012,10 @@ const mvRows=(L,max)=>L.slice(0,max).map(t=>{const m=t.mov;return `<div class="g
 function mvSec(max){const L=S.tasks.filter(movNew).sort((a,b)=>b.mov.t-a.mov.t);if(!L.length)return'';
   return `<section class="gs-sec mvbar" aria-label="Tarefas que mudaram de posto"><h3>🔔 Mudaram de posto <em>${L.length}</em></h3>${mvRows(L,max)}<button type="button" class="btn" data-mvall>✓ Marcar todas como vistas</button></section>`}
 document.addEventListener('click',e=>{if(e.target.closest('[data-mvall]')){setVisto(S.tasks.filter(movNew).map(t=>t.id));render()}});
+const _sv=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const NI={gestao:_sv('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'),painel:_sv('<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/>'),tarefa:_sv('<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m8 12 3 3 5-6"/>'),equipe:_sv('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.3c2.2.7 3.5 2.6 3.5 5.7"/>'),med:_sv('<path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/>'),admin:_sv('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>'),guia:_sv('<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5Z"/><path d="M4 21.5V4.5M9 7h7"/>')};
+function clkH(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `<b>${p(d.getHours())}<i>:</i>${p(d.getMinutes())}</b><small>${d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'}).replace(/\./g,'')}</small>`}
+if(!window._clkT)window._clkT=setInterval(()=>{const e=document.getElementById('clk');if(e)e.innerHTML=clkH()},15000);
 const NAV=[['gestao','Gestão'],['painel','Todas as tarefas'],['tarefa','Por tarefa'],['equipe','Por funcionário'],['med','Concessionárias'],['admin','Administração'],['guia','Passo a passo']];
 const allowed=v=>isAdm()||v==='painel';
 let USR=null;const MX=new Set(),CC=new Set();
@@ -1155,12 +1203,12 @@ function render(){fxView();
     body=(isAdm()?'<p class="hint" style="margin:0 0 8px">Arraste um card para a coluna de outro funcionário para passar a ele o passo liberado.</p>':'')+`<div class="hsb" id="hsb" hidden aria-hidden="true"><div></div></div><div class="board postit" id="bdp">${P.map(([pk,p],i)=>{const L=srt(TF.filter(t=>holders(t).some(h=>pkey(h.pessoa)===pk)&&(t.status!=='done'||fKpi==='done')));
       return `<section class="col" data-p="${esc(pk)}" data-pn="${esc(p)}" aria-label="${esc(p)}"><h2><span><span class="avatar" aria-hidden="true">${esc(p[0])}</span>${esc(p)}</span><span><button type="button" class="xa" data-xa title="Expandir/recolher todos" aria-label="Expandir ou recolher todos">⇕</button><em>${L.length}</em></span></h2><div class="list">${L.map((t,j)=>card(t,'p').replace('class="card"',`class="card" style="--rot:${(j%2?1:-1)*(0.6+j%3*0.4)}deg;--c:${corOf(t)}"`)).join('')||'<div class="empty">Sem atividades</div>'}</div></section>`}).join('')||'<div class="empty" style="width:100%">Crie uma tarefa com fluxo para ver os funcionários aqui.</div>'}</div>`;
   }
-  $('#app').innerHTML=`<div class="stk"><header><div class="logo">Flu<b>xo</b></div>
-  <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" ${view===v?'aria-current="page"':''}>${v==='painel'&&!isAdm()?'Minhas tarefas':l}${v==='gestao'?gBadge():''}${v==='tarefa'?mvBadge():''}</button>`).join('')}</nav>
+  $('#app').innerHTML=`<header class="sb"><div class="logo">Flu<b>xo</b></div><span class="sbl">Menu</span>
+  <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" ${view===v?'aria-current="page"':''}><i class="ni" aria-hidden="true">${NI[v]||''}</i><span class="nl">${v==='painel'&&!isAdm()?'Minhas tarefas':l}</span>${v==='gestao'?gBadge():''}${v==='tarefa'?mvBadge():''}</button>`).join('')}</nav><div class="clk" id="clk" aria-hidden="true">${clkH()}</div>
   <div class="sp"></div><span class="status" id="fs" role="status">${esc(stText())}</span>
   <span class="ap" role="group" aria-label="Aparência"><button class="btn" id="bt" title="Trocar tema (tecla T)" aria-label="Tema ${THEMES.find(x=>x[0]===themeOf())[1]}. Trocar tema">◐</button><button class="btn" id="bf" title="Tela cheia" aria-label="Alternar tela cheia">⛶</button><button class="btn" id="bc" title="Recolher ou expandir o cabeçalho" aria-label="Recolher ou expandir o cabeçalho">⇕</button><button class="btn" id="bz" title="Tamanho do texto" aria-label="Tamanho do texto ${Math.round(ZOOMS[PREF.z||0]*100)}%. Alterar">Aa</button></span>
   <button class="btn pri" id="bn" ${isAdm()?'':'hidden'} title="Nova tarefa (tecla N)">+ Nova tarefa</button><button class="btn" id="bo" aria-label="Sair de ${esc(user)}">Sair</button></header>
-  <div class="top">${hero()}
+  <div class="stk"><div class="top">${hero()}
   <div class="kpis" role="group" aria-label="Segmentar por situação">${kp('open',open,'em aberto')}${kp('late',B.filter(late).length,'atrasadas')}${kp('done',B.filter(t=>t.status==='done').length,'concluídas')}</div></div>${['guia','med','gestao'].includes(view)?'':bar()}</div>
   <div class="shell${isAdm()?'':' nosb'}">${medSide()}<main id="main" tabindex="-1">${body}</main></div>`;
   bind();setHH();titulo();if(view==='guia')bindGuia();if(view==='admin')bindAdmin();
@@ -1179,7 +1227,7 @@ function kpiGo(k){
   view='painel';
   colOpen=undefined;focoKpi=true;ANIM=true;render();
 }
-function setHH(){const e=$('.stk');if(e)document.documentElement.style.setProperty('--hh',e.offsetHeight+'px')}
+function setHH(){const e=$('.stk');if(e)document.documentElement.style.setProperty('--hh',e.offsetHeight+'px');const h=$('header.sb');document.documentElement.style.setProperty('--hdh',(h?h.offsetHeight:0)+'px')}
 addEventListener('resize',setHH);
 function bind(){
   document.documentElement.dataset.view=view;try{document.documentElement.classList.toggle('cmp',!!localStorage.getItem('fl_cmp'))}catch(e){}
