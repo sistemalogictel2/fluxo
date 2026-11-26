@@ -1304,3 +1304,5 @@ main{scrollbar-gutter:stable;min-width:0}
 .gmi:hover{background:var(--ov,#8881)}
 .gmi input{width:16px;height:16px;margin:0;flex:none;accent-color:var(--ac)}
 .gmi:first-child{font-weight:700;border-bottom:1px solid var(--line);border-radius:8px 8px 0 0;margin-bottom:4px}
+
+.gxl{white-space:nowrap;font-weight:700}
