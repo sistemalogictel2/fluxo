@@ -2055,7 +2055,7 @@ function gMapInit(){
 function gFit(){
   const p=document.querySelector('.gcp');if(!p)return;
   if(innerWidth<=820){p.style.height='';return}
-  if(scrollY>0&&!gFit.nr){scrollTo(0,0)}const top=p.getBoundingClientRect().top;p.style.height=Math.max(400,innerHeight-top-14)+'px';
+  if(scrollY>0&&!gFit.nr){scrollTo(0,0)}const top=p.getBoundingClientRect().top,z=parseFloat(document.documentElement.style.getPropertyValue('--z'))||parseFloat(getComputedStyle(document.documentElement).zoom)||1;p.style.height=Math.max(400,(innerHeight-top-14)/z)+'px';
   const gb=p.querySelector('.gbd'),cs=p.querySelector('.gcols');
   if(gb&&cs){const mx=+cs.dataset.mx||1,lg=p.querySelector('.gleg'),hn=gb.querySelector('.hint'),nm=Math.max(0,...[...p.querySelectorAll('.gnm')].map(e=>e.offsetHeight)),
     PH=Math.max(80,Math.min(300,gb.clientHeight-(lg?lg.offsetHeight+12:0)-(hn?hn.offsetHeight+8:0)-nm-6-34));
