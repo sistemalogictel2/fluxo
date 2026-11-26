@@ -227,7 +227,7 @@ function card(t,mode){
   return `<div class="card${ex?'':' co'}" role="button" tabindex="0" style="--c:${corOf(t)}" draggable="${(mode==='k'||view==='equipe')&&isAdm()}" data-id="${t.id}" aria-label="Abrir tarefa ${esc(nome(t))}. ${esc(step)}">
   <span class="tg" role="button" aria-label="${ex?'Recolher':'Expandir'}" aria-expanded="${ex}" title="${ex?'Recolher':'Expandir'}">${ex?'▴':'▾'}</span><h3>${esc(nome(t))}</h3>${t.sub?`<div class="sub">${esc(t.sub)}</div>`:''}
   <div class="step">${step}${late(t)&&!ex?' <span class="tag late">⚠</span>':''}${movNew(t)?` <span class="tag mv" title="${esc(movLine(t.mov))}">🔔 ${t.mov.tp==='d'?'Devolvida':t.mov.fim?'Concluída':t.mov.pp?'Novo posto':'Passo concluído'}${t.mov.pp&&!t.mov.fim?': '+esc(ppShort(t.mov.pp)):''}</span>`:''}${mode==='k'&&A.length?` <span class="sub">→ ${esc([...new Set(A.map(a=>a.pessoa))].join(', '))}</span>`:''}${mA.length?' <span class="tag vez">Sua vez</span>':''}</div><div class="dots" aria-hidden="true">${dots}</div>${ex&&movNew(t)?`<div class="mvd">${esc(movLine(t.mov))} · há ${ago(t.mov.t)}</div>`:''}${mA.map(a=>`<button type="button" class="btn pri fin" data-fin="${t.id}" data-fs="${a.id}">✔ Finalizar${mA.length>1?': '+esc(a.etapa):' meu passo'}</button>`).join('')}
-  <div class="meta">${ufOf(t)?`<span class="tag uf-card">UF: ${esc(ufOf(t))}</span>`:''}${tipoTag(t)}${t.protocolo?`<span class="tag">Prot. ${esc(t.protocolo)}</span>`:''}${t.portal?`<span class="tag">${esc(t.portal)}</span>`:''}
+  <div class="meta">${tipoTag(t)}${t.protocolo?`<span class="tag">Prot. ${esc(t.protocolo)}</span>`:''}${t.portal?`<span class="tag">${esc(t.portal)}</span>`:''}
   ${t.final?`<span class="tag">Entrega ${fmt(t.final)}</span>`:''}${late(t)?'<span class="tag late">⚠ Atrasada</span>':''}</div></div>`;
 }
 
@@ -1309,13 +1309,22 @@ function gestaoView(){
   if(!GT.some(x=>x[0]===gTab))gTab='graf';
   const gcp=(()=>{
     const ST=[['todo','A iniciar','#8ea4cf'],['doing','Em andamento','#f2c14e'],['wait','Aguardando','#c4a5f5'],['done','Concluídas','#2fb59f']],
-      V=S.tasks.filter(vis),T00=V.filter(t=>ST.some(x=>x[0]===t.status)&&gOk(t,0)),MP=gMapHtml(gSel?T00.filter(t=>medMatch(t,gSel)):T00),FU=gFld(/^(UF|ESTADO)$/),FM=gFld(/MUNIC|CIDADE/),
+      V=S.tasks.filter(vis),T00=V.filter(t=>ST.some(x=>x[0]===t.status)&&gOk(t,0)),
+      medBase=V.filter(t=>ST.some(x=>x[0]===t.status)),
+      medOpts=[...(S.medicoes||[])].filter(m=>medBase.some(t=>medMatch(t,m.id))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>({id:m.id,nome:m.nome})),
+      medSem=medBase.some(t=>medMatch(t,'_')),
+      logBase=medBase.filter(t=>!gSel||medMatch(t,gSel)),
+      vtBase=logBase.filter(t=>!gLog||String(t.vmc||'').slice(0,7)===gLog),
+      ufBase=vtBase.filter(t=>!gVt||String(t.vmg||'').trim()===gVt),
+      MP=gMapHtml(T00.filter(t=>(!gSel||medMatch(t,gSel))&&(!gLog||String(t.vmc||'').slice(0,7)===gLog)&&(!gVt||String(t.vmg||'').trim()===gVt))),
+      FU=gFld(/^(UF|ESTADO)$/),FM=gFld(/MUNIC|CIDADE/),
       T0=(gUf&&FU)||(gMun&&FM)?T00.filter(t=>(!gUf||!FU||UFK[gNorm(t[FU.id])]===gUf)&&(!gMun||!FM||gNorm(String(t[FM.id]||'').trim())===gMun)):T00,T=gSel?T0.filter(t=>medMatch(t,gSel)):T0,
-      ms=[...(S.medicoes||[])].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>({id:m.id,nome:m.nome}));
-    if(V.some(t=>medMatch(t,'_')))ms.push({id:'_',nome:'Sem medição'});
+      ms=medOpts;
+    if(medSem)ms.push({id:'_',nome:'Sem medição'});
     const C=ms.map(m=>{const L=T0.filter(t=>medMatch(t,m.id)),c=ST.map(([k,l,cl])=>({k,l,cl,n:L.filter(t=>t.status===k).length})).filter(x=>x.n);return{m,c,n:L.length}}),
       mx=Math.max(1,...C.map(x=>x.n&&Math.max(...x.c.map(y=>y.n)))),PH=190,tot=T.length,dn=T.filter(t=>t.status==='done').length,pct=tot?Math.round(dn/tot*100):0;
-    const lo=[...new Set(V.map(t=>String(t.vmc||'').slice(0,7)).filter(k=>/^\d{4}-\d{2}$/.test(k)))].sort(),vo=[...new Set(V.map(t=>String(t.vmg||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
+    const lo=[...new Set(logBase.map(t=>String(t.vmc||'').slice(0,7)).filter(k=>/^\d{4}-\d{2}$/.test(k)))].sort(),
+      vo=[...new Set(vtBase.map(t=>String(t.vmg||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
     const fs=(id,l,cur,o)=>`<label class="gfi"><span>${l}</span><select class="fsel" id="${id}"><option value="">Todas</option>${o.map(([v,t])=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
     const leg=`<div class="gleg">${ST.map(([k,l,c])=>`<span style="--c:${c}"><i></i>${l} <b>${T.filter(t=>t.status===k).length}</b></span>`).join('')}</div>`;
     const cols=C.length?`<div class="gcols" data-mx="${mx}">${C.map(({m,c,n})=>`<div class="gg${gSel&&gSel!==m.id?' dim':''}" style="flex-grow:${Math.max(1,c.length)}"><div class="gbs">${c.map(({l,cl,n:v})=>{const h=v/mx*PH;return `<u data-v="${v}" style="--c:${cl};--h:${h.toFixed(1)}px" class="${h<20?'sm':''}" title="${esc(m.nome)} · ${l}: ${v}"><b>${v}</b></u>`}).join('')||'<span class="gz">0</span>'}</div><button type="button" class="gnm${gSel===m.id?' on':''}" data-gmed="${esc(m.id)}" aria-pressed="${gSel===m.id}" title="Filtrar por ${esc(m.nome)} (${n} tarefas)">${esc(m.nome)}</button></div>`).join('')}</div>`:'<div class="empty">Nenhuma medição cadastrada.</div>';
