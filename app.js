@@ -9,7 +9,7 @@ function cycZoom(){PREF.z=((PREF.z||0)+1)%ZOOMS.length;applyPref();render()}
 const COLORS=['#fde68a','#fbcfe8','#bfdbfe','#bbf7d0','#ddd6fe','#fed7aa','#a5f3fc','#e5e7eb'];
 const COLS=[['todo','A iniciar'],['doing','Em andamento'],['wait','Aguardando'],['done','Concluídas'],['fixo','Fixo']];
 const ACT=['painel','tarefa','equipe'];let lastAct='painel',focoKpi=false;
-const EX=new Set();let colOpen,colNow,fQ='';let S={users:[],tasks:[]},view='gestao',fFunc='',fTipo='',fMed='',fPessoa='',fKpi='',ME=(()=>{try{const m=JSON.parse(sessionStorage.getItem('me'));return m&&m.tk?m:null}catch(e){return null}})(),user=ME&&ME.n;
+const EX=new Set();let colOpen,colNow,fQ='';let S={users:[],tasks:[]},view='gestao',fFunc='',fTipo='',fMed='',fPessoa='',fKpi='',fUf='',ME=(()=>{try{const m=JSON.parse(sessionStorage.getItem('me'));return m&&m.tk?m:null}catch(e){return null}})(),user=ME&&ME.n;
 const $=s=>document.querySelector(s);
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=d=>d?d.split('-').reverse().join('/'):'—';
@@ -273,6 +273,7 @@ function render(){fxView();
   if(fMed&&!(S.medicoes||[]).some(c=>c.id===fMed))fMed='';
   if(fPessoa&&!personOpts().some(o=>o[0]===fPessoa))fPessoa='';
   if(fFunc&&!cargos().includes(fFunc))fFunc='';
+  if(fUf&&!ufList().includes(fUf))fUf='';
   const B=base(),TF=B.filter(kpiOk),open=B.filter(t=>t.status!=='done').length;
   const kp=(k,n,l)=>`<button type="button" class="kpi" data-k="${k}" aria-pressed="${fKpi===k}"><b>${n}</b><span>${l}</span></button>`;
   let body='';
@@ -351,8 +352,8 @@ function bind(){
   document.querySelectorAll('[data-cx]').forEach(b=>b.onclick=()=>{const k=b.dataset.cx;colOpen=colNow===k?null:k;ANIM=true;render()});
   document.querySelectorAll('.pcap[data-tp]').forEach(b=>b.onclick=()=>openTP(b.dataset.pk,b.dataset.tp));
   document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{if(b.dataset.v==='medicao'){window._xpLock=true;const h=b.closest('header.sb');if(h)h.classList.remove('xp');setMed(!MEDOPEN);return}MEDOPEN=false;if(b.dataset.v==='gestao'&&view!=='gestao'){gTab='graf';gCh='map';gMore=false}view=b.dataset.v;ANIM=true;render()});
-  $('#bn').onclick=()=>openTask();$('#bt').onclick=cycTheme;$('#bz').onclick=cycZoom;[['fl-t',v=>fTipo=v],['fl-p',v=>fPessoa=v],['fl-c',v=>{fMed=v;if(fTipo&&!S.tipos.some(y=>y.id===fTipo&&(!fMed||medId(y)===fMed)))fTipo=''}]].forEach(([id,fn])=>{const e=$('#'+id);if(e)e.onchange=()=>{fn(e.value);render()}});
-  const fx=$('#fl-x');if(fx)fx.onclick=()=>{fTipo=fPessoa=fKpi=fMed=fQ='';render()};
+  $('#bn').onclick=()=>openTask();$('#bt').onclick=cycTheme;$('#bz').onclick=cycZoom;[['fl-t',v=>fTipo=v],['fl-p',v=>fPessoa=v],['fl-u',v=>fUf=v],['fl-c',v=>{fMed=v;if(fTipo&&!S.tipos.some(y=>y.id===fTipo&&(!fMed||medId(y)===fMed)))fTipo=''}]].forEach(([id,fn])=>{const e=$('#'+id);if(e)e.onchange=()=>{fn(e.value);render()}});
+  const fx=$('#fl-x');if(fx)fx.onclick=()=>{fTipo=fPessoa=fKpi=fMed=fUf=fQ='';render()};
   const fq=$('#fq');if(fq)fq.oninput=()=>{clearTimeout(fq._t);fq._t=setTimeout(()=>{fQ=fq.value;const p=fq.selectionStart;render();const n=$('#fq');if(n){n.focus();n.setSelectionRange(p,p)}},180)};
   document.querySelectorAll('button.kpi').forEach(b=>b.onclick=()=>kpiGo(b.dataset.k));
   $('#bo').onclick=()=>{sessionStorage.removeItem('me');ME=user=null;USR=null;view='gestao';render()};
@@ -434,20 +435,23 @@ const pkey=p=>{const c=contactFor(p);return c?'c:'+c.id:'n:'+nk(p)};
 function flowPeople(){const m=new Map();S.tasks.forEach(t=>t.fluxo.forEach(f=>{if(f.pessoa==='Sem responsável')return;const k=pkey(f.pessoa);if(!m.has(k)){const c=contactFor(f.pessoa);m.set(k,c?chipName(c):f.pessoa)}}));return[...m]}
 const personOpts=()=>{const m=new Map(flowPeople());(S.contatos||[]).forEach(c=>m.set('c:'+c.id,chipName(c)));return[...m].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'))};
 const qOk=t=>{return nk([nome(t),t.tarefa,t.protocolo,...holders(t).map(h=>h.pessoa),...t.fluxo.flatMap(f=>[f.etapa,f.pessoa])].join(' ')).includes(nk(fQ))};
-const base=()=>S.tasks.filter(t=>vis(t)&&(!fQ||qOk(t))&&(!fTipo||t.tipo===fTipo)&&(!fMed||medId(tipoOf(t))===fMed)&&(!fPessoa||holders(t).some(h=>pkey(h.pessoa)===fPessoa)));
+const ufV=()=>view==='tarefa'||view==='equipe';
+const ufOf=t=>{try{const f=gFld(/^(UF|ESTADO)$/);return f?(UFK[gNorm(t[f.id])]||''):''}catch(e){return''}};
+const ufList=()=>{try{return[...new Set(S.tasks.filter(vis).map(ufOf).filter(Boolean))].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR'))}catch(e){return[]}};
+const base=()=>S.tasks.filter(t=>vis(t)&&(!fUf||!ufV()||ufOf(t)===fUf)&&(!fQ||qOk(t))&&(!fTipo||t.tipo===fTipo)&&(!fMed||medId(tipoOf(t))===fMed)&&(!fPessoa||holders(t).some(h=>pkey(h.pessoa)===fPessoa)));
 const kpiOk=t=>!fKpi||(fKpi==='open'?t.status!=='done':fKpi==='late'?late(t):t.status==='done');
-const anyF=()=>!!(fTipo||fPessoa||fKpi||fQ||fMed);
+const anyF=()=>!!(fTipo||fPessoa||fKpi||fQ||fMed||(fUf&&ufV()));
 const KPI_TXT={open:'em aberto',late:'atrasadas',done:'concluídas'};
 function bar(){
   const Y=(S.tipos||[]).filter(y=>!fMed||medId(y)===fMed).map(y=>[y.id,tipoLbl(y)]),P=isAdm()?personOpts():[],C=(S.medicoes||[]).map(c=>[c.id,c.nome]).sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'));
-  const sel=(id,l,cur,all,o)=>o.length?`<div class="fg"><label for="${id}">${l}</label><select class="fsel" id="${id}"><option value="">${all}</option>${o.map(([v,t])=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(t)}</option>`).join('')}</select></div>`:'';
+  const sel=(id,l,cur,all,o,cls)=>o.length?`<div class="fg${cls?' '+cls:''}"><label for="${id}">${l}</label><select class="fsel" id="${id}"><option value="">${all}</option>${o.map(([v,t])=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(t)}</option>`).join('')}</select></div>`:'';
   const f=anyF();
   let extra='';
   if(view==='admin'){
     const n={cls:(S.medicoes||[]).length,med:(S.concessionarias||[]).length,tipos:S.tipos.length,campos:campos().filter(c=>!c.fixo).length,func:(S.contatos||[]).length,usr:USR?USR.length:'·'};
     extra=`<div class="amenu-bar" role="group" aria-label="Cadastros">${ASEC.map(([k,l],i)=>`<button type="button" data-sec="${k}" ${adminSec===k?'aria-current="page"':''}><span>${i+1}. ${l}</span><em>${n[k]}</em></button>`).join('')}</div>`;
   }
-  return `<div class="bar" role="group" aria-label="Filtros">${['painel','tarefa','equipe'].includes(view)?`<div class="fg"><label for="fq">Buscar</label><input type="search" id="fq" class="cs" placeholder="Título, protocolo, pessoa…  ( / )" value="${esc(fQ)}" autocomplete="off"></div>`:''}${sel('fl-c','Medição',fMed,'Todas',C)}${sel('fl-t','Tipo',fTipo,'Todos',Y)}${sel('fl-p','Funcionário',fPessoa,'Todos',P)}<span class="fsp"></span>`
+  return `<div class="bar" role="group" aria-label="Filtros">${['painel','tarefa','equipe'].includes(view)?`<div class="fg"><label for="fq">Buscar</label><input type="search" id="fq" class="cs" placeholder="Título, protocolo, pessoa…  ( / )" value="${esc(fQ)}" autocomplete="off"></div>`:''}${sel('fl-c','Medição',fMed,'Todas',C)}${sel('fl-t','Tipo',fTipo,'Todos',Y)}${sel('fl-p','Funcionário',fPessoa,'Todos',P)}${ufV()?sel('fl-u','UF',fUf,'Todas',ufList().map(u=>[u,u]),'fu'):''}<span class="fsp"></span>`
    +(f?`<span class="fcount">${fKpi?'Mostrando '+KPI_TXT[fKpi]+' · ':''}${base().filter(kpiOk).length} de ${S.tasks.filter(vis).length} tarefa(s)</span><button type="button" class="btn clr" id="fl-x">${ICO_BROOM} Limpar filtros</button>`:'')+extra+`</div>`;
 }
 async function copyText(txt){

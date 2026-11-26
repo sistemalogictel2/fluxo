@@ -1038,3 +1038,9 @@ header.sb.xp :is(.nl,.sbl,.clk small,.status:not(:empty)){animation:sbfade .3s e
 /* Busca: o campo ocupa só a própria coluna, sem passar por cima do filtro vizinho */
 .bar .fg:has(#fq){flex:1 1 230px;min-width:230px;max-width:300px}
 .bar .fg input.cs{max-width:100%}
+
+/* filtros da barra (Por tarefa / Por funcionário): fonte menor + filtro UF */
+.bar .fg label{font-size:10.5px}
+.bar .fg input.cs,.bar .fg select.fsel{font-size:13px;height:38px;min-height:38px;padding:0 8px}
+.bar .fg{min-width:110px}
+.bar .fg.fu{flex:0 1 90px;min-width:80px;max-width:110px}
