@@ -1416,3 +1416,8 @@ main{scrollbar-gutter:stable;min-width:0}
 }
 @media(max-width:760px){.stk .bar .fst{display:contents}}
 .fsb{height:40px;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+
+/* Contador + Limpar filtros na mesma linha dos filtros, à direita */
+.stk .bar .fst{flex:0 0 auto;margin:0 0 0 auto;height:auto;align-self:flex-end;min-height:38px}
+.stk .bar .fst .btn.clr{min-height:38px}
+@media(max-width:760px){.stk .bar .fst{display:flex;flex:1 1 100%;margin:0;height:auto}}
