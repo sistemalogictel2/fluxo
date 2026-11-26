@@ -660,8 +660,8 @@ input.mpk{cursor:pointer}
 @keyframes fxDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 @keyframes fxBar{from{width:0}}
 @keyframes fxPulse{50%{opacity:.55;transform:scale(.96)}}
-#splash{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#12372f,#08130f 70%);clip-path:circle(150% at 50% 45%);transition:clip-path .9s cubic-bezier(.7,0,.2,1)}
-#splash.go{clip-path:circle(0% at 50% 45%);pointer-events:none}
+#splash{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#12372f,#08130f 70%);opacity:1;transition:opacity .35s ease}
+#splash.go{opacity:0;pointer-events:none}
 .spl{display:flex;flex-direction:column;align-items:center;gap:10px;color:#e6fff7;font-size:20px;letter-spacing:.2em;animation:fxPulse 1.2s ease-in-out infinite}
 @media(prefers-reduced-motion:no-preference){
 html[data-anim] :is(.gs-k,.gcp,.tcard,.col,.mdc,.gs-row,.gs-p,.kpi,.tabs){animation:fxUp .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0ms)}
@@ -866,44 +866,44 @@ header.sb{--gl:color-mix(in srgb,var(--tx) 8%,transparent);--gb:color-mix(in srg
 #app{margin-left:var(--sbw)}
 header.sb{position:fixed;left:8px;top:8px;bottom:8px;width:56px;z-index:38;display:flex;flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:10px;padding:10px 6px;border:1px solid var(--gb);border-radius:20px;overflow-x:hidden;overflow-y:auto;scrollbar-width:none;transition:width .25s var(--e,ease),padding .25s;
  background:color-mix(in srgb,var(--s1) 58%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7);box-shadow:0 12px 32px var(--sh),inset 0 1px 0 #ffffff30}
-header.sb:is(:hover,:focus-within){width:216px;padding:12px 10px}
+header.sb.xp{width:216px;padding:12px 10px}
 header.sb::-webkit-scrollbar{display:none}header.sb [hidden]{display:none!important}
 header.sb .logo{margin:0;padding:8px 0;text-align:center;font-size:0;line-height:1.1;border-radius:14px;color:var(--tx);background:var(--gl);border:1px solid var(--gb)}
 header.sb .logo::before{content:"F";font-size:22px;font-weight:800;color:var(--ac)}
 header.sb .logo::after{content:"Organizador de tarefas";display:none;margin-top:3px;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mu)}
-header.sb:is(:hover,:focus-within) .logo{font-size:22px;padding:12px 14px;text-align:left}
-header.sb:is(:hover,:focus-within) .logo::before{display:none}header.sb:is(:hover,:focus-within) .logo::after{display:block}
+header.sb.xp .logo{font-size:22px;padding:12px 14px;text-align:left}
+header.sb.xp .logo::before{display:none}header.sb.xp .logo::after{display:block}
 header.sb .sbl,header.sb .nl,header.sb .status,header.sb .clk small{display:none}
-header.sb:is(:hover,:focus-within) :is(.nl,.clk small){display:block}header.sb:is(:hover,:focus-within) .sbl{display:block}header.sb:is(:hover,:focus-within) .status:not(:empty){display:block}
+header.sb.xp :is(.nl,.clk small){display:block}header.sb.xp .sbl{display:block}header.sb.xp .status:not(:empty){display:block}
 header.sb .sbl{align-self:flex-start;padding:2px 10px;border-radius:99px;font-size:9.5px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--act);background:var(--acbg)}
 header.sb nav{flex-direction:column;gap:6px;margin:0;padding:0;border:0;overflow:visible;background:none}
 header.sb nav button{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;flex:none;min-height:42px;padding:9px 0;text-align:left;white-space:nowrap;font-size:13.5px;font-weight:600;color:var(--mu);border-radius:12px;border:1px solid transparent;background:none;box-shadow:none;position:relative;transition:background .2s,color .2s,border-color .2s}
-header.sb:is(:hover,:focus-within) nav button{justify-content:flex-start;padding:9px 12px}
+header.sb.xp nav button{justify-content:flex-start;padding:9px 12px}
 header.sb nav button>:not(.ni):not(.nl){position:absolute;top:1px;right:3px;transform:scale(.8)}
-header.sb:is(:hover,:focus-within) nav button>:not(.ni):not(.nl){position:static;transform:none}
+header.sb.xp nav button>:not(.ni):not(.nl){position:static;transform:none}
 header.sb nav button:hover{color:var(--tx);background:var(--gl);border-color:var(--gb);transform:none}
 header.sb nav button[aria-current=page]{color:var(--tx);font-weight:700;background:color-mix(in srgb,var(--ac) 24%,transparent);border-color:color-mix(in srgb,var(--ac) 55%,transparent);box-shadow:0 0 14px color-mix(in srgb,var(--ac) 25%,transparent)}
 header.sb .ni{display:inline-flex;flex:none;color:inherit}header.sb .ni svg{width:20px;height:20px}header.sb nav button[aria-current=page] .ni{color:var(--act)}
 header.sb .nl{flex:1;min-width:0}
 header.sb .clk{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:14px;background:var(--gl);border:1px solid var(--gb)}
-header.sb:is(:hover,:focus-within) .clk{align-items:flex-start;padding:10px 14px}
+header.sb.xp .clk{align-items:flex-start;padding:10px 14px}
 header.sb .clk b{font:700 12px/1 ui-monospace,Consolas,monospace;letter-spacing:.02em;color:var(--act)}
-header.sb:is(:hover,:focus-within) .clk b{font-size:26px;letter-spacing:.06em}
+header.sb.xp .clk b{font-size:26px;letter-spacing:.06em}
 header.sb .clk i{font-style:normal;animation:sbk 1.2s steps(2,start) infinite}
 header.sb .clk small{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mu)}
 @keyframes sbk{50%{opacity:.25}}@media(prefers-reduced-motion:reduce){header.sb .clk i{animation:none}}
 header.sb .sp{display:block;flex:1 1 auto;min-height:0}
 header.sb .status{text-align:center;font-size:11.5px;color:var(--mu)}
-header.sb .ap{display:flex;flex-direction:column;gap:6px}header.sb:is(:hover,:focus-within) .ap{flex-direction:row}
+header.sb .ap{display:flex;flex-direction:column;gap:6px}header.sb.xp .ap{flex-direction:row}
 header.sb .btn{width:100%;min-height:36px;padding:7px 0;justify-content:center;text-align:center;white-space:nowrap;color:var(--tx);background:var(--gl);border:1px solid var(--gb);box-shadow:none}
 header.sb .ap .btn{width:auto;flex:1}
 header.sb .btn:hover{border-color:var(--act);color:var(--act)}
 header.sb #bn{font-size:0;color:var(--on,#241800);font-weight:700;background:var(--ac);border-color:var(--ac)}
 header.sb #bn::before{content:"+";font-size:20px;line-height:1}
-header.sb:is(:hover,:focus-within) #bn{font-size:14px}header.sb:is(:hover,:focus-within) #bn::before{display:none}
+header.sb.xp #bn{font-size:14px}header.sb.xp #bn::before{display:none}
 header.sb #bn:hover{color:var(--on,#241800);filter:brightness(1.1)}
 header.sb #bo{font-size:12px;font-weight:700;background:color-mix(in srgb,#e5493d 26%,transparent);border-color:color-mix(in srgb,#e5493d 60%,transparent)}
-header.sb:is(:hover,:focus-within) #bo{font-size:14px}
+header.sb.xp #bo{font-size:14px}
 header.sb #bo:hover{color:var(--tx);background:color-mix(in srgb,#e5493d 45%,transparent)}
 /* ===== Medições como cortina: fechada = aba na lateral; aberta = janela que desce ===== */
 .msbk{position:fixed;inset:0;z-index:36;background:#0006;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
@@ -911,13 +911,13 @@ header.sb #bo:hover{color:var(--tx);background:color-mix(in srgb,#e5493d 45%,tra
  background:color-mix(in srgb,var(--s1) 78%,transparent);-webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6);box-shadow:0 20px 50px var(--sh)}
 .msb.min{position:fixed!important;left:var(--sbw);top:50%;transform:translateY(-50%);width:auto!important;flex:none!important;padding:10px 6px!important;z-index:20;border:1px solid var(--line);border-left:0;border-radius:0 14px 14px 0;background:color-mix(in srgb,var(--s1) 70%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:4px 4px 16px var(--sh)}
 .msb.min:hover{border-color:var(--act)}
-@keyframes cort{from{clip-path:inset(0 0 100% 0 round 20px);opacity:.3}to{clip-path:inset(0 0 0 0 round 20px);opacity:1}}
+@keyframes cort{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
 @keyframes cfade{from{opacity:0}}
 @media(prefers-reduced-motion:reduce){.msb:not(.min),.msbk{animation:none}}
 }
 @media(min-width:761px){
-.msb.ani:not(.min){animation:cort .38s cubic-bezier(.2,.8,.2,1)}
-.msbk.ani{animation:cfade .25s}
+.msb.ani:not(.min){animation:cort .22s ease-out}
+.msbk.ani{animation:cfade .2s}
 .msb:not(.min){width:min(980px,calc(100vw - var(--sbw) - 20px))!important;display:flex;flex-direction:column;overflow:hidden!important}
 .msb:not(.min){bottom:auto!important;height:calc(100vh/var(--z,1) - 16px)!important;height:calc(100dvh/var(--z,1) - 16px)!important;max-height:calc(100vh/var(--z,1) - 16px)!important}
 .msb:not(.min) .msh2{flex:none}
@@ -951,12 +951,12 @@ header.sb #bo:hover{color:var(--tx);background:color-mix(in srgb,#e5493d 45%,tra
 .btn.clr svg{vertical-align:0;margin:0;flex:none;display:block}
 .gch .gbr svg{display:block;margin:0}
 /* Menu lateral: tudo centralizado */
-header.sb,header.sb:is(:hover,:focus-within){align-items:stretch;text-align:center}
-header.sb:is(:hover,:focus-within) .logo{text-align:center}
-header.sb .sbl,header.sb:is(:hover,:focus-within) .sbl{align-self:center}
-header.sb:is(:hover,:focus-within) nav button{justify-content:center}
+header.sb,header.sb.xp{align-items:stretch;text-align:center}
+header.sb.xp .logo{text-align:center}
+header.sb .sbl,header.sb.xp .sbl{align-self:center}
+header.sb.xp nav button{justify-content:center}
 header.sb .status{text-align:center}
-header.sb .ap,header.sb:is(:hover,:focus-within) .ap{justify-content:center}
+header.sb .ap,header.sb.xp .ap{justify-content:center}
 
 /* ===== Unificação visual: todo o site no estilo do menu lateral (Glass escuro e Glass claro) ===== */
 :root{--gl:color-mix(in srgb,var(--tx) 8%,transparent);--gb:color-mix(in srgb,var(--tx) 14%,transparent);--gg:color-mix(in srgb,var(--ac) 25%,transparent);--gi:color-mix(in srgb,#fff 30%,transparent)}
@@ -1023,3 +1023,7 @@ dialog .db,dialog .vb{overflow-y:auto;-webkit-overflow-scrolling:touch}
 .msb.min{width:36px!important;padding:10px 3px!important;overflow:hidden}
 .msb.min .msx{padding:4px 0}
 }
+
+/* Fluidez: menu lateral e aba de medições */
+header.sb{transition:width .22s ease,padding .22s ease}
+header.sb nav button,header.sb .btn,.msb.min{transition:background-color .15s,border-color .15s,color .15s,box-shadow .2s}

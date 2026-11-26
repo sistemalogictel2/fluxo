@@ -1478,4 +1478,14 @@ setInterval(()=>{if(user&&Date.now()-_act>120*60*1000){sessionStorage.removeItem
 (function(){try{if(sessionStorage.getItem('fx-sp')||matchMedia('(prefers-reduced-motion:reduce)').matches)return;sessionStorage.setItem('fx-sp','1')}catch(e){}
   const s=document.createElement('div');s.id='splash';s.setAttribute('aria-hidden','true');
   s.innerHTML='<div class="spl"><svg viewBox="0 0 64 64" width="64" height="64"><rect width="64" height="64" rx="14" fill="#0f141d"/><path d="M20 46V19h27M20 32h20" stroke="#f2c14e" stroke-width="7" fill="none" stroke-linecap="round"/></svg><b>Fluxo</b></div>';
-  document.body.appendChild(s);setTimeout(()=>s.classList.add('go'),1000);setTimeout(()=>s.remove(),2000)})();
+  document.body.appendChild(s);setTimeout(()=>s.classList.add('go'),500);setTimeout(()=>s.remove(),900)})();
+
+/* Menu lateral: só expande se o mouse ficar parado 0,6 s sobre ele (teclado expande na hora) */
+(function(){let t=0;const D=600,sb=e=>e&&e.closest?e.closest('header.sb'):null,clr=()=>{clearTimeout(t);t=0};
+ const arm=h=>{clr();t=setTimeout(()=>{t=0;if(h.isConnected&&h.matches(':hover'))h.classList.add('xp')},D)};
+ document.addEventListener('mousemove',e=>{const h=sb(e.target);if(h&&!h.classList.contains('xp'))arm(h)},{passive:true});
+ document.addEventListener('mouseout',e=>{const h=sb(e.target);if(!h||sb(e.relatedTarget))return;clr();if(!h.matches(':focus-within')||!h.querySelector(':focus-visible'))h.classList.remove('xp')});
+ document.addEventListener('focusin',e=>{const h=sb(e.target);if(h&&e.target.matches(':focus-visible'))h.classList.add('xp')});
+ document.addEventListener('focusout',e=>{const h=sb(e.target);if(h&&!sb(e.relatedTarget)&&!h.matches(':hover'))h.classList.remove('xp')});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){const h=document.querySelector('header.sb.xp');if(h)h.classList.remove('xp')}});
+})();
