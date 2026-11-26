@@ -1000,6 +1000,23 @@ html[data-view=gestao] .stk{display:none}
 :root[data-theme] .msb.min .msx em{background:var(--gl);border:1px solid var(--gb)}
 :root[data-theme] .msb:not(.min){border-color:var(--gb)}
 :root[data-theme] .msr{border-radius:12px}
+
+/* ===== Cards: texto centralizado e organizado ===== */
+.card{position:relative;text-align:center;display:flex;flex-direction:column;align-items:stretch;gap:0}
+.card .tg{position:absolute;top:6px;right:6px;float:none;margin:0}
+.card h3{padding:0 26px;margin:0 0 2px;text-align:center;overflow-wrap:anywhere}
+.card .sub{text-align:center;overflow-wrap:anywhere}
+.card .step{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 6px;text-align:center;margin-top:8px}
+.card .dots{margin-top:8px}
+.card .meta{justify-content:center;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid color-mix(in srgb,var(--tx) 10%,transparent)}
+.card .meta:empty{display:none;border:0;padding:0;margin:0}
+.card .mvd{text-align:center}
+.card .fin{margin-top:10px}
+.card.co .step{margin-top:4px}
+/* ===== Rolagem presa dentro da janela (visualizar/editar) ===== */
+html:has(dialog[open]){overflow:hidden}
+dialog,dialog *{overscroll-behavior:contain}
+dialog .db,dialog .vb{overflow-y:auto;-webkit-overflow-scrolling:touch}
 </style>
 </head>
 <body>
