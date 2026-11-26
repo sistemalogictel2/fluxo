@@ -112,51 +112,20 @@ async function rpc(fn,args){const r=await fetch(sbU('rpc/'+fn),{method:'POST',he
 async function loadUsr(){try{USR=await rpc('fx_usuarios_listar',{p_token:ME.tk})}catch(e){USR=[];toast('Não foi possível carregar os usuários: '+e.message)}if(view==='admin'&&adminSec==='usr')render()}
 /* ---------- Abertura estilo comercial após o login ---------- */
 function introFx(done){
-  const h=document.querySelector('.login h1');
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches||!h||!h.animate){done();return}
-  const act=getComputedStyle(document.documentElement).getPropertyValue('--act').trim()||'#f2c14e',vw=innerWidth,vh=innerHeight,
-    fs=Math.max(72,Math.min(vw*.16,vh*.26,170)),f0=parseFloat(getComputedStyle(h).fontSize)||30,s0=f0/fs,rg=document.createRange();rg.selectNodeContents(h);const r=rg.getBoundingClientRect();
-  const P='-16,-100 16,-100 12,100 -12,100',bar=(c,rot)=>`<g class="${c}"><polygon points="${P}" transform="rotate(${rot})" fill="url(#fxg${c==='b1'?1:2})" stroke="url(#fxg${c==='b1'?1:2})" stroke-width="10" stroke-linejoin="round"/></g>`;
-  const svg=`<svg class="fxm" viewBox="-110 -110 220 220" aria-hidden="true"><defs>
-    <linearGradient id="fxg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:color-mix(in srgb,var(--act) 62%,#fff)"/><stop offset="1" style="stop-color:var(--act)"/></linearGradient>
-    <linearGradient id="fxg2" x1="0" y1="1" x2="0" y2="0"><stop offset="0" style="stop-color:color-mix(in srgb,var(--ac2) 62%,#fff)"/><stop offset="1" style="stop-color:var(--ac2)"/></linearGradient>
-    <linearGradient id="fxsh" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".8"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-    <clipPath id="fxc1"><polygon points="${P}" transform="rotate(45)"/></clipPath>
-    <clipPath id="fxcu"><polygon points="${P}" transform="rotate(45)"/><polygon points="${P}" transform="rotate(-45)"/></clipPath></defs>
-    ${bar('b2',-45)}${bar('b1',45)}
-    <g clip-path="url(#fxc1)"><polygon class="fxit" points="${P}" transform="rotate(-45)" fill="#fff" fill-opacity=".34" opacity="0"/></g>
-    <g clip-path="url(#fxcu)"><g transform="skewX(-20)"><rect class="fxsh" x="-170" y="-140" width="80" height="280" fill="url(#fxsh)"/></g></g></svg>`;
+  const card=document.querySelector('.login');
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches||!document.body.animate){done();return}
   const o=document.createElement('div');o.className='fxi';
-  o.innerHTML=`<div class="fxbg"></div><div class="fxflare"></div><div class="fxring"></div>
-    <div class="fxw" style="font-size:${fs}px"><span class="fa">Flu</span><span class="fx">x</span><span class="fb">o</span></div>
-    <div class="fxl">${svg}<div class="fxwm">${'Flu'.split('').map(c=>`<i class="l">${c}</i>`).join('')}<i class="l k">x</i><i class="l k">o</i></div><div class="fxtg">Organizador de tarefas</div></div>`;
-  document.body.appendChild(o);h.style.visibility='hidden';
-  const q=x=>o.querySelector(x),qa=x=>[...o.querySelectorAll(x)],W=q('.fxw'),X=q('.fx'),A=q('.fa'),B=q('.fb'),M=q('.fxm'),L=q('.fxl'),E='cubic-bezier(.7,0,.2,1)',OV='cubic-bezier(.2,.9,.25,1.12)',
-    T=(x,y,k)=>`translate(-50%,-50%) translate(${x}px,${y}px) scale(${k})`,dx=r.left+r.width/2-vw/2,dy=r.top+r.height/2-vh/2,card=document.querySelector('.login'),tm=[];
-  let fin=0;const end=(ms)=>{if(fin)return;fin=1;tm.forEach(clearTimeout);done();o.animate([{opacity:1},{opacity:0}],{duration:ms,fill:'forwards'});setTimeout(()=>o.remove(),ms+60)};
-  o.onclick=()=>end(350);
-  card&&card.animate([{opacity:1,transform:'none'},{opacity:0,transform:'scale(.94) translateY(14px)'}],{duration:450,easing:'ease',fill:'forwards'});
-  q('.fxbg').animate([{opacity:0},{opacity:1}],{duration:500,fill:'both'});
-  /* 1. a palavra voa para o centro e cresce */
-  W.animate([{transform:T(dx,dy,s0)},{transform:T(0,0,1)}],{duration:1100,delay:150,easing:E,fill:'both'});
-  q('.fxflare').animate([{opacity:0,transform:'scaleX(0)'},{opacity:1,transform:'scaleX(1)',offset:.45},{opacity:0,transform:'scaleX(1.1)'}],{duration:1000,delay:1150,easing:'ease-out',fill:'both'});
-  /* 2. a palavra se desfaz e vira a marca */
-  A.animate([{transform:'none',opacity:1,filter:'blur(0)'},{transform:'translateX(-.5em)',opacity:0,filter:'blur(10px)'}],{duration:700,delay:1350,easing:E,fill:'both'});
-  B.animate([{transform:'none',opacity:1,filter:'blur(0)'},{transform:'translateX(.5em)',opacity:0,filter:'blur(10px)'}],{duration:700,delay:1350,easing:E,fill:'both'});
-  X.animate([{transform:'scale(1)',opacity:1,filter:'blur(0)'},{transform:'scale(2.2)',opacity:0,filter:'blur(8px)'}],{duration:650,delay:1400,easing:E,fill:'both'});
-  /* 3. as duas fitas cruzam e formam o X */
-  const fly=(c,x,y,d)=>q('.'+c).animate([{transform:`translate(${x}px,${y}px) scale(.6)`,opacity:0},{opacity:1,offset:.25},{transform:'none',opacity:1}],{duration:900,delay:d,easing:OV,fill:'both'});
-  fly('b1',-320,-320,1650);fly('b2',320,320,1800);
-  q('.fxit').animate([{opacity:0},{opacity:1}],{duration:500,delay:2500,fill:'both'});
-  q('.fxring').animate([{opacity:.85,transform:'scale(.3)'},{opacity:0,transform:'scale(9)'}],{duration:1100,delay:2450,easing:'ease-out',fill:'both'});
-  M.animate([{filter:'drop-shadow(0 0 0 transparent)'},{filter:`drop-shadow(0 0 30px ${act})`}],{duration:700,delay:2500,easing:'ease-out',fill:'both'});
-  q('.fxsh').animate([{transform:'translateX(0)'},{transform:'translateX(520px)'}],{duration:1000,delay:2800,easing:'ease-in-out',fill:'both'});
-  /* 4. assinatura: nome e legenda */
-  qa('.fxwm .l').forEach((e,i)=>e.animate([{transform:'translateY(.5em)',opacity:0,filter:'blur(8px)'},{transform:'none',opacity:1,filter:'blur(0)'}],{duration:650,delay:3250+i*90,easing:'cubic-bezier(.2,.8,.2,1)',fill:'both'}));
-  q('.fxtg').animate([{opacity:0,letterSpacing:'.6em'},{opacity:1,letterSpacing:'.32em'}],{duration:900,delay:3800,easing:'ease-out',fill:'both'});
-  /* 5. a marca invade a tela e revela o sistema */
-  L.animate([{transform:'translate(-50%,-50%) scale(1)'},{transform:'translate(-50%,-50%) scale(30)'}],{duration:800,delay:4800,easing:'cubic-bezier(.6,0,.9,.4)',fill:'both'});
-  tm.push(setTimeout(done,5300),setTimeout(()=>{if(!fin){fin=1;o.animate([{opacity:1},{opacity:0}],{duration:650,fill:'forwards'});setTimeout(()=>o.remove(),700)}},5350));
+  o.innerHTML='<div class="fxbg"></div><div class="fxl"><div class="fxwm">Flu<b>xo</b></div><i class="fxln"></i><div class="fxtg">Organizador de tarefas</div></div>';
+  document.body.appendChild(o);
+  const q=x=>o.querySelector(x),E='cubic-bezier(.2,.8,.2,1)',tm=[];let fin=0,did=0;
+  const go=()=>{if(did)return;did=1;done()},end=ms=>{if(fin)return;fin=1;tm.forEach(clearTimeout);go();o.animate([{opacity:1},{opacity:0}],{duration:ms,fill:'forwards'});setTimeout(()=>o.remove(),ms+60)};
+  o.onclick=()=>end(250);
+  card&&card.animate([{opacity:1,transform:'none'},{opacity:0,transform:'translateY(8px)'}],{duration:250,easing:'ease',fill:'forwards'});
+  q('.fxbg').animate([{opacity:0},{opacity:1}],{duration:300,fill:'both'});
+  q('.fxwm').animate([{opacity:0,transform:'translateY(10px)',filter:'blur(6px)'},{opacity:1,transform:'none',filter:'blur(0)'}],{duration:600,delay:100,easing:E,fill:'both'});
+  q('.fxln').animate([{opacity:0,transform:'scaleX(0)'},{opacity:1,transform:'scaleX(1)'}],{duration:500,delay:350,easing:E,fill:'both'});
+  q('.fxtg').animate([{opacity:0},{opacity:1}],{duration:500,delay:500,easing:'ease-out',fill:'both'});
+  tm.push(setTimeout(go,1150),setTimeout(()=>end(500),1250));
 }
 function loginScreen(){
   $('#app').innerHTML=`<div class="login"><h1>Flu<strong>xo</strong></h1><p>Entre para acompanhar a operação.</p>
@@ -291,9 +260,10 @@ function render(){fxView();
     body=(isAdm()?'<p class="hint" style="margin:0 0 8px">Arraste um card para a coluna de outro funcionário para passar a ele o passo liberado.</p>':'')+`<div class="hsb" id="hsb" hidden aria-hidden="true"><div></div></div><div class="board postit" id="bdp">${P.map(([pk,p],i)=>{const L=srt(TF.filter(t=>holders(t).some(h=>pkey(h.pessoa)===pk)&&(t.status!=='done'||fKpi==='done')));
       return `<section class="col" data-p="${esc(pk)}" data-pn="${esc(p)}" aria-label="${esc(p)}"><h2><span><span class="avatar" aria-hidden="true">${esc(p[0])}</span>${esc(p)}</span><span><button type="button" class="xa" data-xa title="Expandir/recolher todos" aria-label="Expandir ou recolher todos">⇕</button><em>${L.length}</em></span></h2><div class="list">${L.map((t,j)=>card(t,'p').replace('class="card"',`class="card" style="--rot:${(j%2?1:-1)*(0.6+j%3*0.4)}deg;--c:${corOf(t)}"`)).join('')||'<div class="empty">Sem atividades</div>'}</div></section>`}).join('')||'<div class="empty" style="width:100%">Crie uma tarefa com fluxo para ver os funcionários aqui.</div>'}</div>`;
   }
+  const _fe=document.activeElement,_fv=_fe&&_fe.matches&&_fe.matches(':focus-visible')&&_fe.closest('header.sb nav')?_fe.dataset.v:null;
   const _xp=!!document.querySelector('header.sb.xp'),_mc=document.querySelector('.msb .msc'),_msT=_mc?{l:_mc.scrollLeft,c:[..._mc.querySelectorAll('.msl')].map(x=>x.scrollTop)}:null;
   $('#app').innerHTML=`<header class="sb"><div class="logo">Flu<b>xo</b></div><span class="sbl">Menu</span>
-  <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" ${v==='medicao'?`aria-haspopup="dialog" aria-expanded="${MEDOPEN}" class="${MEDOPEN?'on':''}"`:view===v?'aria-current="page"':''}><i class="ni" aria-hidden="true">${NI[v]||''}</i><span class="nl">${v==='painel'&&!isAdm()?'Minhas tarefas':l}</span>${v==='gestao'?gBadge():''}${v==='tarefa'?mvBadge():''}</button>`).join('')}</nav>
+  <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" aria-label="${v==='painel'&&!isAdm()?'Minhas tarefas':l}" title="${v==='painel'&&!isAdm()?'Minhas tarefas':l}" ${v==='medicao'?`aria-haspopup="dialog" aria-expanded="${MEDOPEN}" class="${MEDOPEN?'on':''}"`:view===v?'aria-current="page"':''}><i class="ni" aria-hidden="true">${NI[v]||''}</i><span class="nl">${v==='painel'&&!isAdm()?'Minhas tarefas':l}</span>${v==='gestao'?gBadge():''}${v==='tarefa'?mvBadge():''}</button>`).join('')}</nav>
   <div class="sp"></div><span class="status" id="fs" role="status">${esc(stText())}</span>
   <span class="ap" role="group" aria-label="Aparência"><button class="btn" id="bt" title="Trocar tema (tecla T)" aria-label="Tema ${THEMES.find(x=>x[0]===themeOf())[1]}. Trocar tema">◐</button><button class="btn" id="bf" title="Tela cheia" aria-label="Alternar tela cheia">⛶</button><button class="btn" id="bc" title="Recolher ou expandir o cabeçalho" aria-label="Recolher ou expandir o cabeçalho">⇕</button><button class="btn" id="bz" title="Tamanho do texto" aria-label="Tamanho do texto ${Math.round(ZOOMS[PREF.z||0]*100)}%. Alterar">Aa</button></span>
   <button class="btn pri" id="bn" ${isAdm()?'':'hidden'} title="Nova tarefa (tecla N)">+ Nova tarefa</button><button class="btn" id="bo" aria-label="Sair de ${esc(user)}">Sair</button></header>
@@ -302,6 +272,8 @@ function render(){fxView();
   <div class="shell${isAdm()?'':' nosb'}">${medSide()}<main id="main" tabindex="-1">${body}</main></div>`;
   if(_msT){const e=document.querySelector('.msb .msc');if(e){e.scrollLeft=_msT.l;e.querySelectorAll('.msl').forEach((x,i)=>x.scrollTop=_msT.c[i]||0)}}
   if(_xp&&!window._xpLock){const h=document.querySelector('header.sb');if(h)h.classList.add('xp')}
+  if(_fv){const b=document.querySelector('header.sb nav [data-v="'+_fv+'"]');if(b)b.focus({preventScroll:true})}
+  if(_xp)setTimeout(()=>{const x=document.querySelector('header.sb.xp');if(x&&!x.matches(':hover')&&!x.contains(document.activeElement))x.classList.remove('xp')},800);
   bind();setHH();titulo();if(view==='guia')bindGuia();if(view==='admin')bindAdmin();
   if(focoKpi){focoKpi=false;focaAtividades()}
 }
@@ -1487,10 +1459,6 @@ setInterval(()=>{if(user&&Date.now()-_act>120*60*1000){sessionStorage.removeItem
  const first=e=>{if(e.type==='keydown'&&e.key!=='Enter')return;if(e.target.closest&&e.target.closest('#fsb'))return;document.removeEventListener('click',first,true);document.removeEventListener('keydown',first,true);if(!no&&!isFs())go()};
  document.addEventListener('click',first,true);document.addEventListener('keydown',first,true);
  ['fullscreenchange','webkitfullscreenchange','resize'].forEach(ev=>addEventListener(ev,sync));sync()})();
-(function(){try{if(sessionStorage.getItem('fx-sp')||matchMedia('(prefers-reduced-motion:reduce)').matches)return;sessionStorage.setItem('fx-sp','1')}catch(e){}
-  const s=document.createElement('div');s.id='splash';s.setAttribute('aria-hidden','true');
-  s.innerHTML='<div class="spl"><svg viewBox="0 0 64 64" width="64" height="64"><rect width="64" height="64" rx="14" fill="#0f141d"/><path d="M20 46V19h27M20 32h20" stroke="#f2c14e" stroke-width="7" fill="none" stroke-linecap="round"/></svg><b>Fluxo</b></div>';
-  document.body.appendChild(s);setTimeout(()=>s.classList.add('go'),500);setTimeout(()=>s.remove(),900)})();
 
 /* Menu lateral: expande se o mouse ficar parado 0,45 s sobre ele; recolhe 0,3 s depois de sair (teclado expande na hora) */
 (function(){let t=0,c=0;const D=450,sb=e=>e&&e.closest?e.closest('header.sb'):null,clr=()=>{clearTimeout(t);t=0},clc=()=>{clearTimeout(c);c=0};
@@ -1499,5 +1467,6 @@ setInterval(()=>{if(user&&Date.now()-_act>120*60*1000){sessionStorage.removeItem
  document.addEventListener('mouseout',e=>{const h=sb(e.target);if(!h||sb(e.relatedTarget))return;clr();window._xpLock=false;clc();c=setTimeout(()=>{c=0;const x=document.querySelector('header.sb');if(x&&!x.matches(':hover')&&!x.querySelector(':focus-visible'))x.classList.remove('xp')},300)});
  document.addEventListener('focusin',e=>{const h=sb(e.target);if(h&&e.target.matches(':focus-visible')){clc();h.classList.add('xp')}});
  document.addEventListener('focusout',e=>{const h=sb(e.target);if(h&&!sb(e.relatedTarget)&&!h.matches(':hover'))h.classList.remove('xp')});
+ document.addEventListener('click',e=>{if(!matchMedia('(hover:none)').matches||!e.target.closest)return;const h=document.querySelector('header.sb');if(!h)return;if(e.target.closest('header.sb .logo')){h.classList.toggle('xp');return}if(!e.target.closest('header.sb'))h.classList.remove('xp');else if(e.target.closest('nav'))setTimeout(()=>{const x=document.querySelector('header.sb');if(x)x.classList.remove('xp')},0)});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!MEDOPEN){const h=document.querySelector('header.sb.xp');if(h)h.classList.remove('xp')}});
 })();
