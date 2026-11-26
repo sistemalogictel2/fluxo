@@ -1263,3 +1263,30 @@ main{scrollbar-gutter:stable;min-width:0}
 @media(prefers-reduced-motion:reduce){
   .card .tag.vez{animation:none}
 }
+
+
+/* Ajuste de altura da pilha de cards: aproveitar a área vertical disponível */
+.board.postit{
+  height:calc(100dvh - 145px);
+  min-height:320px;
+  align-items:stretch;
+  box-sizing:border-box;
+}
+.board.postit>.col{
+  height:100%;
+  min-height:0;
+  max-height:none;
+  box-sizing:border-box;
+}
+.board.postit>.col .list{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior-y:contain;
+}
+@media(max-width:760px){
+  .board.postit{
+    height:calc(100dvh - 165px);
+    min-height:280px;
+  }
+}
