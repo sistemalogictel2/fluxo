@@ -1342,3 +1342,54 @@ main{scrollbar-gutter:stable;min-width:0}
 .gcc>.gfl .gfi>span{height:18px;display:flex;align-items:flex-end;line-height:18px}
 .gcc>.gfl .gmb,.gcc>.gfl select{height:40px;min-height:40px}
 .gcc>.gfl .gfi .gmdp{top:calc(100% + 5px)}
+
+/* Padronização final dos itens de todos os filtros com checkbox */
+.gmdp .gmi,
+.gfl .gmdp .gmi,
+.bar .gmdp .gmi{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:9px!important;
+  width:100%;
+  min-height:34px;
+  box-sizing:border-box;
+  margin:0!important;
+  padding:7px 10px!important;
+  text-align:left!important;
+  line-height:1.2!important;
+  white-space:nowrap;
+  text-transform:none!important;
+  letter-spacing:0!important;
+}
+.gmdp .gmi input[type="checkbox"]{
+  position:static!important;
+  display:block!important;
+  float:none!important;
+  flex:0 0 16px!important;
+  width:16px!important;
+  height:16px!important;
+  min-width:16px;
+  margin:0!important;
+  padding:0!important;
+  opacity:1!important;
+  transform:none!important;
+  vertical-align:middle;
+}
+.gmdp .gmi>span{
+  display:inline-block!important;
+  flex:1 1 auto!important;
+  min-width:0;
+  margin:0!important;
+  padding:0!important;
+  line-height:1.2!important;
+  text-align:left!important;
+  white-space:nowrap;
+  text-transform:none!important;
+  letter-spacing:0!important;
+}
+.gmdp .gmi:first-child{display:flex!important;align-items:center!important}
+/* Todos os filtros compartilham altura, espaçamento e alinhamento de base */
+.gfl .gfi,.bar .gmf{align-self:flex-end;min-width:0}
+.gfl .gmb,.bar .gmf .gmb{display:flex;align-items:center;justify-content:flex-start;box-sizing:border-box}
