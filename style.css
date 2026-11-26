@@ -1039,3 +1039,42 @@ header.sb.xp :is(.nl,.sbl,.clk small,.status:not(:empty)){animation:sbfade .3s e
 .bar .fg input.cs,.bar .fg select.fsel{font-size:13px;height:38px;min-height:38px;padding:0 8px}
 .bar .fg{min-width:110px}
 .bar .fg.fu{flex:0 1 90px;min-width:80px;max-width:110px}
+
+
+/* ===== Ajustes finais do menu lateral compacto ===== */
+@media (min-width:761px) {
+  /* Controles de cabeçalho e fontes ficam disponíveis apenas expandido */
+  header.sb:not(.xp) #bc,
+  header.sb:not(.xp) #bz {
+    display: none !important;
+  }
+
+  /* No menu compacto, o botão Sair usa um ícone para caber por inteiro */
+  header.sb:not(.xp) #bo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    min-height: 36px;
+    padding: 7px 0;
+    overflow: hidden;
+    font-size: 0;
+    line-height: 1;
+  }
+
+  header.sb:not(.xp) #bo::before {
+    content: "↪";
+    display: block;
+    font-size: 21px;
+    line-height: 1;
+  }
+
+  /* No menu expandido, mantém o botão Sair com texto normal */
+  header.sb.xp #bo {
+    font-size: 14px;
+  }
+  header.sb.xp #bo::before {
+    content: none;
+  }
+}
