@@ -1078,3 +1078,21 @@ header.sb.xp :is(.nl,.sbl,.clk small,.status:not(:empty)){animation:sbfade .3s e
     content: none;
   }
 }
+
+
+/* ===== Cards: hierarquia visual e identificação da tarefa ===== */
+.card{position:relative;display:flex;flex-direction:column;gap:7px;padding:12px 11px 10px;border-radius:12px}
+.card .tg{z-index:2}
+.card-ident{min-width:0;padding-right:18px}
+.card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0}
+.card-heading h3{flex:1;min-width:0;margin:0;font-size:clamp(12px,1.05em,14px);line-height:1.3;font-weight:750;letter-spacing:.005em;overflow-wrap:anywhere;text-align:left}
+.card-uf{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:29px;height:23px;padding:0 7px;border-radius:7px;background:color-mix(in srgb,var(--c) 13%,var(--panel,#fff));border:1px solid color-mix(in srgb,var(--c) 35%,transparent);color:var(--c);font-size:10px;font-weight:800;letter-spacing:.05em}
+.card-ident>.sub{margin-top:3px;font-size:10px;line-height:1.3;color:var(--muted)}
+.card .step{font-size:10.5px;line-height:1.4;color:var(--muted);margin:0}
+.card-your-turn{display:flex;justify-content:center;align-items:center;padding:1px 0}
+.card .tag.vez{display:inline-flex;align-items:center;justify-content:center;min-width:78px;padding:5px 13px;border-radius:999px;background:#ffcf55;color:#342400;font-size:10px;font-weight:850;letter-spacing:.045em;box-shadow:0 2px 7px #b779192e;animation:cardYourTurnPulse 1.15s ease-in-out infinite}
+@keyframes cardYourTurnPulse{0%,100%{opacity:1;transform:scale(1);box-shadow:0 2px 7px #b779192e}50%{opacity:.58;transform:scale(1.045);box-shadow:0 0 0 4px #f5bd4233}}
+.card .dots{margin:1px 0 2px}
+.card .fin{width:100%;min-height:38px;margin-top:1px;font-size:11px;line-height:1.25;border-radius:9px}
+.card .meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+@media(prefers-reduced-motion:reduce){.card .tag.vez{animation:none}}

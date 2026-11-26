@@ -223,10 +223,13 @@ function card(t,mode){
   const A=act(t),st=tstate(t),n=t.fluxo.length,dn=st.filter(x=>x==='done').length,mA=A.filter(mine);
   const step=t.status==='done'?'✔ Concluída':n?`${dn} de ${n} passos · agora: ${A.length?esc(A.map(a=>a.etapa).join(' + ')):'—'}`:'Sem fluxo';
   const dots=t.fluxo.map((_,i)=>`<i class="${st[i]==='done'?'on':st[i]==='ready'?'cur':''}"></i>`).join('');
-  const ex=EX.has(t.id);
+  const ex=EX.has(t.id), uf=ufOf(t);
   return `<div class="card${ex?'':' co'}" role="button" tabindex="0" style="--c:${corOf(t)}" draggable="${(mode==='k'||view==='equipe')&&isAdm()}" data-id="${t.id}" aria-label="Abrir tarefa ${esc(nome(t))}. ${esc(step)}">
-  <span class="tg" role="button" aria-label="${ex?'Recolher':'Expandir'}" aria-expanded="${ex}" title="${ex?'Recolher':'Expandir'}">${ex?'▴':'▾'}</span><h3>${esc(nome(t))}</h3>${t.sub?`<div class="sub">${esc(t.sub)}</div>`:''}
-  <div class="step">${step}${late(t)&&!ex?' <span class="tag late">⚠</span>':''}${movNew(t)?` <span class="tag mv" title="${esc(movLine(t.mov))}">🔔 ${t.mov.tp==='d'?'Devolvida':t.mov.fim?'Concluída':t.mov.pp?'Novo posto':'Passo concluído'}${t.mov.pp&&!t.mov.fim?': '+esc(ppShort(t.mov.pp)):''}</span>`:''}${mode==='k'&&A.length?` <span class="sub">→ ${esc([...new Set(A.map(a=>a.pessoa))].join(', '))}</span>`:''}${mA.length?' <span class="tag vez">Sua vez</span>':''}</div><div class="dots" aria-hidden="true">${dots}</div>${ex&&movNew(t)?`<div class="mvd">${esc(movLine(t.mov))} · há ${ago(t.mov.t)}</div>`:''}${mA.map(a=>`<button type="button" class="btn pri fin" data-fin="${t.id}" data-fs="${a.id}">✔ Finalizar${mA.length>1?': '+esc(a.etapa):' meu passo'}</button>`).join('')}
+  <span class="tg" role="button" aria-label="${ex?'Recolher':'Expandir'}" aria-expanded="${ex}" title="${ex?'Recolher':'Expandir'}">${ex?'▴':'▾'}</span>
+  <div class="card-ident"><div class="card-heading"><h3>${esc(nome(t))}</h3>${uf?`<span class="card-uf" title="Unidade federativa">${esc(uf)}</span>`:''}</div>${t.sub?`<div class="sub">${esc(t.sub)}</div>`:''}</div>
+  <div class="step">${step}${late(t)&&!ex?' <span class="tag late">⚠</span>':''}${movNew(t)?` <span class="tag mv" title="${esc(movLine(t.mov))}">🔔 ${t.mov.tp==='d'?'Devolvida':t.mov.fim?'Concluída':t.mov.pp?'Novo posto':'Passo concluído'}${t.mov.pp&&!t.mov.fim?': '+esc(ppShort(t.mov.pp)):''}</span>`:''}${mode==='k'&&A.length?` <span class="sub">→ ${esc([...new Set(A.map(a=>a.pessoa))].join(', '))}</span>`:''}</div>
+  ${mA.length?`<div class="card-your-turn"><span class="tag vez">Sua vez</span></div>`:''}
+  <div class="dots" aria-hidden="true">${dots}</div>${ex&&movNew(t)?`<div class="mvd">${esc(movLine(t.mov))} · há ${ago(t.mov.t)}</div>`:''}${mA.map(a=>`<button type="button" class="btn pri fin" data-fin="${t.id}" data-fs="${a.id}">✔ Finalizar${mA.length>1?': '+esc(a.etapa):' meu passo'}</button>`).join('')}
   <div class="meta">${tipoTag(t)}${t.protocolo?`<span class="tag">Prot. ${esc(t.protocolo)}</span>`:''}${t.portal?`<span class="tag">${esc(t.portal)}</span>`:''}
   ${t.final?`<span class="tag">Entrega ${fmt(t.final)}</span>`:''}${late(t)?'<span class="tag late">⚠ Atrasada</span>':''}</div></div>`;
 }
