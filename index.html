@@ -931,8 +931,12 @@ header.sb #bo:hover{color:var(--tx);background:color-mix(in srgb,#e5493d 45%,tra
 .msbk.ani{animation:cfade .25s}
 .msb:not(.min){width:min(980px,calc(100vw - var(--sbw) - 20px))!important;display:flex;flex-direction:column;overflow:hidden!important}
 .msb:not(.min) .msh2{flex:none}
-.msc{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;padding:2px 6px 6px 0}
-.msc .mcg{flex:1 1 260px;min-width:240px;max-width:100%;margin-bottom:0}
+.msc{flex:1;min-height:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior:contain;display:flex;flex-wrap:nowrap;gap:0;align-items:stretch;padding:2px 0 6px}
+.msc .mcg{flex:1 0 260px;min-width:260px;margin-bottom:0;min-height:0;padding:0 12px}
+.msc .mcg:first-child{padding-left:0}.msc .mcg:last-child{padding-right:0}
+.msc .mcg+.mcg{border-left:1px solid var(--line2)}
+.msc .mcg .mch{flex:none}
+.msc .msl{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 4px 6px 0;scrollbar-width:thin}
 .msc .empty{flex:1 1 100%}
 .msb .mdc,.msb .mcg{animation:none!important}
 .shell.mn{padding-left:52px}
@@ -947,6 +951,10 @@ header.sb #bo:hover{color:var(--tx);background:color-mix(in srgb,#e5493d 45%,tra
  header.sb nav button[aria-current=page]{background:var(--ac);color:#241800}
  header.sb .sp,header.sb .status{display:none}
 }
+/* Botão Limpar filtros: ícone centralizado */
+.btn.clr{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.clr svg{vertical-align:0;margin:0;flex:none;display:block}
+.gch .gbr svg{display:block;margin:0}
 /* Menu lateral: tudo centralizado */
 header.sb,header.sb:is(:hover,:focus-within){align-items:stretch;text-align:center}
 header.sb:is(:hover,:focus-within) .logo{text-align:center}
@@ -1247,7 +1255,7 @@ function render(){fxView();
     body=(isAdm()?'<p class="hint" style="margin:0 0 8px">Arraste um card para a coluna de outro funcionário para passar a ele o passo liberado.</p>':'')+`<div class="hsb" id="hsb" hidden aria-hidden="true"><div></div></div><div class="board postit" id="bdp">${P.map(([pk,p],i)=>{const L=srt(TF.filter(t=>holders(t).some(h=>pkey(h.pessoa)===pk)&&(t.status!=='done'||fKpi==='done')));
       return `<section class="col" data-p="${esc(pk)}" data-pn="${esc(p)}" aria-label="${esc(p)}"><h2><span><span class="avatar" aria-hidden="true">${esc(p[0])}</span>${esc(p)}</span><span><button type="button" class="xa" data-xa title="Expandir/recolher todos" aria-label="Expandir ou recolher todos">⇕</button><em>${L.length}</em></span></h2><div class="list">${L.map((t,j)=>card(t,'p').replace('class="card"',`class="card" style="--rot:${(j%2?1:-1)*(0.6+j%3*0.4)}deg;--c:${corOf(t)}"`)).join('')||'<div class="empty">Sem atividades</div>'}</div></section>`}).join('')||'<div class="empty" style="width:100%">Crie uma tarefa com fluxo para ver os funcionários aqui.</div>'}</div>`;
   }
-  const _ms=document.querySelector('.msb:not(.min)'),_msT=_ms?(_ms.querySelector('.msc')||_ms).scrollTop:0;
+  const _mc=document.querySelector('.msb:not(.min) .msc'),_msT=_mc?{l:_mc.scrollLeft,c:[..._mc.querySelectorAll('.msl')].map(x=>x.scrollTop)}:null;
   $('#app').innerHTML=`<header class="sb"><div class="logo">Flu<b>xo</b></div><span class="sbl">Menu</span>
   <nav aria-label="Telas">${NAV.filter(([v])=>allowed(v)).map(([v,l])=>`<button data-v="${v}" ${view===v?'aria-current="page"':''}><i class="ni" aria-hidden="true">${NI[v]||''}</i><span class="nl">${v==='painel'&&!isAdm()?'Minhas tarefas':l}</span>${v==='gestao'?gBadge():''}${v==='tarefa'?mvBadge():''}</button>`).join('')}</nav>
   <div class="sp"></div><span class="status" id="fs" role="status">${esc(stText())}</span>
@@ -1256,7 +1264,7 @@ function render(){fxView();
   <div class="stk"><div class="top">${hero()}
   <div class="kpis" role="group" aria-label="Segmentar por situação">${kp('open',open,'em aberto')}${kp('late',B.filter(late).length,'atrasadas')}${kp('done',B.filter(t=>t.status==='done').length,'concluídas')}</div></div>${['guia','med','gestao'].includes(view)?'':bar()}</div>
   <div class="shell${isAdm()?(MEDOPEN?'':' mn'):' nosb'}">${medSide()}<main id="main" tabindex="-1">${body}</main></div>`;
-  {const e=document.querySelector('.msb:not(.min) .msc');if(e&&_msT)e.scrollTop=_msT}
+  if(_msT){const e=document.querySelector('.msb:not(.min) .msc');if(e){e.scrollLeft=_msT.l;e.querySelectorAll('.msl').forEach((x,i)=>x.scrollTop=_msT.c[i]||0)}}
   bind();setHH();titulo();if(view==='guia')bindGuia();if(view==='admin')bindAdmin();
   if(focoKpi){focoKpi=false;focaAtividades()}
 }
