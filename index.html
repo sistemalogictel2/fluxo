@@ -850,6 +850,14 @@ html[data-view=gestao] .top,html.cmp .top{display:none}
 .rc,.gmr2,.gs-sec{contain:layout style}
 .gmgh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;font-weight:700;color:var(--mu);padding:8px 4px 3px;position:sticky;top:0;background:var(--s1);z-index:1;border-bottom:1px solid var(--line);margin-top:4px}.gmgh em{font-style:normal;font-weight:500;font-size:11px}
 .gmrow.on{border-color:var(--tx);background:var(--ov)}
+/* municípios por medição (cores escuras no claro, claras no escuro) */
+:root{--m0:#7cc4ff;--m1:#ffa07a;--m2:#6fe3a1;--m3:#d6a6ff;--m4:#f2c14e;--m5:#5fe0e6}
+:root[data-theme=light],:root[data-skin=corp],:root[data-skin=glass]{--m0:#0b4f8a;--m1:#a33a0c;--m2:#0f6a3a;--m3:#6b2a8c;--m4:#7a4a00;--m5:#0b5f66}
+.gmmun{position:absolute;left:6px;top:6px;bottom:6px;width:27%;min-width:150px;max-width:250px;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:6px 8px;z-index:2;scrollbar-width:thin;background:linear-gradient(90deg,color-mix(in srgb,var(--s2) 92%,transparent) 75%,transparent);border-radius:10px}
+.gmmh{margin:0 0 2px;font-size:14px;font-weight:800;color:var(--mc);line-height:1.2}
+.gmmu{display:block;width:100%;text-align:left;font:inherit;font-size:13.5px;color:var(--mc);background:none;border:1px solid transparent;border-radius:6px;padding:2px 6px;cursor:pointer}
+.gmmu:hover{background:var(--ov)}.gmmu.on{border-color:var(--mc);background:var(--ov);font-weight:700}.gmmu small{opacity:.8}
+.gmgh span{color:var(--mc)}
 </style>
 </head>
 <body>
@@ -1944,7 +1952,7 @@ function gMapHtml(T0){
   gMapFl='';
   const fu=gFld(/^(UF|ESTADO)$/),fm=gFld(/MUNIC|CIDADE/);
   if(!fu)return'<div class="empty">Não encontrei o campo “UF” nas tarefas. Cadastre um campo chamado UF para ver o mapa.</div>';
-  const G=T0.map(t=>({uf:UFK[gNorm(t[fu.id])]||'',mun:fm?String(t[fm.id]||'').trim():'',t}));
+  const G=T0.map(t=>({uf:UFK[gNorm(t[fu.id])]||'',mun:(fm?String(t[fm.id]||'').trim():'')||String(t.tarefa||'').trim(),t}));
   const ufs=[...new Set(G.map(g=>g.uf).filter(Boolean))].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR'));
   if(gUf&&!ufs.includes(gUf))gUf='';
   const MM=new Map();G.filter(g=>g.mun&&(!gUf||g.uf===gUf)).forEach(g=>{const k=gNorm(g.mun);const e=MM.get(k)||{n:g.mun,c:0};e.c++;MM.set(k,e)});
@@ -1963,11 +1971,12 @@ function gMapHtml(T0){
   const medNm=t=>{const i=medId(tipoOf(t)),m=(S.medicoes||[]).find(c=>c.id===i);return[m?i:'_',m?m.nome:'Sem medição']},grp=new Map();
   if(gUf)G.filter(g=>g.mun&&g.uf===gUf).forEach(g=>{const[mi,mn]=medNm(g.t);let o=grp.get(mi);if(!o)grp.set(mi,o={n:mn,m:new Map()});const k=gNorm(g.mun);let e=o.m.get(k);if(!e)o.m.set(k,e={n:g.mun,c:0,id:g.t.id});e.c++});
   const gOrd=[...grp.entries()].sort((a,b)=>{const ix=i=>i==='_'?1e9:(S.medicoes||[]).findIndex(c=>c.id===i);return ix(a[0])-ix(b[0])}),mm2=Math.max(1,...gOrd.flatMap(([,o])=>[...o.m.values()].map(e=>e.c)));
-  const mrow=e=>`<button type="button" class="gmrow${gMun===gNorm(e.n)?' on':''}" data-gmun="${esc(gNorm(e.n))}" data-tid="${esc(e.id)}" title="1 clique filtra · 2 cliques abrem o card"><span>${esc(e.n)}</span><i><u style="--p:${Math.round(e.c/mm2*100)}%;background:${gRamp(mm2>1?(e.c-1)/(mm2-1):1)}"></u></i><b>${e.c}</b></button>`;
-  const lst=gUf?(gOrd.length?gOrd.map(([,o])=>{const L=[...o.m.values()].sort((a,b)=>b.c-a.c||a.n.localeCompare(b.n,'pt-BR'));return`<div class="gmgh"><span>${esc(o.n)}</span><em>${L.length} município(s) · ${L.reduce((a,e)=>a+e.c,0)} tarefa(s)</em></div>`+L.map(mrow).join('')}).join(''):`<p class="hint">${fm?'Nenhum município preenchido nas tarefas.':'Não encontrei o campo “Município” nas tarefas.'}</p>`):U.map(([u,c])=>row(`data-guf="${u}" data-h="${u}" title="${esc(UFN[u])}"`,u,c,um,col(c))).join('');
+  const mcol=i=>i==='_'?'var(--mu)':`var(--m${Math.max(0,(S.medicoes||[]).findIndex(c=>c.id===i))%6})`,srt=o=>[...o.m.values()].sort((a,b)=>a.n.localeCompare(b.n,'pt-BR'));
+  const ov=gUf&&gOrd.length?`<div class="gmmun" aria-label="Municípios de ${esc(UFN[gUf])} por medição">${gOrd.map(([mi,o])=>`<section style="--mc:${mcol(mi)}"><h5 class="gmmh">${esc(o.n)}</h5>${srt(o).map(e=>`<button type="button" class="gmmu${gMun===gNorm(e.n)?' on':''}" data-gmun="${esc(gNorm(e.n))}" data-tid="${esc(e.id)}" title="1 clique filtra · 2 cliques abrem o card">${esc(e.n)}${e.c>1?` <small>×${e.c}</small>`:''}</button>`).join('')}</section>`).join('')}</div>`:'';
+  const lst=gUf?(gOrd.length?gOrd.map(([mi,o])=>{const L=[...o.m.values()];return`<div class="gmgh" style="--mc:${mcol(mi)}"><span>${esc(o.n)}</span><em>${L.length} município(s) · ${L.reduce((a,e)=>a+e.c,0)} tarefa(s)</em></div>`}).join('')+'<p class="hint">Dê 2 cliques no nome do município (no mapa) para abrir o card.</p>':`<p class="hint">Nenhuma tarefa nesta UF.</p>`):U.map(([u,c])=>row(`data-guf="${u}" data-h="${u}" title="${esc(UFN[u])}"`,u,c,um,col(c))).join('');
   const top=U[0];
-  const side=`<aside class="gmr2"><div class="gmhd"><small>${gUf?esc(UFN[gUf]):'Brasil'}${gMun?' · '+esc((MM.get(gMun)||{}).n||''):''}</small>${gUf||gMun?'<button type="button" class="btn" id="gfx2">← Brasil</button>':''}</div><div class="gmbig"><b>${tot}</b><span>tarefa(s)</span></div><div class="gmst"><div><b>${gUf?1:U.length}</b><span>UF(s)</span></div><div><b>${gUf?MM.size:new Set(G.filter(g=>g.mun).map(g=>gNorm(g.mun))).size}</b><span>município(s)</span></div><div><b>${top?top[0]:'–'}</b><span>líder${top?' · '+top[1]:''}</span></div></div><h4>${gUf?'Municípios por medição':'Estados'}</h4><div class="gmls${gUf?'':' g2'}">${lst}</div></aside>`;
-  return`<div class="gme"><div class="gmp"><div class="gmtb"><button type="button" data-z="in" aria-label="Aproximar">+</button><button type="button" data-z="out" aria-label="Afastar">−</button><button type="button" data-z="0" aria-label="Centralizar">⟲</button></div>${sv}<div class="gmtip" hidden></div>${lg}</div>${side}</div><p class="hint">${tot} tarefa(s) com UF${semUf?' · '+semUf+' sem UF':''}. Passe o mouse para ver os números · clique num estado para dar zoom e filtrar · clique fora dele para voltar ao Brasil · 2 cliques num município abrem o card · Esc volta ao Brasil · roda do mouse = zoom · arraste = mover.</p>`;
+  const side=`<aside class="gmr2"><div class="gmhd"><small>${gUf?esc(UFN[gUf]):'Brasil'}${gMun?' · '+esc((MM.get(gMun)||{}).n||''):''}</small>${gUf||gMun?'<button type="button" class="btn" id="gfx2">← Brasil</button>':''}</div><div class="gmbig"><b>${tot}</b><span>tarefa(s)</span></div><div class="gmst"><div><b>${gUf?1:U.length}</b><span>UF(s)</span></div><div><b>${gUf?MM.size:new Set(G.filter(g=>g.mun).map(g=>gNorm(g.mun))).size}</b><span>município(s)</span></div><div><b>${top?top[0]:'–'}</b><span>líder${top?' · '+top[1]:''}</span></div></div><h4>${gUf?'Medições nesta UF':'Estados'}</h4><div class="gmls${gUf?'':' g2'}">${lst}</div></aside>`;
+  return`<div class="gme"><div class="gmp"><div class="gmtb"><button type="button" data-z="in" aria-label="Aproximar">+</button><button type="button" data-z="out" aria-label="Afastar">−</button><button type="button" data-z="0" aria-label="Centralizar">⟲</button></div>${sv}${ov}<div class="gmtip" hidden></div>${lg}</div>${side}</div><p class="hint">${tot} tarefa(s) com UF${semUf?' · '+semUf+' sem UF':''}. Passe o mouse para ver os números · clique num estado para dar zoom e filtrar · clique fora dele para voltar ao Brasil · 2 cliques num município abrem o card · Esc volta ao Brasil · roda do mouse = zoom · arraste = mover.</p>`;
 }
 function gMapInit(){
   const sv=document.querySelector('svg.gmap');if(!sv)return;
@@ -1981,7 +1990,7 @@ function gMapInit(){
   const SC=()=>{const r=sv.getBoundingClientRect();return Math.min(r.width/V.w,r.height/V.h)||.7};
   const lab=()=>{
     window._gPrev={...V};lb.innerHTML='';
-    const sc=SC(),f=(V.w>=B.w*.5?10:12)/sc,sw=3/sc,pad=f*.7,placed=[],x0=V.x,y0=V.y,x1=V.x+V.w,y1=V.y+V.h,far=V.w>B.w*.45,outs=[];let ux0=1e9,ux1=-1e9;
+    const sc=SC(),f=(V.w>=B.w*.5?10:12)/sc,sw=3/sc,pad=f*.7,placed=[],x0=V.x+(pn.querySelector('.gmmun')?V.w*.3:0),y0=V.y,x1=V.x+V.w,y1=V.y+V.h,far=V.w>B.w*.45,outs=[];let ux0=1e9,ux1=-1e9;
     const hit=r=>placed.some(q=>r.x<q.x+q.w&&r.x+r.w>q.x&&r.y<q.y+q.h&&r.y+r.h>q.y);
     const ord=paths.filter(p=>{const b=bb.get(p);return b&&b.x<x1&&b.x+b.width>x0&&b.y<y1&&b.y+b.height>y0}).sort((a,c)=>bb.get(c).width*bb.get(c).height-bb.get(a).width*bb.get(a).height);
     ord.forEach(p=>{
@@ -2029,7 +2038,7 @@ function gMapInit(){
   const hl=u=>{wrap.querySelectorAll('.hv').forEach(x=>x.classList.remove('hv'));if(u)wrap.querySelectorAll('[data-guf="'+u+'"]').forEach(x=>x.classList.add('hv'))};
   paths.forEach(p=>{p.addEventListener('mousemove',e=>{if(moved)return;const r=pn.getBoundingClientRect(),n=+p.dataset.n,tt=+sv.dataset.tt;tip.innerHTML='<b>'+p.dataset.nm+'</b><span>'+n+' tarefa(s)</span>'+(n&&tt>0?'<em>Representa '+Math.round(n/tt*100)+'% do total</em>':'');tip.hidden=false;tip.style.left=Math.min(e.clientX-r.left+14,r.width-170)+'px';tip.style.top=Math.max(4,e.clientY-r.top-58)+'px';hl(p.dataset.guf)});p.addEventListener('mouseleave',()=>{tip.hidden=true;hl('')})});
   wrap.querySelectorAll('.gmrow[data-h]').forEach(r=>{r.addEventListener('mouseenter',()=>hl(r.dataset.h));r.addEventListener('mouseleave',()=>hl(''))});
-  const tgt=()=>{const p=gUf&&paths.find(q=>q.dataset.guf===gUf),b=p&&bb.get(p);if(!b)return{...B};const asp=B.w/B.h,m=.2;let w=Math.max(B.w/10,b.width*(1+2*m)),h=Math.max(B.h/10,b.height*(1+2*m));if(w/h<asp)w=h*asp;else h=w/asp;return{x:b.x+b.width/2-w/2,y:b.y+b.height/2-h/2,w,h}};
+  const tgt=()=>{const p=gUf&&paths.find(q=>q.dataset.guf===gUf),b=p&&bb.get(p);if(!b)return{...B};const asp=B.w/B.h,m=.2;let w=Math.max(B.w/10,b.width*(1+2*m)),h=Math.max(B.h/10,b.height*(1+2*m));if(w/h<asp)w=h*asp;else h=w/asp;if(pn.querySelector('.gmmun')){w*=1.18;h*=1.18;return{x:b.x+b.width/2-w*.6,y:b.y+b.height/2-h/2,w,h}}return{x:b.x+b.width/2-w/2,y:b.y+b.height/2-h/2,w,h}};
   const anim=T=>{const A={...V},t0=performance.now(),D=550,ez=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;lb.style.opacity=0;
     const step=now=>{if(!sv.isConnected)return;const u=Math.min(1,(now-t0)/D),e=ez(u);V={x:A.x+(T.x-A.x)*e,y:A.y+(T.y-A.y)*e,w:A.w+(T.w-A.w)*e,h:A.h+(T.h-A.h)*e};window._gPrev={...V};
       if(u<1){sv.setAttribute('viewBox',[V.x,V.y,V.w,V.h].join(' '));requestAnimationFrame(step)}else{V={...T};set(1)}};requestAnimationFrame(step)};
@@ -2038,7 +2047,7 @@ function gMapInit(){
 function gFit(){
   const p=document.querySelector('.gcp');if(!p)return;
   if(innerWidth<=820){p.style.height='';return}
-  const top=p.getBoundingClientRect().top+scrollY;p.style.height=Math.max(440,innerHeight-top-50)+'px';
+  const top=p.getBoundingClientRect().top+scrollY;p.style.height=Math.max(400,innerHeight-top-12)+'px';
   const gb=p.querySelector('.gbd'),cs=p.querySelector('.gcols');
   if(gb&&cs){const mx=+cs.dataset.mx||1,lg=p.querySelector('.gleg'),hn=gb.querySelector('.hint'),nm=Math.max(0,...[...p.querySelectorAll('.gnm')].map(e=>e.offsetHeight)),
     PH=Math.max(80,Math.min(300,gb.clientHeight-(lg?lg.offsetHeight+12:0)-(hn?hn.offsetHeight+8:0)-nm-6-34));
