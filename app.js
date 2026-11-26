@@ -435,7 +435,7 @@ const pkey=p=>{const c=contactFor(p);return c?'c:'+c.id:'n:'+nk(p)};
 function flowPeople(){const m=new Map();S.tasks.forEach(t=>t.fluxo.forEach(f=>{if(f.pessoa==='Sem responsável')return;const k=pkey(f.pessoa);if(!m.has(k)){const c=contactFor(f.pessoa);m.set(k,c?chipName(c):f.pessoa)}}));return[...m]}
 const personOpts=()=>{const m=new Map(flowPeople());(S.contatos||[]).forEach(c=>m.set('c:'+c.id,chipName(c)));return[...m].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'))};
 const qOk=t=>{return nk([nome(t),t.tarefa,t.protocolo,...holders(t).map(h=>h.pessoa),...t.fluxo.flatMap(f=>[f.etapa,f.pessoa])].join(' ')).includes(nk(fQ))};
-const ufV=()=>view==='tarefa'||view==='equipe';
+const ufV=()=>view==='painel'||view==='tarefa'||view==='equipe';
 const ufOf=t=>{try{const f=gFld(/^(UF|ESTADO)$/);return f?(UFK[gNorm(t[f.id])]||''):''}catch(e){return''}};
 const ufList=()=>{try{return[...new Set(S.tasks.filter(vis).map(ufOf).filter(Boolean))].sort((a,b)=>UFN[a].localeCompare(UFN[b],'pt-BR'))}catch(e){return[]}};
 const base=()=>S.tasks.filter(t=>vis(t)&&(!fUf||!ufV()||ufOf(t)===fUf)&&(!fQ||qOk(t))&&(!fTipo||t.tipo===fTipo)&&(!fMed||medId(tipoOf(t))===fMed)&&(!fPessoa||holders(t).some(h=>pkey(h.pessoa)===fPessoa)));
