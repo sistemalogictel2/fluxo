@@ -183,7 +183,7 @@ function openUsuario(id){
   q('form').onsubmit=async e=>{e.preventDefault();const perfil=q('#up').value,cid=q('#uc').value;
     if(perfil==='normal'&&!cid){toast('Usuário Normal precisa de um funcionário vinculado');return}
     try{await rpc('fx_usuario_salvar',{p_token:ME.tk,p_id:id||null,p_usuario:q('#ul').value.trim(),p_nome:q('#un').value.trim(),p_perfil:perfil,p_contato_id:cid||null,p_ativo:q('#ua').checked,p_senha:q('#us').value||null});close();await loadUsr();toast('Usuário salvo')}catch(err){toast(err.message)}};
-  if(!isNew)q('#dl').onclick=async()=>{if(!await confirmUI('Excluir este usuário? Ele deixa de conseguir entrar.'))return;try{await rpc('fx_usuario_excluir',{p_token:ME.tk,p_id:id});close();await loadUsr();toast('Usuário excluído')}catch(err){toast(err.message)}};
+  if(!isNew)q('#dl').onclick=async()=>{if(!confirm('Excluir este usuário? Ele deixa de conseguir entrar.'))return;try{await rpc('fx_usuario_excluir',{p_token:ME.tk,p_id:id});close();await loadUsr();toast('Usuário excluído')}catch(err){toast(err.message)}};
   q('#un').focus();
 }
 
@@ -311,23 +311,16 @@ function bind(){
   document.querySelectorAll('[data-mx]').forEach(b=>b.onclick=()=>{const k=b.dataset.mx,c=b.closest('.mdc'),o=!MX.has(k);o?MX.add(k):MX.delete(k);c.classList.toggle('open',o);b.setAttribute('aria-expanded',o);b.querySelector('.mdg').textContent=o?'▴':'▾'});
   document.querySelectorAll('[data-mo],[data-gm]').forEach(b=>b.onclick=()=>openConcItens(b.dataset.mo||b.dataset.gm));
   document.querySelectorAll('[data-gv]').forEach(b=>b.onclick=()=>openView(b.dataset.gv));
-  const fop=$('#gFilterOpen'),fcl=$('#gFilterClose'),fpa=$('#gFilterPanel');if(fop&&fpa)fop.onclick=()=>{gFilterOpen=true;fpa.hidden=false;fpa.classList.add('opened')};if(fcl&&fpa)fcl.onclick=()=>{gFilterOpen=false;fpa.hidden=true;fpa.classList.remove('opened')};const fap=$('#gFilterApply');if(fap)fap.onclick=()=>{gTask=$('#gfTask')?.value||'';gConc=$('#gfConc')?.value||'';gFilterOpen=false;if(fpa)fpa.hidden=true;render()};const fclear=$('#gFilterClear');if(fclear)fclear.onclick=()=>{gSel=gLog=gVt=gUf=gMun=gTar=gTask=gConc='';gR={fu:'',st:'',pa:''};render()};
   const xl=$('#gxl');if(xl)xl.onclick=gXlsx;const gi=$('#gimp'),gf=$('#gimpf');if(gi&&gf){gi.onclick=()=>gf.click();gf.onchange=()=>{const f=gf.files[0];gf.value='';if(f)gImport(f)}}
   
   document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTab=b.dataset.gt;render()});
-  document.querySelectorAll('[data-hist-task]').forEach(b=>b.onclick=()=>{gHighlight=JSON.parse(b.dataset.histFields||'[]');openView(b.dataset.histTask)});
-  const undoBtn=$('#gUndoImport');if(undoBtn)undoBtn.onclick=()=>{const hs=gImportHistory(),h=hs[0];if(!h)return;const [ud,uc]=dlg(`<div class="dh"><h2>Reverter última atualização?</h2><button type="button" class="btn" id="x">✕</button></div><div class="db"><p>Restaurar os ${h.count} campo(s) anteriores ao arquivo <b>${esc(h.file)}</b>?</p></div><div class="df"><button class="btn" id="no">Cancelar</button><button class="btn dan" id="yes">Reverter</button></div>`,'#ff8f86');ud.querySelector('#no').onclick=uc;ud.querySelector('#yes').onclick=async()=>{h.backup.forEach(x=>{const t=S.tasks.find(t=>t.id===x.id);if(t)x.values.forEach(([k,v])=>t[k]=v)});hs.shift();localStorage.setItem('fluxo-import-history',JSON.stringify(hs));await save();uc();render();toast('Última atualização revertida.')};};
-
-  document.querySelectorAll('[data-hist-task]').forEach(b=>b.onclick=()=>{gHighlight=JSON.parse(b.dataset.histFields||'[]');openView(b.dataset.histTask)});
-  const undo=$('#gUndoImport');if(undo)undo.onclick=async()=>{const H=gImportHistory(),h=H[0];if(!h)return;const [ud,uc]=dlg(`<div class="dh"><h2>Reverter atualização?</h2><button type="button" class="btn" id="x">✕</button></div><div class="db"><p>Os ${h.count} campo(s) alterados pelo arquivo <b>${esc(h.file)}</b> voltarão aos valores anteriores.</p></div><div class="df"><button class="btn" id="no">Cancelar</button><button class="btn dan" id="yes">Reverter</button></div>`,'#ff8f86');ud.querySelector('#no').onclick=uc;ud.querySelector('#yes').onclick=async()=>{h.backup.forEach(x=>{const t=S.tasks.find(t=>t.id===x.id);if(t)x.values.forEach(([k,v])=>t[k]=v)});H.shift();localStorage.setItem('fluxo-import-history',JSON.stringify(H));await save();uc();render();toast('Última atualização revertida.')};};
-
   document.querySelectorAll('[data-gmed]').forEach(b=>b.onclick=()=>{gSel=gToggle(gSel,b.dataset.gmed);render()});
-  window.gClr=()=>{gSel=gLog=gVt=gUf=gMun=gK=gTar=gTask=gConc='';gFilterOpen=false;gR={fu:'',st:'',pa:''};render()};const gClr=window.gClr;const gx=$('#gfx');if(gx)gx.onclick=gClr;const rx=$('#rx');if(rx)rx.onclick=gClr;
+  window.gClr=()=>{gSel=gLog=gVt=gUf=gMun=gK=gTar='';gR={fu:'',st:'',pa:''};render()};const gClr=window.gClr;const gx=$('#gfx');if(gx)gx.onclick=gClr;const rx=$('#rx');if(rx)rx.onclick=gClr;
   document.querySelectorAll('[data-rk]').forEach(b=>b.onclick=()=>{gK=gK===b.dataset.rk?'':b.dataset.rk;render()});
   document.querySelectorAll('[data-rf]').forEach(b=>b.onclick=()=>{const[k,...r]=b.dataset.rf.split('|'),v=r.join('|');if(k==='uf'){gUf=gToggle(gUf,v);gMun=''}else if(k==='med')gSel=gToggle(gSel,v);else if(k==='log')gLog=gTg(gLog,v);else if(k==='vt')gVt=gTg(gVt,v);else gR[k]=gR[k]===v?'':v;render()});
   document.querySelectorAll('[data-rcx]').forEach(b=>b.onclick=()=>{const k=b.dataset.rcx;if(k==='k')gK='';else if(k==='med')gSel='';else if(k==='log')gLog='';else if(k==='vt')gVt='';else if(k==='uf'){gUf='';gMun=''}else if(k==='mun')gMun='';else gR[k]='';render()});
   document.querySelectorAll('[data-rmore]').forEach(b=>b.onclick=()=>{gMore=!gMore;render()});document.querySelectorAll('[data-rmap]').forEach(b=>b.onclick=()=>{gTab='graf';gCh='map';render()});
-  document.querySelectorAll('[data-rcap]').forEach(b=>b.onclick=()=>{const [pd,pc]=dlg(`<div class="dh"><h2>Limite do gráfico</h2><button type="button" class="btn" id="x">✕</button></div><div class="db"><div class="full"><label for="capValue">Limite de tarefas por pessoa</label><input id="capValue" type="number" min="1" max="100" value="${rCap()}"></div></div><div class="df"><button type="button" class="btn" id="capCancel">Cancelar</button><button type="button" class="btn pri" id="capSave">Salvar</button></div>`,'#f2c14e');pd.querySelector('#capCancel').onclick=pc;pd.querySelector('#capSave').onclick=()=>{const v=parseInt(pd.querySelector('#capValue').value,10);if(v>0){try{localStorage.setItem('fl_cap',v)}catch(e){}pc();render()}}});
+  document.querySelectorAll('[data-rcap]').forEach(b=>b.onclick=()=>{const v=parseInt(prompt('Limite de tarefas por pessoa (linha do gráfico):',rCap()),10);if(v>0){try{localStorage.setItem('fl_cap',v)}catch(e){}render()}});
   {let tp=document.getElementById('rtip');if(!tp){tp=document.createElement('div');tp.id='rtip';document.body.appendChild(tp);document.addEventListener('mouseover',e=>{const x=e.target.closest&&e.target.closest('[data-tip]'),t=document.getElementById('rtip');if(!x){t.hidden=true;return}t.textContent=x.dataset.tip;t.hidden=false});document.addEventListener('mousemove',e=>{const t=document.getElementById('rtip');if(t.hidden)return;t.style.left=Math.max(4,Math.min(innerWidth-t.offsetWidth-8,e.clientX+14))+'px';t.style.top=Math.min(innerHeight-t.offsetHeight-8,e.clientY+18)+'px'})}tp.hidden=true}
 
   document.querySelectorAll('[data-gch]').forEach(b=>b.onclick=()=>{gCh=b.dataset.gch;render()});document.querySelectorAll('[data-guf]').forEach(b=>b.onclick=()=>{gUf=gToggle(gUf,b.dataset.guf);gMun='';render()});document.querySelectorAll('[data-gmun]').forEach(b=>b.onclick=()=>{if(b._t){clearTimeout(b._t);b._t=0;if(b.dataset.tid)openTask(b.dataset.tid);return}b._t=setTimeout(()=>{b._t=0;gMun=gToggle(gMun,b.dataset.gmun);render()},250)});{const x=$('#gfx2');if(x)x.onclick=()=>{gUf=gMun='';render()}}document.querySelectorAll('svg.gmap[data-zf]').forEach(sv=>{try{const p=sv.querySelector('path'),b=p.getBBox(),m=Math.max(b.width,b.height)*.06;sv.setAttribute('viewBox',[b.x-m,b.y-m,b.width+2*m,b.height+2*m].join(' '))}catch(e){}});gFit();gMapInit();requestAnimationFrame(gFit);setTimeout(gFit,250);{const sk=document.querySelector('.stk');if(window._gRS)window._gRS.disconnect();if(sk&&window.ResizeObserver){window._gRS=new ResizeObserver(()=>{clearTimeout(window._gRT2);window._gRT2=setTimeout(()=>{setHH();gFit()},40)});window._gRS.observe(sk)}}{const gp=document.querySelector('.gcp .gmp');if(window._gRO){window._gRO.disconnect()}if(gp&&window.ResizeObserver){window._gRO=new ResizeObserver(()=>{clearTimeout(window._gRT);window._gRT=setTimeout(()=>{window._gRe&&window._gRe()},70)});window._gRO.observe(gp)}}
@@ -667,7 +660,7 @@ function openMedicao(id){
   d.querySelector('form').onsubmit=async e=>{e.preventDefault();const nm=d.querySelector('#kn').value.trim();if(!nm)return;
     if(S.medicoes.some(x=>x.id!==id&&nk(x.nome)===nk(nm))){toast('Já existe uma medição com este nome');return}
     const o=isNew?{id:'cl'+Date.now()}:c;o.nome=nm;if(isNew)S.medicoes.push(o);await save();close();render()};
-  if(!isNew)d.querySelector('#dl').onclick=async()=>{if((S.concessionarias||[]).some(m=>m.medicao===id)){toast('Mova ou exclua antes as concessionárias desta medição');return}if(await confirmUI('Excluir esta medição?')){S.medicoes=S.medicoes.filter(x=>x.id!==id);await save();close();render()}};
+  if(!isNew)d.querySelector('#dl').onclick=async()=>{if((S.concessionarias||[]).some(m=>m.medicao===id)){toast('Mova ou exclua antes as concessionárias desta medição');return}if(confirm('Excluir esta medição?')){S.medicoes=S.medicoes.filter(x=>x.id!==id);await save();close();render()}};
   d.querySelector('#kn').focus();
 }
 const byMed=L=>{const C=[...(S.medicoes||[])].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')),g=C.map(c=>({c,L:L.filter(x=>(x.m||x).medicao===c.id)}));const rest=L.filter(x=>!C.some(c=>c.id===(x.m||x).medicao));if(rest.length)g.push({c:{id:'',nome:'Sem medição'},L:rest});return g};
@@ -694,7 +687,7 @@ function openConc(id){
     const it=[...new Set(d.querySelector('#mi').value.split('\n').map(s=>s.trim()).filter(Boolean))];if(!it.length){toast('Informe ao menos um item');return}
     const o=isNew?{id:'m'+Date.now()}:m;o.medicao=d.querySelector('#mk').value;o.nome=nm;o.itens=it;o.dir=d.querySelector('#md').value.trim();o.prazo=d.querySelector('#mp').value;o.cor=d.querySelector('[name=mc]:checked').value;
     if(isNew)S.concessionarias.push(o);S.tipos.filter(y=>y.conc===o.id).forEach(y=>{y.nome=o.nome;y.cor=o.cor});await save();close();render()};
-  if(!isNew)d.querySelector('#dl').onclick=async()=>{if(S.tipos.some(y=>y.conc===id)){toast('Exclua antes o fluxo desta concessionária');return}if(await confirmUI('Excluir esta concessionária?')){S.concessionarias=S.concessionarias.filter(x=>x.id!==id);await save();close();render()}};
+  if(!isNew)d.querySelector('#dl').onclick=async()=>{if(S.tipos.some(y=>y.conc===id)){toast('Exclua antes o fluxo desta concessionária');return}if(confirm('Excluir esta concessionária?')){S.concessionarias=S.concessionarias.filter(x=>x.id!==id);await save();close();render()}};
   d.querySelector('#mn').focus();
 }
 function openFluxoTipo(id){const y=S.tipos.find(x=>x.id===id);if(!y)return;const F=stepsOf(y),G=grp(F),by=byId(F);
@@ -728,10 +721,6 @@ function bindAdmin(){
   document.querySelectorAll('[data-cf]').forEach(b=>b.onclick=()=>openCampo(b.dataset.cf));
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>openTipo(b.dataset.ed));
   if(adminSec==='func')bindFunc();if(adminSec==='usr'){if(USR===null)loadUsr();const nu=$('#nu');if(nu)nu.onclick=()=>openUsuario();document.querySelectorAll('[data-eu]').forEach(b=>b.onclick=()=>openUsuario(b.dataset.eu))}}
-async function confirmUI(message){
-  const [d,close]=dlg(`<div class="dh"><h2>Confirmar ação</h2><button type="button" class="btn" id="x">✕</button></div><div class="db"><p>${esc(message).replace(/\\n/g,'<br>')}</p></div><div class="df"><button type="button" class="btn" id="no">Cancelar</button><button type="button" class="btn dan" id="yes">Confirmar</button></div>`,'#f2c14e');
-  return await new Promise(resolve=>{d.querySelector('#x').onclick=()=>{close();resolve(false)};d.querySelector('#no').onclick=()=>{close();resolve(false)};d.querySelector('#yes').onclick=()=>{close();resolve(true)};d.addEventListener('cancel',()=>resolve(false),{once:true})});
-}
 function dlg(html,color){
   const d=document.createElement('dialog');d.style.setProperty('--c',color);d.innerHTML=html;document.body.appendChild(d);d.showModal();d.querySelectorAll('.vb section>*,.db>*').forEach((e,i)=>e.style.setProperty('--j',Math.min(i,10)));
   const close=()=>{if(d._c)return;d._c=1;if(d._oc){try{d._oc()}catch(e){console.error(e)}}d.classList.add('out');setTimeout(()=>{d.close();d.remove()},170)};d.addEventListener('cancel',e=>{e.preventDefault();close()});d.addEventListener('mousedown',e=>{if(e.target===d)d._bd=1;else d._bd=0});d.addEventListener('click',e=>{if(e.target===d&&d._bd)close()});d.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter'){const f=d.querySelector('form');if(f&&f.reportValidity())f.requestSubmit()}});d.querySelector('#x').onclick=close;return[d,close];
@@ -745,7 +734,7 @@ function openCampo(id){
   const tp=d.querySelector('#ctp'),h=()=>d.querySelector('#cth').textContent=CH[tp.value];tp.onchange=h;h();
   d.querySelector('form').onsubmit=async()=>{const o=isNew?{id:'c'+Date.now()}:c;o.nome=d.querySelector('#cnm').value.trim();if(!c.fixo)o.tipo=tp.value;
     if(isNew)S.campos.push(o);await save();close();render()};
-  if(!isNew&&!c.fixo)d.querySelector('#dl').onclick=async()=>{if(await confirmUI('Excluir este campo? Os valores já preenchidos nas tarefas ficam guardados, mas deixam de aparecer.')){S.campos=S.campos.filter(x=>x.id!==id);S.tipos.forEach(y=>y.campos=y.campos.filter(k=>k!==id));await save();close();render()}};
+  if(!isNew&&!c.fixo)d.querySelector('#dl').onclick=async()=>{if(confirm('Excluir este campo? Os valores já preenchidos nas tarefas ficam guardados, mas deixam de aparecer.')){S.campos=S.campos.filter(x=>x.id!==id);S.tipos.forEach(y=>y.campos=y.campos.filter(k=>k!==id));await save();close();render()}};
   d.querySelector('#cnm').focus();
 }
 function cloneTipoPick(){
@@ -806,7 +795,7 @@ function openTipo(id){
     const o=isNew?{id:'ty'+Date.now()}:y;{const m=S.concessionarias.find(x=>x.id===d.querySelector('#tn').value);o.conc=m.id;o.nome=m.nome;o.cor=m.cor||o.cor||COLORS[0]}{o.steps=D.get().steps;delete o.passos;delete o.pc}
     o.campos=[...d.querySelectorAll('.chk input:checked')].map(i=>i.value);o.meta={v:+d.querySelector('#mv').value||0,u:d.querySelector('#mu').value};
     if(isNew)S.tipos.push(o);await save();close();render()};
-  if(!isNew)d.querySelector('#dl').onclick=async()=>{if(await confirmUI('Excluir este tipo? As tarefas existentes continuam, sem tipo.')){S.tipos=S.tipos.filter(x=>x.id!==id);await save();close();render()}};
+  if(!isNew)d.querySelector('#dl').onclick=async()=>{if(confirm('Excluir este tipo? As tarefas existentes continuam, sem tipo.')){S.tipos=S.tipos.filter(x=>x.id!==id);await save();close();render()}};
   d.querySelector('#tn').focus();
 }
 
@@ -851,7 +840,7 @@ function openContato(id,pre){
     if(isNew)S.contatos.push(o);await save();
     if(mk){try{await rpc('fx_usuario_salvar',{p_token:ME.tk,p_id:null,p_usuario:lg,p_nome:o.nome,p_perfil:'normal',p_contato_id:o.id,p_ativo:true,p_senha:pw});USR=null;toast('Funcionário e acesso salvos no banco')}catch(err){toast('Funcionário salvo, mas o acesso falhou: '+err.message)}}
     close();render()};
-  if(!isNew)d.querySelector('#dl').onclick=async()=>{if(await confirmUI('Excluir este contato?')){S.contatos=S.contatos.filter(x=>x.id!==id);await save();close();render()}};
+  if(!isNew)d.querySelector('#dl').onclick=async()=>{if(confirm('Excluir este contato?')){S.contatos=S.contatos.filter(x=>x.id!==id);await save();close();render()}};
   if(isNew){const ca=d.querySelector('#ca'),cab=d.querySelector('#cab'),cl=d.querySelector('#cl');let tc=!!cl.value;ca.onchange=()=>cab.style.display=ca.checked?'':'none';cl.oninput=()=>tc=true;d.querySelector('#cn').addEventListener('input',e=>{if(!tc)cl.value=first(e.target.value)})}
   d.querySelector('#cn').focus();
 }
@@ -1084,10 +1073,9 @@ function openView(id,tab0){
   d.querySelectorAll('[data-sf]').forEach(e=>e.addEventListener('change',async()=>{if(await saveF()&&SB.on&&SB.ok&&!SB.dirty)toast('Salvo no banco ✔')}));
   d._oc=()=>{saveF();if(seenNow)render()};
   on('#nb',async()=>{const x=d.querySelector('#na').value.trim();if(!x){toast('Escreva a anotação');return}await saveF();const ns=d.querySelector('#ns');(t.anot=t.anot||[]).push({id:'a'+Date.now(),passo:ns?+ns.value:pn,u:user,t:Date.now(),txt:x});await save();close();render();openView(id,'ano')});
-  d.querySelectorAll('[data-da]').forEach(b=>b.onclick=async()=>{if(!await confirmUI('Excluir esta anotação?'))return;t.anot=(t.anot||[]).filter(a=>a.id!==b.dataset.da);await save();close();render();openView(id,'ano')});
+  d.querySelectorAll('[data-da]').forEach(b=>b.onclick=async()=>{if(!confirm('Excluir esta anotação?'))return;t.anot=(t.anot||[]).filter(a=>a.id!==b.dataset.da);await save();close();render();openView(id,'ano')});
   on('#sv',async()=>{await saveF(true);if(!SB.on)toast('Campos salvos');else if(SB.ok&&!SB.dirty)toast('Campos salvos no banco ✔')});
   on('#ed',()=>{close();openTask(id)});on('#bk',()=>{close();pedirDevolucao(id)});
-  if(gHighlight&&gHighlight.length){const names=gHighlight.map(x=>x.name);d.querySelectorAll('label').forEach(lb=>{if(names.includes(lb.textContent.trim())){const wrap=lb.parentElement;wrap.classList.add('import-change');const val=gHighlight.find(x=>x.name===lb.textContent.trim());if(val)wrap.title='Atualizado pela importação: '+val.name}});gHighlight=null;}
   d.querySelectorAll('[data-fs]').forEach(b=>b.onclick=async()=>{await saveF();const f=t.fluxo.find(x=>x.id===b.dataset.fs);if(!f)return;
     const mis=(f.campos||[]).map(k=>campos().find(c=>c.id===k)).filter(c=>c&&(t[c.id]==null||String(t[c.id]).trim()===''));
     if(mis.length){toast('Preencha antes de finalizar o passo: '+mis.map(c=>c.nome).join(', '));const e=d.querySelector('[data-sf="'+mis[0].id+'"]');if(e){const p=e.closest('[data-tp]');if(p&&p.hidden)d.querySelector('[data-tab="'+p.dataset.tp+'"]').click();e.focus()}return}close();await avancar(id,1,{sid:f.id})});
@@ -1151,13 +1139,6 @@ async function xRows(file){const F=await xRead(await file.arrayBuffer()),P=new D
   [...doc(await F[tg]()).getElementsByTagName('row')].forEach(r=>{const a=[];[...r.getElementsByTagName('c')].forEach(c=>{const t=c.getAttribute('t'),v=c.getElementsByTagName('v')[0],i=col(c.getAttribute('r'));let x='';
     if(t==='inlineStr')x=[...c.getElementsByTagName('t')].map(z=>z.textContent).join('');else if(v){const q=v.textContent;x=t==='s'?(SS[+q]||''):t==='str'||t==='e'?q:t==='b'?q==='1'?'Sim':'Não':(q!==''&&!isNaN(q)?+q:q)}
     a[i]=x});R.push(a)});return R}
-function gImportHistory(){try{return JSON.parse(localStorage.getItem('fluxo-import-history')||'[]')}catch(e){return[]}}
-function gImportHistoryView(){
-  const H=gImportHistory(),last=H[0];
-  return `<div class="gih"><div class="gih-head"><div><h2>Histórico de importações</h2><p class="hint">Acompanhe o que mudou em cada atualização feita por Excel.</p></div>${last?`<button type="button" class="btn dan" id="gUndoImport">↶ Reverter última atualização</button>`:''}</div>${H.length?H.map((h,i)=>`<section class="gih-item"><div class="gih-meta"><b>${esc(h.file)}</b><span>${new Date(h.date).toLocaleString('pt-BR')}</span><small>${h.items.length} tarefa(s) · ${h.count} campo(s) alterado(s)</small></div><div class="gih-list">${h.items.map(it=>`<button type="button" class="gih-row" data-hist-task="${esc(it.id)}" data-hist-fields="${esc(JSON.stringify(it.fields))}"><b>${esc(it.task)}</b><span>${esc(it.conc||'—')} · ${esc(it.uf||'—')} · ${esc(it.mun||'—')}</span><small>Campos: ${it.fields.map(x=>esc(x.name)).join(', ')}</small></button>`).join('')}</div></section>`).join(''):'<div class="empty">Nenhuma atualização por Excel registrada.</div>'}</div>`;
-}
-function gImportHistory(){try{return JSON.parse(localStorage.getItem('fluxo-import-history')||'[]')}catch(e){return[]}}
-function gImportHistoryView(){const H=gImportHistory();return `<div class="gih"><div class="gih-head"><div><h2>Histórico em demanda</h2><p class="hint">Últimos arquivos enviados e alterações identificadas.</p></div>${H.length?'<button type="button" class="btn dan" id="gUndoImport">↶ Reverter última atualização</button>':''}</div>${H.map(h=>`<section class="gih-item"><b class="gih-file">${esc(h.file)}</b><small>${new Date(h.date).toLocaleString('pt-BR')} · ${h.items.length} tarefa(s) · ${h.count} campo(s)</small>${h.items.map(it=>`<button type="button" class="gih-row" data-hist-task="${esc(it.id)}" data-hist-fields="${esc(JSON.stringify(it.fields))}"><b>${esc(it.task)}</b><span>${esc(it.conc||'—')} · ${esc(it.uf||'—')} · ${esc(it.mun||'—')}</span><small>Atualizado: ${it.fields.map(f=>esc(f.name)).join(', ')}</small></button>`).join('')}</section>`).join('')||'<div class="empty">Nenhuma atualização por Excel registrada.</div>'}</div>`}
 async function gImport(file){
   try{const rows=await xRows(file);if(!rows.length)throw Error('Planilha vazia');
     const H=(rows[0]||[]).map(h=>nk(h)),ci=H.indexOf('tarefa'),cc=H.indexOf('concessionaria');if(ci<0){toast('Planilha sem a coluna “Tarefa”: use o relatório baixado pelo sistema.');return}
@@ -1177,16 +1158,10 @@ async function gImport(file){
       d.length?ch.push([t,d]):eq++});
     const nc=ch.reduce((a,x)=>a+x[1].length,0);
     if(!ch.length){toast('Nada a atualizar: '+eq+' tarefa(s) já iguais'+(miss?', '+miss+' sem correspondência':'')+'.');return}
-    const [cd,cclose]=dlg(`<div class="dh"><div><h2>Confirmar atualização</h2><div class="hint">Arquivo: ${esc(file.name)}</div></div><button type="button" class="btn" id="x">✕</button></div><div class="db"><div class="full"><b>${ch.length}</b> tarefa(s) · <b>${nc}</b> campo(s) a atualizar<p class="hint">${eq} iguais · ${miss} sem correspondência · ${bad} célula(s) inválida(s) ignoradas.</p><p class="hint">Células vazias não apagam dados. Status, Tarefa, Concessionária e Medição não são alterados.</p></div></div><div class="df"><button type="button" class="btn" id="cancelImport">Cancelar</button><button type="button" class="btn pri" id="confirmImport">Atualizar dados</button></div>`,'#5fd4c4');
-    cd.querySelector('#cancelImport').onclick=cclose;
-    const ok=await new Promise(resolve=>{cd.querySelector('#x').onclick=()=>{cclose();resolve(false)};cd.querySelector('#confirmImport').onclick=()=>{cclose();resolve(true)};cd.addEventListener('cancel',()=>resolve(false),{once:true})});
-    if(!ok)return;
-    const histItems=ch.map(([t,d])=>{const y=tipoOf(t),co=concOf(y),ufc=CP.find(c=>/^(uf|estado)$/.test(nk(c.nome))),muc=CP.find(c=>/munic|cidade/.test(nk(c.nome)));return{id:t.id,task:nome(t),conc:co?.nome||'',uf:ufc?t[ufc.id]||'':'',mun:muc?t[muc.id]||'':'',fields:d.map(([k,n])=>({id:k,name:CP.find(c=>c.id===k)?.nome||k,old:t[k]??'',value:n}))}});
-    ch.forEach(([t,d])=>d.forEach(([k,n])=>{t[k]=n}));
-    try{const hs=gImportHistory();hs.unshift({file:file.name,date:new Date().toISOString(),count:nc,items:histItems,backup:histItems.map(it=>({id:it.id,values:it.fields.map(f=>[f.id,f.old])}))});localStorage.setItem('fluxo-import-history',JSON.stringify(hs.slice(0,30)))}catch(e){console.warn(e)}
-    await save();gTab='hist';render();toast('Importado: '+ch.length+' tarefa(s) atualizadas.')
+    if(!confirm('Importar relatório?\n\n• '+ch.length+' tarefa(s) serão atualizadas ('+nc+' campo(s))\n• '+eq+' tarefa(s) já estão iguais\n• '+miss+' linha(s) sem tarefa correspondente (ignoradas)'+(bad?'\n• '+bad+' célula(s) com formato inválido (ignoradas)':'')+'\n\nCélulas vazias não apagam dados. Status, Tarefa, Concessionária e Medição não são alterados.'))return;
+    ch.forEach(([t,d])=>d.forEach(([k,n])=>{t[k]=n}));await save();render();toast('Importado: '+ch.length+' tarefa(s) atualizadas.')
   }catch(e){console.error(e);toast('Não foi possível ler o XLSX: '+String(e.message||e).slice(0,120))}}
-let GP=new Map(),gTab='graf',gSub='',gChart='dots',gSel='',gLog='',gVt='';let gCh='map',gUf='',gMun='',gMapFl='',gTar='',gTask='',gConc='',gHighlight=null,gFilterOpen=false;const tarOk=t=>!gTar||nk(nome(t)+' '+(t.tarefa||'')).includes(nk(gTar));
+let GP=new Map(),gTab='graf',gSub='',gChart='dots',gSel='',gLog='',gVt='';let gCh='map',gUf='',gMun='',gMapFl='',gTar='';const tarOk=t=>!gTar||nk(nome(t)+' '+(t.tarefa||'')).includes(nk(gTar));
 const gVals=v=>v?String(v).split(GSEP).filter(Boolean):[],gHas=(v,x)=>!v||gVals(v).includes(String(x)),gToggle=(v,x)=>{const a=gVals(v),i=a.indexOf(String(x));i<0?a.push(String(x)):a.splice(i,1);return a.join(GSEP)};
 const medMatch=(t,id)=>{const i=medId(tipoOf(t)),ex=(S.medicoes||[]).some(c=>c.id===i);return id==='_'?!ex:i===id};
 const gOk=(t,sel=1)=>(!sel||!gSel||gVals(gSel).some(v=>medMatch(t,v)))&&(gMt(gLog,gLk(t)))&&(gMt(gVt,gVk(t)));
@@ -1466,11 +1441,11 @@ function gestaoView(){
   const med=`<div class="gs-list">${lst(M,({m,no,d,tot,dd})=>`<button type="button" class="gs-row" data-gm="${esc(m.id)}" style="--c:${corConc(m)}"><span><b>${esc(concLbl(m))}</b><small>${d} de ${tot} concluídos · ${no?no+' item(ns) sem tarefa':'todos cadastrados'}</small></span><span class="tag${dd!==null&&dd<0?' late':''}">${dd===null?'Sem prazo':dd<0?'Venceu há '+(-dd)+' d':dd===0?'Vence hoje':'Vence em '+dd+' d'}</span></button>`)}</div>`;
   const nmov=S.tasks.filter(movNew).length,mov=mvSec(40)||'<div class="empty">Nenhuma tarefa mudou de posto recentemente ✔</div>';
   const K=(n,l,hot,go)=>`<button type="button" class="gs-k${hot&&n?' hot':''}" data-gk="${go}"><b data-cu>${n}</b><span>${l}</span></button>`;
-  const GT=[['graf','Mapa e medições'],['res','Resumo'],['acao','Ação agora',G.n,1],['med','Concessionárias',M.length],['mov','Mudaram de posto',nmov,1],['hist','Histórico de importações']];
+  const GT=[['graf','Mapa e medições'],['res','Resumo'],['acao','Ação agora',G.n,1],['med','Concessionárias',M.length],['mov','Mudaram de posto',nmov,1]];
   if(!GT.some(x=>x[0]===gTab))gTab='graf';
   const gcp=(()=>{
     const ST=[['todo','A iniciar','#8ea4cf'],['doing','Em andamento','#f2c14e'],['wait','Aguardando','#c4a5f5'],['done','Concluídas','#2fb59f']],
-      V=S.tasks.filter(vis),T00=V.filter(t=>ST.some(x=>x[0]===t.status)&&gOk(t,0)&&tarOk(t)&&(!gTask||nome(t)===gTask)&&(!gConc||((concOf(tipoOf(t))||{}).nome||'')===gConc)),
+      V=S.tasks.filter(vis),T00=V.filter(t=>ST.some(x=>x[0]===t.status)&&gOk(t,0)&&tarOk(t)),
       medBase=V.filter(t=>ST.some(x=>x[0]===t.status)),
       medOptBase=medBase.filter(t=>gMt(gLog,gLk(t))&&gMt(gVt,gVk(t))),medOpts=[...(S.medicoes||[])].filter(m=>medOptBase.some(t=>medMatch(t,m.id))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>({id:m.id,nome:m.nome})),
       medSem=medOptBase.some(t=>medMatch(t,'_')),
@@ -1494,8 +1469,7 @@ function gestaoView(){
     gRep={T,f:[['Medição',gSel?gVals(gSel).map(v=>v===EMP?'Nenhuma':v==='_'?'Sem medição':medNm(v)||v).join(', '):'Todas'],['Medição Logictel',gLog?gLb(gLog,fmtMes):'Todas'],['Medição V.tal',gVt?gLb(gVt):'Todas'],['UF',(gUf?gVals(gUf).map(v=>v===EMP?'Nenhum':v).join(', '):'Todos')],['Município',gMun?gVals(gMun).map(v=>v===EMP?'Nenhum':v).join(', '):'Todos']]};
     const chBar=`<div class="gch" role="group" aria-label="Tipo de gráfico">${GCH.map(([k,l])=>`<button type="button" class="btn${gCh===k?' pri':''}" data-gch="${k}" aria-pressed="${gCh===k}">${GI[k]||''}${l}</button>`).join('')}<button type="button" class="btn gxl" id="gxl" title="Baixar relatório em Excel (XLSX) conforme os filtros" aria-label="Baixar relatório XLSX">⬇ XLSX</button><button type="button" class="btn gxl" id="gimp" title="Atualizar os dados importando um relatório XLSX (mesmo modelo do baixado)" aria-label="Importar relatório XLSX">⬆ Importar</button><input type="file" id="gimpf" accept=".xlsx" hidden><button type="button" class="btn gbr" id="gfx" aria-label="Limpar filtros" title="Limpar filtros"${gSel||gLog||gVt||gUf||gMun||gK||gR.fu||gR.pa||gR.st?'':' disabled'}>${ICO_BROOM}</button></div>`;
     const gBody=gCh==='map'?MP:cols+'<p class="hint">Colunas por medição e status. Clique no nome da medição para filtrar a Gestão.</p>';
-    const taskOpts=[...new Set(V.map(t=>nome(t)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')),concOpts=[...new Set(V.map(t=>(concOf(tipoOf(t))||{}).nome||'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
-    const flt=`<div class="gfilter-launch"><button type="button" class="btn pri" id="gFilterOpen">☷ Filtros avançados <span>${[gSel,gLog,gVt,gUf,gMun,gTask,gConc].filter(Boolean).length||''}</span></button><small>Organize a visualização por medição, região e carteira</small></div><div class="gfl gfl-modal${gFilterOpen?' opened':''}" id="gFilterPanel"${gFilterOpen?'':' hidden'}><div class="gfl-head"><div><b>Filtros da gestão</b><small>Refine os dados exibidos no mapa e nos indicadores</small></div><button type="button" class="btn" id="gFilterClose">✕</button></div>${fs('gfmed','Medição',gSel,ms.map(m=>[m.id,m.nome]))}${fm('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]),logSem)}${fm('gfvt','Medição V.tal',gVt,vo.map(v=>[v,v]),vtSem)}${gMapFl}<div class="gfi"><label for="gfTask">Tarefa (lista)</label><select id="gfTask"><option value="">Todas as tarefas</option>${taskOpts.map(v=>`<option ${gTask===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div><div class="gfi"><label for="gfConc">Concessionária (lista)</label><select id="gfConc"><option value="">Todas as concessionárias</option>${concOpts.map(v=>`<option ${gConc===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div><div class="gfi gfi-t"><label for="gftar">Tarefa / Concessionária · busca por texto</label><input type="search" id="gftar" class="gtar" placeholder="Digite o nome da tarefa ou da concessionária" autocomplete="off" value="${esc(gTar)}"></div><div class="gfl-actions"><button type="button" class="btn" id="gFilterClear">Limpar filtros</button><button type="button" class="btn pri" id="gFilterApply">Aplicar filtros</button></div></div>`;
+    const flt=`<div class="gfl">${fs('gfmed','Medição',gSel,ms.map(m=>[m.id,m.nome]))}${fm('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]),logSem)}${fm('gfvt','Medição V.tal',gVt,vo.map(v=>[v,v]),vtSem)}${gMapFl}<div class="gfi gfi-t"><label for="gftar">Tarefa / Concessionária</label><input type="search" id="gftar" class="gtar" placeholder="Digite o nome da tarefa ou da concessionária" autocomplete="off" value="${esc(gTar)}"></div></div>`;
     const valCampos=campos().filter(c=>c.tipo==='valor');
     const somaVP=T.reduce((acc,t)=>acc+valCampos.reduce((s,c)=>s+(parseFloat(t[c.id])||0),0),0);
     const vpTxt=somaVP>0?brl(somaVP):'',gsz=vpTxt?Math.max(30,Math.min(64,Math.floor(200/(vpTxt.length*.6)))):64;
@@ -1503,7 +1477,7 @@ function gestaoView(){
     return `<section class="gcp" aria-label="Gráficos">${chBar}<div class="gbig"${vpTxt?` style="--gs:${gsz}px"`:''}>${vpHtml}<b data-cu>${tot}</b><span>tarefas nas medições</span><span class="gbg">${pct}% concluído</span><small>${tot-dn} em andamento ou a fazer · ${dn} concluída(s)</small></div><div class="gcc">${flt}<div class="gbd">${gCh==='map'?'':leg}${gBody}</div></div></section>`})();
   return `<div class="admin"><div class="gs-k4"${gTab==='res'?' hidden':''}>${K(G.atr.length,'atrasadas',1,'acao|atr')}${K(G.prox.length,'vencem em até 2 dias',0,'acao|prox')}${K(G.par.length,'paradas há 3+ dias',0,'acao|par')}${K(M.reduce((a,x)=>a+x.no,0),'itens de concessionária sem tarefa',1,'med|')}</div>
   <div class="tabs" role="tablist" aria-label="Gestão">${GT.map(([k,l,n,h])=>`<button type="button" role="tab" aria-selected="${gTab===k}" data-gt="${k}">${l}${n?` <em${h?' class="hot"':''}>${n}</em>`:''}</button>`).join('')}</div>
-  <div role="tabpanel">${gTab==='res'?gResumo():gTab==='graf'?gcp:gTab==='acao'?acao:gTab==='med'?med:gTab==='hist'?gImportHistoryView():mov}</div></div>`;
+  <div role="tabpanel">${gTab==='res'?gResumo():gTab==='graf'?gcp:gTab==='acao'?acao:gTab==='med'?med:mov}</div></div>`;
 }
 
 /* ---------- Aba Concessionárias: itens cadastrados x faltando ---------- */
@@ -1586,7 +1560,7 @@ function openTask(id,pre,after){
     if(isNew){t.id='t'+Date.now();S.tasks.push(t)}await save();close();render();if(after)setTimeout(after,200)};
   if(!isNew){
     
-    q('#dl').onclick=async()=>{if(await confirmUI('Excluir esta tarefa definitivamente?')){S.tasks=S.tasks.filter(x=>x.id!==id);await save();close();render()}};
+    q('#dl').onclick=async()=>{if(confirm('Excluir esta tarefa definitivamente?')){S.tasks=S.tasks.filter(x=>x.id!==id);await save();close();render()}};
   }
   q('#f1').focus();
 }
