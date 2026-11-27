@@ -1480,7 +1480,8 @@ function gestaoView(){
     const gBody=gCh==='map'?MP:cols+'<p class="hint">Colunas por medição e status. Clique no nome da medição para filtrar a Gestão.</p>';
     const tkO=[...new Map(medBase.filter(t=>t.tarefa).map(t=>[nk(t.tarefa),String(t.tarefa)])).entries()].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR',{numeric:true})),
       cnO=[...new Set(medBase.map(cnOf).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(v=>[v,v]);
-    const flt=`<aside class="gfx" aria-label="Filtros"><div class="gxh"><h2>Filtros</h2><button type="button" class="btn" id="gfc">Limpar filtros</button></div><div class="gxb">
+    const gNf=[gSel,gLog,gVt,gUf,gMun,gTar,gTk,gCn].filter(Boolean).length;
+    const flt=`<aside class="gfx" aria-label="Filtros"><div class="gxh"><h2>Filtros${gNf?`<em class="gxn">${gNf}</em>`:''}</h2><button type="button" class="btn" id="gfc"${gNf?'':' disabled'}>Limpar filtros</button></div><div class="gxb">
       <section class="gxs"><h4>Medições</h4><div class="gfl">${fs('gfmed','Medição',gSel,ms.map(m=>[m.id,m.nome]))}${fm('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]),logSem)}${fm('gfvt','Medição V.tal',gVt,vo.map(v=>[v,v]),vtSem)}</div></section>
       <section class="gxs"><h4>Localização</h4><div class="gfl">${gMapFl}</div></section>
       <section class="gxs"><h4>Tarefas e concessionárias</h4><div class="gfl">${fm('gftk','Tarefas',gTk,tkO,0)}${fm('gfcn','Concessionária',gCn,cnO,0)}<div class="gfi gfi-t"><label for="gftar">Tarefa / Concessionária</label><input type="search" id="gftar" class="gtar" placeholder="Digite o nome da tarefa ou da concessionária" autocomplete="off" value="${esc(gTar)}"></div></div></section>
