@@ -1699,3 +1699,13 @@ main{scrollbar-gutter:stable;min-width:0}
 .gsc>.gpb+small{display:block;margin:0}
 .gsc .gst{display:flex;justify-content:center;margin-top:2px;font-size:11px}
 .gsc .gpb,.gpb{display:block;height:5px;margin:3px 0}
+
+/* ===== v6.3: lista 100% opaca (nada transparece por baixo) e acabamento ===== */
+.gfx .gmdp{background:#fff!important;opacity:1!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;isolation:isolate;padding:4px;border:1px solid #b7d3d0;border-radius:10px;box-shadow:0 14px 32px #0a102038,0 2px 6px #0a10201f}
+.gfx .gmdp .gmi{background:transparent;padding:6px 8px;border-radius:6px;color:#1b2740;font-size:13px}
+.gfx .gmdp .gmi:hover{background:#e6f4f1}
+.gfx .gmdp .gmi:has(input:checked) span{font-weight:600}
+.gfx .gfi:has(.gmdp:not([hidden])){z-index:200}
+:root[data-theme=dark] .gfx .gmdp{background:#0f1626!important;border-color:#3a4b6e}
+:root[data-theme=dark] .gfx .gmdp .gmi{color:#e6edf8}
+:root[data-theme=dark] .gfx .gmdp .gmi:hover{background:#1c2a47}

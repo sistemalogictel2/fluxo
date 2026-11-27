@@ -1649,7 +1649,7 @@ function fxAsk(o){return new Promise(res=>{let r=false;
 /* ---------- Filtros: botão + histórico de importações ---------- */
 /* Listas dos filtros: flutuam sobre o painel e abrem para cima quando não há espaço embaixo */
 function gFloat(){const p=document.querySelector('.gfx');if(!p)return;p.querySelectorAll('.gmdp:not([hidden])').forEach(d=>{const a=(d.closest('.gfi')||d.parentElement).querySelector('.gmb');if(!a)return;
-  d.classList.remove('gup');d.style.maxHeight='none';const r=a.getBoundingClientRect(),full=d.scrollHeight+2,dn=innerHeight-r.bottom-14,up=r.top-14,goUp=dn<Math.min(full,200)&&up>dn;
+  d.classList.remove('gup');d.style.maxHeight='none';const r=a.getBoundingClientRect(),pr=p.getBoundingClientRect(),hd=p.querySelector('.gxh'),full=d.scrollHeight+2,dn=innerHeight-r.bottom-12,up=r.top-pr.top-(hd?hd.offsetHeight:0)-8,goUp=dn<Math.min(full,180)&&up>dn;
   d.classList.toggle('gup',goUp);d.style.maxHeight=Math.max(120,Math.min(280,goUp?up:dn))+'px'})}
 window.addEventListener('resize',gFloat);
 function gFbtn(){const n=[gSel,gLog,gVt,gUf,gMun,gTar,gTk,gCn].filter(Boolean).length;return `<button type="button" class="btn gfb${gFOpen||n?' pri':''}" id="gfb" aria-expanded="${gFOpen}" title="Abrir os filtros">⚙ Filtros${n?` <em>${n}</em>`:''}</button>`}
