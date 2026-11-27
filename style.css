@@ -1761,3 +1761,16 @@ main{scrollbar-gutter:stable;min-width:0}
 .gfx .gxh{padding:9px 14px;border-bottom:1px solid var(--fk-ln)}
 .mcs>h3,.rc .rh h3,.rc>h3{font-size:14.5px;font-weight:800;color:var(--fk-hd)}
 .ahead p,.gcap small,.hint{color:var(--fk-mu)}
+
+/* ===== v7.1: painel de filtros preenche a largura; cabeçalhos de página e de seção padronizados ===== */
+.gfx .gfl{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));justify-content:stretch}
+.gfx .gfi,.gfx .gfi.gfi-t{max-width:none}
+.gfx .gxs:nth-child(1) .gfl>:first-child{grid-column:auto}
+.gfx .gfl .gfi-t,.gfx .gfg .gfl>:first-child.gfi-t{grid-column:1/-1;max-width:none}
+.gfx .gfl>:nth-child(even) .gmdp{left:0;right:auto}
+.admin>.ahead{align-items:center;padding:14px 18px;border:1px solid var(--line);border-left:6px solid var(--ac);border-radius:16px;background:var(--s1);box-shadow:0 6px 20px var(--sh),inset 0 1px 0 var(--gi,#ffffff40);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4)}
+.admin>.ahead h2{font-size:18px;font-weight:800;color:var(--tx)}
+.admin>.ahead p{max-width:75ch;font-size:13px;color:var(--mu)}
+.mcs>h3{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:8px 14px;border:1px solid var(--line);border-radius:12px;background:var(--s2);font-size:14.5px;font-weight:800;color:var(--tx)}
+.mcs>h3::before{content:"";flex:none;width:4px;height:18px;border-radius:3px;background:var(--ac)}
+.gfx .gxs:nth-child(3) .gfl{grid-template-columns:repeat(2,minmax(0,1fr))}
