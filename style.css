@@ -1733,3 +1733,31 @@ main{scrollbar-gutter:stable;min-width:0}
 .gfx .gmb[aria-expanded=true]{border-bottom-left-radius:0;border-bottom-right-radius:0}
 :root[data-theme=dark] .gmdp.gpt{border-color:#14b8a6}
 :root[data-theme=dark] .gmdp.gpt .gms{background:#18223a;border-color:#3a4b6e;color:#eaf0fb}
+
+/* ===== v7: padrão único de filtros e cabeçalhos (glass claro e glass escuro) ===== */
+:root{--fk-bg:#ffffffeb;--fk-bd:#c3d3dc;--fk-hv:#0f9a8c;--fk-dp:#ffffff;--fk-it:#e6f4f1;--fk-tx:#1b2740;--fk-mu:#52627a;--fk-hd:#14213a;--fk-sec:#0f766e;--fk-ln:#d5e3e8}
+:root[data-theme=dark]{--fk-bg:#0f1626e6;--fk-bd:#3a4b6e;--fk-hv:#14b8a6;--fk-dp:#0f1626;--fk-it:#1c2a47;--fk-tx:#e6edf8;--fk-mu:#a9b8d4;--fk-hd:#dfe7f5;--fk-sec:#5eead4;--fk-ln:#2b3a58}
+/* campos: mesma altura, fonte e cor em toda a Gestão, filtros e barras das demais telas */
+.gfx .gmb,.gfx .gtar,.gfx select,.bar .gmf .gmb,.bar select.fsel,.gfl .gmb,.gfl select{height:34px!important;min-height:34px!important;padding:0 28px 0 10px;font-size:13px;font-weight:500;border-radius:10px;background:var(--fk-bg)!important;color:var(--fk-tx)!important;border:1px solid var(--fk-bd)!important;box-shadow:none}
+.gfx .gtar{padding:0 10px}
+.gfx .gmb:hover,.gfx .gtar:focus,.gfx select:focus,.bar .gmf .gmb:hover,.bar select.fsel:focus{border-color:var(--fk-hv)!important;outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--fk-hv) 22%,transparent)}
+.gfx .gmb[aria-expanded=true]{border-color:var(--fk-hv)!important}
+.gfx .gfi>span,.gfx .gfi>label,.bar .gmf>span,.bar>label,.fg label{font-size:11px;font-weight:700;line-height:1.2;color:var(--fk-mu)}
+/* larguras: campos compactos (não esticam com o painel) */
+.gfx .gfl{grid-template-columns:repeat(2,minmax(0,200px));justify-content:start;gap:8px 12px}
+.gfx .gfl .gfi-t,.gfx .gfg .gfl>:first-child{grid-column:1/-1;max-width:412px}
+.gfx .gfi{max-width:200px}.gfx .gfi.gfi-t{max-width:412px}
+.bar .gmf,.fg{flex:0 1 180px;max-width:200px;min-width:130px}
+@media(max-width:560px){.gfx .gfl{grid-template-columns:1fr}.gfx .gfi,.gfx .gfi.gfi-t{max-width:none}}
+/* lista flutuante presa ao campo (posição calculada em gPlace) */
+.gmdp.gpt{background:var(--fk-dp)!important;color:var(--fk-tx);border:1px solid var(--fk-hv);box-shadow:0 14px 30px #0a10203a;min-width:0!important;max-width:none}
+.gmdp.gpt .gmi{color:var(--fk-tx);font-size:13px}
+.gmdp.gpt .gmi:hover{background:var(--fk-it)}
+.gmdp.gpt .gms{background:var(--fk-bg);color:var(--fk-tx);border:1px solid var(--fk-bd)}
+.gmdp.gpt .gms:focus{border-color:var(--fk-hv)}
+/* cabeçalhos: mesmo tamanho, peso, cor e linha em painéis e seções */
+.gxh h2,.ahead h2,.gfp .gfg h4{font-size:15px;font-weight:800;letter-spacing:-.01em;color:var(--fk-hd)}
+.gxs h4,.gfx .gxs h4{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--fk-sec)}
+.gfx .gxh{padding:9px 14px;border-bottom:1px solid var(--fk-ln)}
+.mcs>h3,.rc .rh h3,.rc>h3{font-size:14.5px;font-weight:800;color:var(--fk-hd)}
+.ahead p,.gcap small,.hint{color:var(--fk-mu)}

@@ -1650,10 +1650,12 @@ function fxAsk(o){return new Promise(res=>{let r=false;
 /* Listas dos filtros: flutuam sobre o painel e abrem para cima quando não há espaço embaixo */
 function gAnchor(d){return document.querySelector('.gfx .gmf[data-mf="'+d.dataset.mf+'"] .gmb')}
 function gPlace(d){const a=gAnchor(d);if(!a){d.remove();return}
-  const r=a.getBoundingClientRect(),vh=document.documentElement.clientHeight,vw=document.documentElement.clientWidth,w=Math.min(r.width,vw-16),L=Math.max(8,Math.min(r.left,vw-w-8));
-  d.style.maxHeight='none';d.style.width=w+'px';d.style.left=L+'px';d.style.top='0px';
-  const full=d.scrollHeight+2,dn=vh-r.bottom-10,up=r.top-10,goUp=dn<Math.min(full,200)&&up>dn,mh=Math.max(110,Math.min(236,goUp?up:dn)),h=Math.min(full,mh);
-  d.classList.toggle('gup',goUp);d.style.maxHeight=mh+'px';d.style.top=(goUp?r.top-h+1:r.bottom-1)+'px';d.style.visibility='visible'}
+  /* html{zoom} muda a escala das coordenadas: calibra medindo o próprio elemento */
+  d.style.width='100px';d.style.minWidth='0';const k=d.getBoundingClientRect().width/100||1;
+  const r=a.getBoundingClientRect(),vh=window.innerHeight,vw=window.innerWidth,w=Math.min(r.width,vw-16),L=Math.max(8,Math.min(r.left,vw-w-8));
+  d.style.maxHeight='none';d.style.width=(w/k)+'px';d.style.left=(L/k)+'px';d.style.top='0px';
+  const full=d.scrollHeight*k+2,dn=vh-r.bottom-10,up=r.top-10,goUp=dn<Math.min(full,200)&&up>dn,mh=Math.max(110,Math.min(236,goUp?up:dn)),h=Math.min(full,mh);
+  d.classList.toggle('gup',goUp);d.style.maxHeight=(mh/k)+'px';d.style.top=((goUp?r.top-h+1:r.bottom-1)/k)+'px';d.style.visibility='visible'}
 function gFloat(){const old=document.querySelector('body>.gmdp.gpt'),fr=document.querySelector('.gfx .gmdp:not([hidden])');
   if(fr){const f=fr.closest('.gfi'),id=f?f.dataset.mf:'',same=old&&old.dataset.mf===id,sc=same?old.scrollTop:0,q=same&&old.querySelector('.gms')?old.querySelector('.gms').value:'';if(old)old.remove();
     fr.dataset.mf=id;fr.classList.add('gpt');fr.style.visibility='hidden';
