@@ -1479,11 +1479,11 @@ function gestaoView(){
     const gBody=gCh==='map'?MP:cols+'<p class="hint">Colunas por medição e status. Clique no nome da medição para filtrar a Gestão.</p>';
     const tkO=[...new Map(medBase.filter(t=>t.tarefa).map(t=>[nk(t.tarefa),String(t.tarefa)])).entries()].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR',{numeric:true})),
       cnO=[...new Set(medBase.map(cnOf).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(v=>[v,v]);
-    const flt=`<div class="gfp"${gFOpen?'':' hidden'} role="dialog" aria-label="Filtros"><div class="gfp-h"><b>Filtros</b><span class="sp"></span><button type="button" class="btn" id="gfc">Limpar</button><button type="button" class="btn" id="gfk" aria-label="Fechar filtros">✕</button></div><div class="gfp-b">
+    const flt=`<div class="gfp"${gFOpen?'':' hidden'} role="dialog" aria-label="Filtros"><div class="dh"><div><h2>Filtros</h2><p class="hint">Escolha o que entra no mapa, nas colunas, nos valores e no XLSX.</p></div><button type="button" class="btn" id="gfk" aria-label="Fechar filtros">✕</button></div><div class="vb gfp-b">
       <section class="gfg"><h4>Medições</h4><div class="gfl">${fs('gfmed','Medição',gSel,ms.map(m=>[m.id,m.nome]))}${fm('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]),logSem)}${fm('gfvt','Medição V.tal',gVt,vo.map(v=>[v,v]),vtSem)}</div></section>
       <section class="gfg"><h4>Localização</h4><div class="gfl">${gMapFl}</div></section>
       <section class="gfg"><h4>Tarefas e concessionárias</h4><div class="gfl">${fm('gftk','Tarefas',gTk,tkO,0)}${fm('gfcn','Concessionária',gCn,cnO,0)}<div class="gfi gfi-t"><label for="gftar">Tarefa / Concessionária</label><input type="search" id="gftar" class="gtar" placeholder="Digite o nome da tarefa ou da concessionária" autocomplete="off" value="${esc(gTar)}"></div></div></section>
-      </div><div class="gfp-f"><small class="hint">Os filtros valem para o mapa, as colunas, os valores e o relatório XLSX.</small><span class="sp"></span><button type="button" class="btn pri" id="gfo">Aplicar e fechar</button></div></div>`;
+      </div><div class="df"><button type="button" class="btn" id="gfc">Limpar filtros</button><span class="sp"></span><button type="button" class="btn pri" id="gfo">Aplicar e fechar</button></div></div>`;
     const valCampos=campos().filter(c=>c.tipo==='valor');
     const somaVP=T.reduce((acc,t)=>acc+valCampos.reduce((s,c)=>s+(parseFloat(t[c.id])||0),0),0);
     const vpTxt=somaVP>0?brl(somaVP):'',gsz=vpTxt?Math.max(30,Math.min(64,Math.floor(200/(vpTxt.length*.6)))):64;
@@ -1664,3 +1664,5 @@ async function gRevert(){
 
 /* Abrir a tarefa pelo histórico: campos atualizados piscam em verde */
 {const _ov=openView;openView=function(id,tab0,hl){const r=_ov(id,tab0);if(hl&&hl.length){const d=[...document.querySelectorAll('dialog')].pop();if(d)hl.forEach(f=>{const c=campos().find(x=>x.id===f);if(!c)return;d.querySelectorAll('label').forEach(l=>{if(l.textContent.trim()===c.nome&&l.parentElement)l.parentElement.classList.add('fxhl')})})}return r}}
+
+document.addEventListener('click',e=>{if(gFOpen&&e.target.isConnected&&!e.target.closest('.gfp,#gfb,.gmf,dialog')&&!document.querySelector('dialog[open]')){gFOpen=false;gMfOpen='';render()}});

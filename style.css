@@ -1464,3 +1464,15 @@ main{scrollbar-gutter:stable;min-width:0}
 @keyframes fxHl{0%,100%{background:#2fb59f00;box-shadow:0 0 0 0 #2fb59f00}50%{background:#2fb59f3a;box-shadow:0 0 0 4px #2fb59f55}}
 .fxhl{border-radius:10px;animation:fxHl 1.8s ease-in-out infinite!important}
 @media(max-width:700px){.gsy{grid-template-columns:1fr}.gcp.gsx{grid-template-areas:"tg" "bg" "bd";grid-template-rows:auto}.gfp{position:fixed;inset:8px;width:auto;z-index:60}}
+
+/* ajustes: cards menores e janela de filtros no estilo das janelas do programa */
+.gsy{gap:8px}.gsc{padding:6px 10px 6px 36px;border-radius:12px;gap:0}
+.gsc>i{left:10px;top:8px;width:18px;height:18px;font-size:11px}.gcap>i{width:18px;height:18px;font-size:11px}
+.gsc>span{font-size:10px}.gsc>b{font-size:clamp(17px,1.7vw,22px)}.gsc>b small{font-size:11px}.gsc>small{font-size:11.5px}
+.gpb{height:5px;margin:2px 0}.gst{font-size:11px;gap:0 10px}.gcap{font-size:13px;margin-bottom:4px}.gcap small{font-size:11.5px}
+.gfp{left:0;right:0;width:auto;border-radius:18px;background:var(--s1);box-shadow:0 20px 60px #000a;overflow:hidden}
+.gfp .dh{padding:12px 20px}.gfp .dh h2{font-size:18px}.gfp .df{padding:10px 20px;position:static}
+.gfp .vb.gfp-b{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding:14px 20px;overflow:auto;align-content:start;display:grid}
+.gfp .gfg{background:var(--s2,#ffffff0a);border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}
+.gfp .gfl{display:flex;flex-direction:column;gap:10px}
+@media(max-width:900px){.gfp .vb.gfp-b{grid-template-columns:1fr}}
