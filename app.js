@@ -1094,7 +1094,7 @@ function openView(id,tab0){
 /* ---------- Gestão: o que o gestor precisa cobrar ---------- */
 const GSEP='\u0001',gMt=(f,v)=>!f||f.split(GSEP).includes(v||'__n'),gLk=t=>{const k=String(t.vmc||'').slice(0,7);return /^\d{4}-\d{2}$/.test(k)?k:''},gVk=t=>String(t.vmg||'').trim(),
   gTg=(f,v)=>{const a=f?f.split(GSEP):[],i=a.indexOf(v);i<0?a.push(v):a.splice(i,1);return a.join(GSEP)},gLb=(f,fn=x=>x)=>f.split(GSEP).map(x=>x==='__n'||x===EMP?'Nenhuma':fn(x)).join(', ');
-let gMfOpen='',fbOpen=false;document.addEventListener('click',e=>{if(gMfOpen&&!e.target.closest('.gmf')){gMfOpen='';render()}});
+let gMfOpen='',fbOpen=false;document.addEventListener('click',e=>{if(gMfOpen&&!e.target.closest('.gmf,.gmdp')){gMfOpen='';render()}});
 /* ---------- Relatório XLSX da Gestão (sem bibliotecas) ---------- */
 let gRep=null;
 const xZip=(files)=>{const E=new TextEncoder(),tb=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t.push(c>>>0)}return t})(),
@@ -1648,9 +1648,12 @@ function fxAsk(o){return new Promise(res=>{let r=false;
 
 /* ---------- Filtros: botão + histórico de importações ---------- */
 /* Listas dos filtros: flutuam sobre o painel e abrem para cima quando não há espaço embaixo */
-function gFloat(){const p=document.querySelector('.gfx');if(!p)return;p.querySelectorAll('.gmdp:not([hidden])').forEach(d=>{const a=(d.closest('.gfi')||d.parentElement).querySelector('.gmb');if(!a)return;
-  d.classList.remove('gup');d.style.maxHeight='none';const r=a.getBoundingClientRect(),pr=p.getBoundingClientRect(),hd=p.querySelector('.gxh'),full=d.scrollHeight+2,dn=innerHeight-r.bottom-12,up=r.top-pr.top-(hd?hd.offsetHeight:0)-8,goUp=dn<Math.min(full,180)&&up>dn;
-  d.classList.toggle('gup',goUp);d.style.maxHeight=Math.max(120,Math.min(280,goUp?up:dn))+'px'})}
+function gFloat(){const old=document.querySelector('body>.gmdp.gpt'),fr=document.querySelector('.gfx .gmdp:not([hidden])');let d=fr||old,a;
+  if(fr){const id=(fr.closest('.gfi')||{dataset:{}}).dataset.mf||'';a=(fr.closest('.gfi')||fr.parentElement).querySelector('.gmb');if(old){if(old.dataset.mf===id)fr._sc=old.scrollTop;old.remove()}fr.dataset.mf=id;fr.classList.add('gpt');document.body.appendChild(fr)}
+  else if(old){if(!gMfOpen||!document.querySelector('.gfx')){old.remove();return}a=document.querySelector('.gfx .gmf[data-mf="'+old.dataset.mf+'"] .gmb')}
+  if(!d||!a||!a.isConnected){if(d&&d.classList.contains('gpt')&&!a)d.remove();return}
+  const keep=d._sc||0;d.classList.remove('gup');d.style.cssText='left:0;top:0;max-height:none;visibility:hidden';const r=a.getBoundingClientRect(),full=d.scrollHeight+2,dn=innerHeight-r.bottom-12,up=r.top-12,goUp=dn<Math.min(full,180)&&up>dn,mh=Math.max(120,Math.min(300,goUp?up:dn)),w=Math.min(Math.max(r.width,220),innerWidth-16),h=Math.min(full,mh),L=Math.max(8,Math.min(r.left,innerWidth-w-8));
+  d.style.cssText='left:'+L+'px;top:'+(goUp?r.top-4-h:r.bottom+4)+'px;width:'+w+'px;max-height:'+mh+'px;visibility:visible';d.scrollTop=keep}
 window.addEventListener('resize',gFloat);
 function gFbtn(){const n=[gSel,gLog,gVt,gUf,gMun,gTar,gTk,gCn].filter(Boolean).length;return `<button type="button" class="btn gfb${gFOpen||n?' pri':''}" id="gfb" aria-expanded="${gFOpen}" title="Abrir os filtros">⚙ Filtros${n?` <em>${n}</em>`:''}</button>`}
 function gHist(){
