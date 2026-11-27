@@ -1723,3 +1723,13 @@ main{scrollbar-gutter:stable;min-width:0}
 :root[data-theme=dark] .gmdp.gpt{background:#0f1626!important;border-color:#3a4b6e;box-shadow:0 16px 36px #000a}
 :root[data-theme=dark] .gmdp.gpt .gmi{color:#e6edf8}
 :root[data-theme=dark] .gmdp.gpt .gmi:hover{background:#1c2a47}
+
+/* ===== v6.5: lista presa ao campo (mesma largura, encostada), mais curta e com busca ===== */
+.gmdp.gpt{border-color:#0f9a8c;border-radius:0 0 10px 10px;padding:4px;box-shadow:0 12px 24px #0a10202e}
+.gmdp.gpt.gup{border-radius:10px 10px 0 0;box-shadow:0 -12px 24px #0a10202e}
+.gmdp.gpt .gms{display:block;position:sticky;top:-4px;z-index:1;width:100%;box-sizing:border-box;height:30px;margin:0 0 4px;padding:0 10px;font-size:12.5px;color:#1b2740;background:#f3f8f8;border:1px solid #d3dee5;border-radius:7px;outline:0}
+.gmdp.gpt .gms:focus{border-color:#0f9a8c;box-shadow:0 0 0 3px #0f9a8c22}
+.gmdp.gpt .gmi{padding:5px 8px;font-size:12.5px}
+.gfx .gmb[aria-expanded=true]{border-bottom-left-radius:0;border-bottom-right-radius:0}
+:root[data-theme=dark] .gmdp.gpt{border-color:#14b8a6}
+:root[data-theme=dark] .gmdp.gpt .gms{background:#18223a;border-color:#3a4b6e;color:#eaf0fb}
