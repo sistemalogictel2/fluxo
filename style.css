@@ -1590,3 +1590,15 @@ main{scrollbar-gutter:stable;min-width:0}
 :root[data-theme=dark] .gfp .gmdp{background:#0f1626ec;border-color:#3a4b6e;box-shadow:0 16px 36px #000a}
 @media(max-width:900px){.gcp.gsx>.gfp{width:min(420px,calc(100% - 16px))}.gfp .vb.gfp-b{display:flex}}
 @media(max-width:700px){.gcp.gsx>.gfp{position:fixed;inset:8px;width:auto}}
+
+/* ===== v5.1: painel mais largo, seções ocupando toda a largura, campos em 2 colunas na ordem pedida ===== */
+.gcp.gsx>.gfp{width:clamp(420px,58%,780px)}
+.gfp .vb.gfp-b{align-items:stretch}
+.gfp .gfg{width:100%;box-sizing:border-box}
+.gfp .gfl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px;align-items:start}
+.gfp .gfl>*{min-width:0}
+.gfp .gfg:nth-child(1) .gfl>:first-child{grid-column:1/-1}
+.gfp .gfl .gfi-t{grid-column:1/-1;order:-1}
+.gfp .gmdp{min-width:max(100%,230px);width:max-content;max-width:min(340px,90vw)}
+.gfp .gfl>:nth-child(even) .gmdp{left:auto;right:0}
+@media(max-width:560px){.gfp .gfl{grid-template-columns:1fr}.gfp .gfg:nth-child(1) .gfl>:first-child{grid-column:auto}}
