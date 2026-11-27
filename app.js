@@ -311,7 +311,7 @@ function bind(){
   document.querySelectorAll('[data-mx]').forEach(b=>b.onclick=()=>{const k=b.dataset.mx,c=b.closest('.mdc'),o=!MX.has(k);o?MX.add(k):MX.delete(k);c.classList.toggle('open',o);b.setAttribute('aria-expanded',o);b.querySelector('.mdg').textContent=o?'▴':'▾'});
   document.querySelectorAll('[data-mo],[data-gm]').forEach(b=>b.onclick=()=>openConcItens(b.dataset.mo||b.dataset.gm));
   document.querySelectorAll('[data-gv]').forEach(b=>b.onclick=()=>openView(b.dataset.gv));
-  const xl=$('#gxl');if(xl)xl.onclick=gXlsx;
+  const xl=$('#gxl');if(xl)xl.onclick=gXlsx;const gi=$('#gimp'),gf=$('#gimpf');if(gi&&gf){gi.onclick=()=>gf.click();gf.onchange=()=>{const f=gf.files[0];gf.value='';if(f)gImport(f)}}
   
   document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTab=b.dataset.gt;render()});
   document.querySelectorAll('[data-gmed]').forEach(b=>b.onclick=()=>{gSel=gToggle(gSel,b.dataset.gmed);render()});
@@ -1124,6 +1124,43 @@ function gXlsx(){if(!gRep)return;const{T,f}=gRep,CP=campos(),SL={todo:'A iniciar
     ['xl/styles.xml',ct+'<styleSheet xmlns="'+ns+'spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="&quot;R$&quot; #,##0.00"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F3A5F"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'],
     ['xl/worksheets/sheet1.xml',xSheet([H,...R])],['xl/worksheets/sheet2.xml',xSheet(I,0)]]);
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='relatorio-gestao-'+new Date().toISOString().slice(0,10)+'.xlsx';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast('Relatório gerado: '+R.length+' tarefa(s).')}
+/* ---------- Importar relatório XLSX (atualiza os dados) ---------- */
+async function xRead(buf){const dv=new DataView(buf),u=new Uint8Array(buf),D=new TextDecoder();let e=u.length-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw Error('Arquivo XLSX inválido');
+  const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const F={};
+  for(let i=0;i<n;i++){const m=dv.getUint16(p+10,true),cs=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true),nm=D.decode(u.subarray(p+46,p+46+nl));p+=46+nl+xl+cl;
+    const ls=lo+30+dv.getUint16(lo+26,true)+dv.getUint16(lo+28,true),raw=u.subarray(ls,ls+cs);
+    F[nm]=async()=>m===0?D.decode(raw):D.decode(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer())}
+  return F}
+async function xRows(file){const F=await xRead(await file.arrayBuffer()),P=new DOMParser(),doc=t=>P.parseFromString(t,'application/xml');
+  const wb=doc(await F['xl/workbook.xml']()),rel=doc(await F['xl/_rels/workbook.xml.rels']()),sh=[...wb.getElementsByTagName('sheet')],pk=sh.find(x=>nk(x.getAttribute('name'))==='tarefas')||sh[0];
+  const rid=pk.getAttribute('r:id'),rl=[...rel.getElementsByTagName('Relationship')].find(r=>r.getAttribute('Id')===rid);let tg=rl.getAttribute('Target').replace(/^\//,'');if(!tg.startsWith('xl/'))tg='xl/'+tg;
+  const SS=[];if(F['xl/sharedStrings.xml'])[...doc(await F['xl/sharedStrings.xml']()).getElementsByTagName('si')].forEach(si=>SS.push([...si.getElementsByTagName('t')].map(t=>t.textContent).join('')));
+  const col=r=>{let n=0;for(const ch of r.replace(/\d+/g,''))n=n*26+ch.charCodeAt(0)-64;return n-1},R=[];
+  [...doc(await F[tg]()).getElementsByTagName('row')].forEach(r=>{const a=[];[...r.getElementsByTagName('c')].forEach(c=>{const t=c.getAttribute('t'),v=c.getElementsByTagName('v')[0],i=col(c.getAttribute('r'));let x='';
+    if(t==='inlineStr')x=[...c.getElementsByTagName('t')].map(z=>z.textContent).join('');else if(v){const q=v.textContent;x=t==='s'?(SS[+q]||''):t==='str'||t==='e'?q:t==='b'?q==='1'?'Sim':'Não':(q!==''&&!isNaN(q)?+q:q)}
+    a[i]=x});R.push(a)});return R}
+async function gImport(file){
+  try{const rows=await xRows(file);if(!rows.length)throw Error('Planilha vazia');
+    const H=(rows[0]||[]).map(h=>nk(h)),ci=H.indexOf('tarefa'),cc=H.indexOf('concessionaria');if(ci<0){toast('Planilha sem a coluna “Tarefa”: use o relatório baixado pelo sistema.');return}
+    const CP=campos(),FIX=['tarefa','concessionaria','medicao','status'],cols=CP.map(c=>({c,i:H.indexOf(nk(c.nome))})).filter(x=>x.i>=0&&!FIX.includes(nk(x.c.nome)));
+    const key=(n,c)=>nk(n)+'|'+nk(c),mp=new Map();
+    S.tasks.forEach(t=>{const y=tipoOf(t),k=key(y?y.nome+' '+(t.tarefa||''):(t.tarefa||''),(concOf(y)||{}).nome||'');if(!mp.has(k))mp.set(k,[]);mp.get(k).push(t)});
+    const used=new Map(),ser=n=>new Date(Date.UTC(1899,11,30)+Math.round(n)*864e5).toISOString().slice(0,10);
+    const cv=(c,v)=>{const N=typeof v==='number';
+      if(c.tipo==='data'){if(N)return ser(v);const q=String(v).trim(),m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(q);return m?m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0'):/^\d{4}-\d{2}-\d{2}/.test(q)?q.slice(0,10):undefined}
+      if(c.tipo==='mes'){const r=N&&v>20000?ser(v).slice(0,7):parseMes(String(v));return r||undefined}
+      if(c.tipo==='valor'){if(N)return v;const f=parseFloat(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));return isNaN(f)?undefined:f}
+      return String(v).replace(/\r\n/g,'\n').trim()};
+    const same=(c,o,n)=>c.tipo==='data'?String(o||'').slice(0,10)===n:c.tipo==='mes'?fmtMes(o)===fmtMes(n):c.tipo==='valor'?Math.abs((parseFloat(o)||0)-n)<.005:String(o==null?'':o).replace(/\r\n/g,'\n').trim()===n;
+    const ch=[];let miss=0,eq=0,bad=0;
+    rows.slice(1).forEach(r=>{const nm=r[ci];if(nm===''||nm==null)return;const k=key(nm,cc>=0?r[cc]:''),L=mp.get(k),j=used.get(k)||0;used.set(k,j+1);const t=L&&L[j];if(!t){miss++;return}
+      const d=[];cols.forEach(({c,i})=>{const v=r[i];if(v===''||v==null)return;const n=cv(c,v);if(n===undefined||n===''){bad++;return}if(!same(c,t[c.id],n))d.push([c.id,n])});
+      d.length?ch.push([t,d]):eq++});
+    const nc=ch.reduce((a,x)=>a+x[1].length,0);
+    if(!ch.length){toast('Nada a atualizar: '+eq+' tarefa(s) já iguais'+(miss?', '+miss+' sem correspondência':'')+'.');return}
+    if(!confirm('Importar relatório?\n\n• '+ch.length+' tarefa(s) serão atualizadas ('+nc+' campo(s))\n• '+eq+' tarefa(s) já estão iguais\n• '+miss+' linha(s) sem tarefa correspondente (ignoradas)'+(bad?'\n• '+bad+' célula(s) com formato inválido (ignoradas)':'')+'\n\nCélulas vazias não apagam dados. Status, Tarefa, Concessionária e Medição não são alterados.'))return;
+    ch.forEach(([t,d])=>d.forEach(([k,n])=>{t[k]=n}));await save();render();toast('Importado: '+ch.length+' tarefa(s) atualizadas.')
+  }catch(e){console.error(e);toast('Não foi possível ler o XLSX: '+String(e.message||e).slice(0,120))}}
 let GP=new Map(),gTab='graf',gSub='',gChart='dots',gSel='',gLog='',gVt='';let gCh='map',gUf='',gMun='',gMapFl='',gTar='';const tarOk=t=>!gTar||nk(nome(t)+' '+(t.tarefa||'')).includes(nk(gTar));
 const gVals=v=>v?String(v).split(GSEP).filter(Boolean):[],gHas=(v,x)=>!v||gVals(v).includes(String(x)),gToggle=(v,x)=>{const a=gVals(v),i=a.indexOf(String(x));i<0?a.push(String(x)):a.splice(i,1);return a.join(GSEP)};
 const medMatch=(t,id)=>{const i=medId(tipoOf(t)),ex=(S.medicoes||[]).some(c=>c.id===i);return id==='_'?!ex:i===id};
@@ -1430,7 +1467,7 @@ function gestaoView(){
     const leg=`<div class="gleg">${ST.map(([k,l,c])=>`<span style="--c:${c}"><i></i>${l} <b>${T.filter(t=>t.status===k).length}</b></span>`).join('')}</div>`;
     const cols=C.length?`<div class="gcols" data-mx="${mx}">${C.map(({m,c,n})=>`<div class="gg${gSel&&!gHas(gSel,m.id)?' dim':''}" style="flex-grow:${Math.max(1,c.length)}"><div class="gbs">${c.map(({l,cl,n:v})=>{const h=v/mx*PH;return `<u data-v="${v}" style="--c:${cl};--h:${h.toFixed(1)}px" class="${h<20?'sm':''}" title="${esc(m.nome)} · ${l}: ${v}"><b>${v}</b></u>`}).join('')||'<span class="gz">0</span>'}</div><button type="button" class="gnm${gHas(gSel,m.id)&&gSel?' on':''}" data-gmed="${esc(m.id)}" aria-pressed="${gHas(gSel,m.id)&&!!gSel}" title="Filtrar por ${esc(m.nome)} (${n} tarefas)">${esc(m.nome)}</button></div>`).join('')}</div>`:'<div class="empty">Nenhuma medição cadastrada.</div>';
     gRep={T,f:[['Medição',gSel?gVals(gSel).map(v=>v===EMP?'Nenhuma':v==='_'?'Sem medição':medNm(v)||v).join(', '):'Todas'],['Medição Logictel',gLog?gLb(gLog,fmtMes):'Todas'],['Medição V.tal',gVt?gLb(gVt):'Todas'],['UF',(gUf?gVals(gUf).map(v=>v===EMP?'Nenhum':v).join(', '):'Todos')],['Município',gMun?gVals(gMun).map(v=>v===EMP?'Nenhum':v).join(', '):'Todos']]};
-    const chBar=`<div class="gch" role="group" aria-label="Tipo de gráfico">${GCH.map(([k,l])=>`<button type="button" class="btn${gCh===k?' pri':''}" data-gch="${k}" aria-pressed="${gCh===k}">${GI[k]||''}${l}</button>`).join('')}<button type="button" class="btn gxl" id="gxl" title="Baixar relatório em Excel (XLSX) conforme os filtros" aria-label="Baixar relatório XLSX">⬇ XLSX</button><button type="button" class="btn gbr" id="gfx" aria-label="Limpar filtros" title="Limpar filtros"${gSel||gLog||gVt||gUf||gMun||gK||gR.fu||gR.pa||gR.st?'':' disabled'}>${ICO_BROOM}</button></div>`;
+    const chBar=`<div class="gch" role="group" aria-label="Tipo de gráfico">${GCH.map(([k,l])=>`<button type="button" class="btn${gCh===k?' pri':''}" data-gch="${k}" aria-pressed="${gCh===k}">${GI[k]||''}${l}</button>`).join('')}<button type="button" class="btn gxl" id="gxl" title="Baixar relatório em Excel (XLSX) conforme os filtros" aria-label="Baixar relatório XLSX">⬇ XLSX</button><button type="button" class="btn gxl" id="gimp" title="Atualizar os dados importando um relatório XLSX (mesmo modelo do baixado)" aria-label="Importar relatório XLSX">⬆ Importar</button><input type="file" id="gimpf" accept=".xlsx" hidden><button type="button" class="btn gbr" id="gfx" aria-label="Limpar filtros" title="Limpar filtros"${gSel||gLog||gVt||gUf||gMun||gK||gR.fu||gR.pa||gR.st?'':' disabled'}>${ICO_BROOM}</button></div>`;
     const gBody=gCh==='map'?MP:cols+'<p class="hint">Colunas por medição e status. Clique no nome da medição para filtrar a Gestão.</p>';
     const flt=`<div class="gfl">${fs('gfmed','Medição',gSel,ms.map(m=>[m.id,m.nome]))}${fm('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]),logSem)}${fm('gfvt','Medição V.tal',gVt,vo.map(v=>[v,v]),vtSem)}${gMapFl}<div class="gfi gfi-t"><label for="gftar">Tarefa / Concessionária</label><input type="search" id="gftar" class="gtar" placeholder="Digite o nome da tarefa ou da concessionária" autocomplete="off" value="${esc(gTar)}"></div></div>`;
     const valCampos=campos().filter(c=>c.tipo==='valor');
