@@ -315,7 +315,7 @@ function bind(){
   
   document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTab=b.dataset.gt;render()});
   document.querySelectorAll('[data-gmed]').forEach(b=>b.onclick=()=>{gSel=gToggle(gSel,b.dataset.gmed);render()});
-  window.gClr=()=>{gSel=gLog=gVt=gUf=gMun=gK='';gR={fu:'',st:'',pa:''};render()};const gClr=window.gClr;const gx=$('#gfx');if(gx)gx.onclick=gClr;const rx=$('#rx');if(rx)rx.onclick=gClr;
+  window.gClr=()=>{gSel=gLog=gVt=gUf=gMun=gK=gTar='';gR={fu:'',st:'',pa:''};render()};const gClr=window.gClr;const gx=$('#gfx');if(gx)gx.onclick=gClr;const rx=$('#rx');if(rx)rx.onclick=gClr;
   document.querySelectorAll('[data-rk]').forEach(b=>b.onclick=()=>{gK=gK===b.dataset.rk?'':b.dataset.rk;render()});
   document.querySelectorAll('[data-rf]').forEach(b=>b.onclick=()=>{const[k,...r]=b.dataset.rf.split('|'),v=r.join('|');if(k==='uf'){gUf=gToggle(gUf,v);gMun=''}else if(k==='med')gSel=gToggle(gSel,v);else if(k==='log')gLog=gTg(gLog,v);else if(k==='vt')gVt=gTg(gVt,v);else gR[k]=gR[k]===v?'':v;render()});
   document.querySelectorAll('[data-rcx]').forEach(b=>b.onclick=()=>{const k=b.dataset.rcx;if(k==='k')gK='';else if(k==='med')gSel='';else if(k==='log')gLog='';else if(k==='vt')gVt='';else if(k==='uf'){gUf='';gMun=''}else if(k==='mun')gMun='';else gR[k]='';render()});
@@ -341,6 +341,7 @@ function bind(){
   const fbt=$('#fbt');if(fbt)fbt.onclick=()=>{fbOpen=!fbOpen;render()};
   const fsem=$('#fsem');if(fsem)fsem.onclick=()=>{fSemF=!fSemF;render()};
   const fx=$('#fl-x');if(fx)fx.onclick=()=>{fTipo=fPessoa=fKpi=fMed=fUf=fQ=fFunc='';fSemF=false;render()};
+  const gt=$('#gftar');if(gt)gt.oninput=()=>{clearTimeout(gt._t);gt._t=setTimeout(()=>{gTar=gt.value;const p=gt.selectionStart;render();const n=$('#gftar');if(n){n.focus();n.setSelectionRange(p,p)}},180)};
   const fq=$('#fq');if(fq)fq.oninput=()=>{clearTimeout(fq._t);fq._t=setTimeout(()=>{fQ=fq.value;const p=fq.selectionStart;render();const n=$('#fq');if(n){n.focus();n.setSelectionRange(p,p)}},180)};
   document.querySelectorAll('button.kpi').forEach(b=>b.onclick=()=>kpiGo(b.dataset.k));
   $('#bo').onclick=()=>{sessionStorage.removeItem('me');ME=user=null;USR=null;view='gestao';render()};
@@ -1123,7 +1124,7 @@ function gXlsx(){if(!gRep)return;const{T,f}=gRep,CP=campos(),SL={todo:'A iniciar
     ['xl/styles.xml',ct+'<styleSheet xmlns="'+ns+'spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="&quot;R$&quot; #,##0.00"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F3A5F"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'],
     ['xl/worksheets/sheet1.xml',xSheet([H,...R])],['xl/worksheets/sheet2.xml',xSheet(I,0)]]);
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='relatorio-gestao-'+new Date().toISOString().slice(0,10)+'.xlsx';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast('Relatório gerado: '+R.length+' tarefa(s).')}
-let GP=new Map(),gTab='graf',gSub='',gChart='dots',gSel='',gLog='',gVt='';let gCh='map',gUf='',gMun='',gMapFl='';
+let GP=new Map(),gTab='graf',gSub='',gChart='dots',gSel='',gLog='',gVt='';let gCh='map',gUf='',gMun='',gMapFl='',gTar='';const tarOk=t=>!gTar||nk(nome(t)+' '+(t.tarefa||'')).includes(nk(gTar));
 const gVals=v=>v?String(v).split(GSEP).filter(Boolean):[],gHas=(v,x)=>!v||gVals(v).includes(String(x)),gToggle=(v,x)=>{const a=gVals(v),i=a.indexOf(String(x));i<0?a.push(String(x)):a.splice(i,1);return a.join(GSEP)};
 const medMatch=(t,id)=>{const i=medId(tipoOf(t)),ex=(S.medicoes||[]).some(c=>c.id===i);return id==='_'?!ex:i===id};
 const gOk=(t,sel=1)=>(!sel||!gSel||gVals(gSel).some(v=>medMatch(t,v)))&&(gMt(gLog,gLk(t)))&&(gMt(gVt,gVk(t)));
@@ -1310,7 +1311,7 @@ function rAt(t,D){/* situação da tarefa na data D (ms): permite comparar com a
   return{op:1,atr:a,prox:d!==null&&d>=0&&d<=2,par:p>=3&&!a}}
 function rKp(t){const a=rAt(t,Date.now())||{};if(gK==='pct')return!!a.dn;if(gK==='val')return!!a.op&&(campos().filter(c=>c.tipo==='valor').reduce((s,c)=>s+(parseFloat(t[c.id])||0),0))>0;return!!a[gK==='conc'?'w':gK]}
 function rBase(skip,kp=1){const FU=gFld(/^(UF|ESTADO)$/),FM=gFld(/MUNIC|CIDADE/);
-  return S.tasks.filter(t=>vis(t)&&t.fluxo&&t.fluxo.length&&['todo','doing','wait','done'].includes(t.status)&&
+  return S.tasks.filter(t=>vis(t)&&tarOk(t)&&t.fluxo&&t.fluxo.length&&['todo','doing','wait','done'].includes(t.status)&&
     (skip==='med'||!gSel||gVals(gSel).some(v=>medMatch(t,v)))&&(skip==='log'||gMt(gLog,gLk(t)))&&(skip==='vt'||gMt(gVt,gVk(t)))&&
     (skip==='uf'||((!gUf||!FU||gHas(gUf,UFK[gNorm(t[FU.id])]))&&(!gMun||!FM||gHas(gMun,gNorm(String(t[FM.id]||'').trim())))))&&
     (skip==='fu'||!gR.fu||t.fluxo.some(f=>pkey(f.pessoa)===gR.fu))&&(skip==='pa'||!gR.pa||act(t).some(f=>f.etapa===gR.pa))&&
@@ -1407,7 +1408,7 @@ function gestaoView(){
   if(!GT.some(x=>x[0]===gTab))gTab='graf';
   const gcp=(()=>{
     const ST=[['todo','A iniciar','#8ea4cf'],['doing','Em andamento','#f2c14e'],['wait','Aguardando','#c4a5f5'],['done','Concluídas','#2fb59f']],
-      V=S.tasks.filter(vis),T00=V.filter(t=>ST.some(x=>x[0]===t.status)&&gOk(t,0)),
+      V=S.tasks.filter(vis),T00=V.filter(t=>ST.some(x=>x[0]===t.status)&&gOk(t,0)&&tarOk(t)),
       medBase=V.filter(t=>ST.some(x=>x[0]===t.status)),
       medOptBase=medBase.filter(t=>gMt(gLog,gLk(t))&&gMt(gVt,gVk(t))),medOpts=[...(S.medicoes||[])].filter(m=>medOptBase.some(t=>medMatch(t,m.id))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>({id:m.id,nome:m.nome})),
       medSem=medOptBase.some(t=>medMatch(t,'_')),
@@ -1431,7 +1432,7 @@ function gestaoView(){
     gRep={T,f:[['Medição',gSel?gVals(gSel).map(v=>v===EMP?'Nenhuma':v==='_'?'Sem medição':medNm(v)||v).join(', '):'Todas'],['Medição Logictel',gLog?gLb(gLog,fmtMes):'Todas'],['Medição V.tal',gVt?gLb(gVt):'Todas'],['UF',(gUf?gVals(gUf).map(v=>v===EMP?'Nenhum':v).join(', '):'Todos')],['Município',gMun?gVals(gMun).map(v=>v===EMP?'Nenhum':v).join(', '):'Todos']]};
     const chBar=`<div class="gch" role="group" aria-label="Tipo de gráfico">${GCH.map(([k,l])=>`<button type="button" class="btn${gCh===k?' pri':''}" data-gch="${k}" aria-pressed="${gCh===k}">${GI[k]||''}${l}</button>`).join('')}<button type="button" class="btn gxl" id="gxl" title="Baixar relatório em Excel (XLSX) conforme os filtros" aria-label="Baixar relatório XLSX">⬇ XLSX</button><button type="button" class="btn gbr" id="gfx" aria-label="Limpar filtros" title="Limpar filtros"${gSel||gLog||gVt||gUf||gMun||gK||gR.fu||gR.pa||gR.st?'':' disabled'}>${ICO_BROOM}</button></div>`;
     const gBody=gCh==='map'?MP:cols+'<p class="hint">Colunas por medição e status. Clique no nome da medição para filtrar a Gestão.</p>';
-    const flt=`<div class="gfl">${fs('gfmed','Medição',gSel,ms.map(m=>[m.id,m.nome]))}${fm('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]),logSem)}${fm('gfvt','Medição V.tal',gVt,vo.map(v=>[v,v]),vtSem)}${gMapFl}</div>`;
+    const flt=`<div class="gfl">${fs('gfmed','Medição',gSel,ms.map(m=>[m.id,m.nome]))}${fm('gflog','Medição Logictel',gLog,lo.map(k=>[k,fmtMes(k)]),logSem)}${fm('gfvt','Medição V.tal',gVt,vo.map(v=>[v,v]),vtSem)}${gMapFl}<div class="gfi"><label for="gftar">Tarefa</label><input type="search" id="gftar" class="gtar" placeholder="Nome da tarefa ou concessionária" autocomplete="off" value="${esc(gTar)}"></div></div>`;
     const valCampos=campos().filter(c=>c.tipo==='valor');
     const somaVP=T.reduce((acc,t)=>acc+valCampos.reduce((s,c)=>s+(parseFloat(t[c.id])||0),0),0);
     const vpTxt=somaVP>0?brl(somaVP):'',gsz=vpTxt?Math.max(30,Math.min(64,Math.floor(200/(vpTxt.length*.6)))):64;

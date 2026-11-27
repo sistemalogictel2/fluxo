@@ -1421,3 +1421,5 @@ main{scrollbar-gutter:stable;min-width:0}
 .stk .bar .fst{flex:0 0 auto;margin:0 0 0 auto;height:auto;align-self:flex-end;min-height:38px}
 .stk .bar .fst .btn.clr{min-height:38px}
 @media(max-width:760px){.stk .bar .fst{display:flex;flex:1 1 100%;margin:0;height:auto}}
+
+.gfi .gtar{width:100%;min-width:0;box-sizing:border-box;height:40px;font-size:14px;padding:0 12px}
