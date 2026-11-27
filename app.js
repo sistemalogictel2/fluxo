@@ -1164,15 +1164,17 @@ async function gImport(file){
       if(c.tipo==='valor'){if(N)return v;const f=parseFloat(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));return isNaN(f)?undefined:f}
       return String(v).replace(/\r\n/g,'\n').trim()};
     const same=(c,o,n)=>c.tipo==='data'?String(o||'').slice(0,10)===n:c.tipo==='mes'?fmtMes(o)===fmtMes(n):c.tipo==='valor'?Math.abs((parseFloat(o)||0)-n)<.005:String(o==null?'':o).replace(/\r\n/g,'\n').trim()===n;
-    const SLR={'a iniciar':'todo','em andamento':'doing','aguardando':'wait','concluida':'done'},cs=H.indexOf('status'),cm=H.indexOf('medicao'),nw=[];
+    const SLR={'a iniciar':'todo','em andamento':'doing','aguardando':'wait','concluida':'done'},cs=H.indexOf('status'),cm=H.indexOf('medicao'),nw=[],nwI=[];
     /* tarefa que não existe no banco: cria se a concessionária já tem fluxo cadastrado e o item existe nela */
     const mk=(nm,r)=>{if(cc<0)return null;const cn=r[cc];if(cn===''||cn==null)return null;
       let ms=(S.concessionarias||[]).filter(m=>nk(m.nome)===nk(cn));
-      if(ms.length>1&&cm>=0&&r[cm]!==''&&r[cm]!=null){const f=ms.filter(m=>nk(medNm(m.medicao))===nk(r[cm]));if(f.length)ms=f}
-      for(const m of ms){const y=tipoDe(m);if(!y||!stepsOf(y).length)continue;const it=(m.itens||[]).find(i=>nk(y.nome+' '+i)===nk(nm)||nk(i)===nk(nm));if(it)return{y,it}}
-      return null};
+      if(cm>=0&&r[cm]!==''&&r[cm]!=null){const f=ms.filter(m=>nk(medNm(m.medicao))===nk(r[cm]));if(f.length)ms=f}
+      let fb=null;
+      for(const m of ms){const y=tipoDe(m);if(!y||!stepsOf(y).length)continue;const it=(m.itens||[]).find(i=>nk(y.nome+' '+i)===nk(nm)||nk(i)===nk(nm));if(it)return{y,it,m};
+        if(!fb){const q=String(nm).trim(),p=y.nome+' ';fb={y,m,it:nk(q).startsWith(nk(p))?q.slice(p.length).trim():q,novo:1}}}
+      return fb};
     const ch=[];let miss=0,eq=0,bad=0;
-    rows.slice(1).forEach(r=>{const nm=r[ci];if(nm===''||nm==null)return;const k=key(nm,cc>=0?r[cc]:''),L=mp.get(k),j=used.get(k)||0;used.set(k,j+1);const t=L&&L[j];if(!t){const g=mk(nm,r);if(!g){miss++;return}
+    rows.slice(1).forEach(r=>{const nm=r[ci];if(nm===''||nm==null)return;const k=key(nm,cc>=0?r[cc]:''),L=mp.get(k),j=used.get(k)||0;used.set(k,j+1);const t=L&&L[j];if(!t){const g=mk(nm,r);if(!g){miss++;return}if(g.novo)nwI.push([g.m,g.it]);
         const n={id:'t'+Date.now()+'-'+nw.length,tipo:g.y.id,tarefa:g.it,sub:'',protocolo:'',qtd:'',fluxo:stepsOf(g.y).map(f=>({...f,pessoa:'Sem responsável'})),status:SLR[nk(cs>=0?r[cs]:'')]||'todo',repasse:today(),final:'',portal:'',obs:'',notas:[],fx:1,dag:1};
         cols.forEach(({c,i})=>{const v=r[i];if(v===''||v==null)return;const x=cv(c,v);if(x===undefined||x===''){bad++;return}n[c.id]=x});
         n.final=calc(g.y,n.repasse,n.qtd)||'';nw.push(n);return}
@@ -1181,8 +1183,9 @@ async function gImport(file){
     const nc=ch.reduce((a,x)=>a+x[1].length,0);
     if(!ch.length&&!nw.length){fxAsk({t:'Nada a atualizar',m:eq+' tarefa(s) já iguais'+(miss?', '+miss+' sem correspondência':'')+'.',ok:'OK',no:false});return}
     const FU=gFld(/^(UF|ESTADO)$/),FM=gFld(/MUNIC|CIDADE/);
-    const ok=await fxAsk({t:'Importar relatório?',h:`<p><b>${esc(file.name)}</b></p><ul class="fxul"><li><b>${ch.length}</b> tarefa(s) serão atualizadas (${nc} campo(s))</li>${nw.length?`<li><b>${nw.length}</b> tarefa(s) nova(s) serão criadas (concessionária com fluxo já cadastrado)</li>`:''}<li>${eq} tarefa(s) já estão iguais</li><li>${miss} linha(s) sem tarefa correspondente (ignoradas)</li>${bad?`<li>${bad} célula(s) com formato inválido (ignoradas)</li>`:''}</ul><p class="hint">Células vazias não apagam dados. Status, Tarefa, Concessionária e Medição das tarefas existentes não são alterados. As novas nascem com o fluxo da concessionária, sem responsável definido. Você poderá reverter em Gestão › Histórico de atualizações.</p>`,ok:'Importar'});
+    const ok=await fxAsk({t:'Importar relatório?',h:`<p><b>${esc(file.name)}</b></p><ul class="fxul"><li><b>${ch.length}</b> tarefa(s) serão atualizadas (${nc} campo(s))</li>${nw.length?`<li><b>${nw.length}</b> tarefa(s) nova(s) serão criadas (concessionária e medição já cadastradas; itens novos entram na concessionária)</li>`:''}<li>${eq} tarefa(s) já estão iguais</li><li>${miss} linha(s) sem tarefa correspondente (ignoradas)</li>${bad?`<li>${bad} célula(s) com formato inválido (ignoradas)</li>`:''}</ul><p class="hint">Células vazias não apagam dados. Status, Tarefa, Concessionária e Medição das tarefas existentes não são alterados. As novas nascem com o fluxo da concessionária, sem responsável definido. Você poderá reverter em Gestão › Histórico de atualizações.</p>`,ok:'Importar'});
     if(!ok)return;
+    nwI.forEach(([m,it])=>{m.itens=m.itens||[];if(!m.itens.some(i=>nk(i)===nk(it)))m.itens.push(it)});
     const rec={id:'i'+Date.now(),arq:file.name,t:Date.now(),por:String(user||''),iguais:eq,sem:miss,ms:ch.map(([t,d])=>({tid:t.id,tarefa:nome(t),conc:(concOf(tipoOf(t))||{}).nome||'',uf:FU?String(t[FU.id]||''):'',mun:FM?String(t[FM.id]||''):'',cs:d.map(([k,n])=>({id:k,nome:(CP.find(c=>c.id===k)||{}).nome||k,de:t[k]==null?'':t[k],para:n}))}))};
     S.tasks.push(...nw);rec.nv=nw.map(t=>({tid:t.id,tarefa:nome(t),conc:(concOf(tipoOf(t))||{}).nome||'',uf:FU?String(t[FU.id]||''):'',mun:FM?String(t[FM.id]||''):''}));S.imports=S.imports||[];S.imports.unshift(rec);S.imports.length=Math.min(S.imports.length,15);
     ch.forEach(([t,d])=>d.forEach(([k,n])=>{t[k]=n}));await save();gTab='hist';render();await fxAsk({t:'Importação concluída',h:`<p><b>${ch.length}</b> tarefa(s) atualizadas (${nc} campo(s))${nw.length?` e <b>${nw.length}</b> criada(s)`:''}.</p><p class="hint">Veja o que mudou na aba Histórico de atualizações.</p>`,ok:'Ver histórico',no:false})
