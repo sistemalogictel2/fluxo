@@ -1677,3 +1677,25 @@ main{scrollbar-gutter:stable;min-width:0}
 :root[data-theme=dark] .gfx .gxh .btn{color:#5eead4;background:#0f1626!important}
 :root[data-theme=dark] .gfx .gfi>span,:root[data-theme=dark] .gfx .gfi>label{color:#a9b8d4}
 :root[data-theme=dark] .gfx .gxs h4{color:#5eead4}
+
+/* ===== v6.2: listas ancoradas ao campo (sem sobrepor títulos), cards ainda mais baixos ===== */
+.gfx,.gfx .gxb{overflow:visible}
+.gfx .gxb{max-height:none}
+.gfx .gfi:has(.gmdp:not([hidden])){z-index:60}
+.gfx .gmdp{position:absolute;left:0;right:auto;top:calc(100% + 4px);bottom:auto;width:100%;min-width:210px;max-width:min(340px,90vw);z-index:60;box-sizing:border-box;overflow-y:auto;background:#fffffff7;border:1px solid #bfd9d6;box-shadow:0 12px 28px #0a10202e,0 2px 6px #0a10201a}
+.gfx .gmdp[hidden]{display:none!important}
+.gfx .gfl>:nth-child(even) .gmdp{left:auto;right:0}
+.gfx .gmdp.gup{top:auto;bottom:calc(100% + 4px)}
+.gfx .gmdp .gmi{padding:6px 8px}
+:root[data-theme=dark] .gfx .gmdp{background:#0f1626f7;border-color:#3a4b6e}
+@media(max-height:640px){.gfx .gxb{overflow-y:auto}}
+
+.gsc{display:block;text-align:center;padding:5px 12px 6px 36px;min-height:0;line-height:1.2}
+.gsc>i{top:7px;left:10px;width:18px;height:18px;font-size:10.5px}
+.gsc>span{display:block;font-size:10px;padding:0 20px 1px}
+.gsc>b{display:inline;font-size:clamp(18px,1.8vw,23px);line-height:1.1}
+.gsc>b small{font-size:11.5px}
+.gsc>small{display:inline;margin-left:6px;font-size:11px}
+.gsc>.gpb+small{display:block;margin:0}
+.gsc .gst{display:flex;justify-content:center;margin-top:2px;font-size:11px}
+.gsc .gpb,.gpb{display:block;height:5px;margin:3px 0}

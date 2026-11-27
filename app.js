@@ -1648,10 +1648,9 @@ function fxAsk(o){return new Promise(res=>{let r=false;
 
 /* ---------- Filtros: botão + histórico de importações ---------- */
 /* Listas dos filtros: flutuam sobre o painel e abrem para cima quando não há espaço embaixo */
-function gFloat(){const p=document.querySelector('.gfx');if(!p)return;p.querySelectorAll('.gmdp').forEach(d=>{const a=(d.closest('.gfi')||d.parentElement).querySelector('.gmb')||d.previousElementSibling;if(!a)return;
-  d.style.cssText='position:fixed;left:0;top:0;right:auto;bottom:auto;width:auto;max-height:none;visibility:hidden';const o=d.getBoundingClientRect(),ar=a.getBoundingClientRect(),pr=p.getBoundingClientRect(),w=Math.max(ar.width,230),dn=pr.bottom-ar.bottom-10,up=ar.top-pr.top-50,full=d.scrollHeight+2,goUp=dn<Math.min(full,240)&&up>dn,mh=Math.max(120,Math.min(300,goUp?up:dn)),h=Math.min(full,mh);
-  const L=Math.max(pr.left+8,Math.min(ar.left,pr.right-w-8)),T=goUp?ar.top-4-h:ar.bottom+4;
-  d.style.cssText=`position:fixed;right:auto;bottom:auto;width:${w}px;max-height:${mh}px;left:${L-o.left}px;top:${T-o.top}px;visibility:visible`})}
+function gFloat(){const p=document.querySelector('.gfx');if(!p)return;p.querySelectorAll('.gmdp:not([hidden])').forEach(d=>{const a=(d.closest('.gfi')||d.parentElement).querySelector('.gmb');if(!a)return;
+  d.classList.remove('gup');d.style.maxHeight='none';const r=a.getBoundingClientRect(),full=d.scrollHeight+2,dn=innerHeight-r.bottom-14,up=r.top-14,goUp=dn<Math.min(full,200)&&up>dn;
+  d.classList.toggle('gup',goUp);d.style.maxHeight=Math.max(120,Math.min(280,goUp?up:dn))+'px'})}
 window.addEventListener('resize',gFloat);
 function gFbtn(){const n=[gSel,gLog,gVt,gUf,gMun,gTar,gTk,gCn].filter(Boolean).length;return `<button type="button" class="btn gfb${gFOpen||n?' pri':''}" id="gfb" aria-expanded="${gFOpen}" title="Abrir os filtros">⚙ Filtros${n?` <em>${n}</em>`:''}</button>`}
 function gHist(){
