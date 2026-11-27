@@ -1423,3 +1423,4 @@ main{scrollbar-gutter:stable;min-width:0}
 @media(max-width:760px){.stk .bar .fst{display:flex;flex:1 1 100%;margin:0;height:auto}}
 
 .gfi .gtar{width:100%;min-width:0;box-sizing:border-box;height:40px;font-size:14px;padding:0 12px}
+.gfl .gfi.gfi-t{flex:2.4 1 0;max-width:none;min-width:200px}.gfi .gtar{text-overflow:ellipsis}
