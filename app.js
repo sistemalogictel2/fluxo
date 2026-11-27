@@ -1665,11 +1665,11 @@ function gPlace(d){const a=gAnchor(d);if(!a){d.remove();return}
   const full=d.scrollHeight*k+2,dn=vh-r.bottom-10,up=r.top-10,goUp=dn<Math.min(full,200)&&up>dn,mh=Math.max(110,Math.min(236,goUp?up:dn)),h=Math.min(full,mh);
   d.classList.toggle('gup',goUp);d.style.maxHeight=(mh/k)+'px';d.style.top=((goUp?r.top-h+1:r.bottom-1)/k)+'px';d.style.visibility='visible'}
 function gFloat(){const old=document.querySelector('body>.gmdp.gpt'),fr=document.querySelector('.gfx .gmdp:not([hidden])');
-  if(fr){const f=fr.closest('.gfi'),id=f?f.dataset.mf:'',same=old&&old.dataset.mf===id,sc=same?old.scrollTop:0,q=same&&old.querySelector('.gms')?old.querySelector('.gms').value:'';if(old)old.remove();
+  if(fr){const f=fr.closest('.gfi'),id=f?f.dataset.mf:'',same=old&&old.dataset.mf===id,sc=same?((old.querySelector('.gmlist')||old).scrollTop):0,q=same&&old.querySelector('.gms')?old.querySelector('.gms').value:'';if(old)old.remove();
     fr.dataset.mf=id;fr.classList.add('gpt');fr.style.visibility='hidden';
     const its=[...fr.querySelectorAll('.gmi')];if(its.length>8){const si=document.createElement('input');si.type='search';si.className='gms';si.placeholder='Buscar…';si.autocomplete='off';si.value=q;
-      const ft=()=>{const t=si.value.trim().toLowerCase();its.forEach((x,k)=>{x.style.display=k===0||!t||x.textContent.toLowerCase().includes(t)?'':'none'})};si.oninput=ft;fr.insertBefore(si,fr.firstChild);if(q)ft();if(!same)setTimeout(()=>si.focus({preventScroll:true}),0);else if(q)setTimeout(()=>{si.focus({preventScroll:true});si.setSelectionRange(q.length,q.length)},0)}
-    document.body.appendChild(fr);gPlace(fr);fr.scrollTop=sc;requestAnimationFrame(()=>gPlace(fr))}
+      const ft=()=>{const t=si.value.trim().toLowerCase();its.forEach((x,k)=>{x.style.display=k===0||!t||x.textContent.toLowerCase().includes(t)?'':'none'})};si.oninput=ft;const wr=document.createElement('div');wr.className='gmlist';its.forEach(x=>wr.appendChild(x));fr.appendChild(wr);fr.insertBefore(si,wr);if(q)ft();if(!same)setTimeout(()=>si.focus({preventScroll:true}),0);else if(q)setTimeout(()=>{si.focus({preventScroll:true});si.setSelectionRange(q.length,q.length)},0)}
+    document.body.appendChild(fr);gPlace(fr);{const w=fr.querySelector('.gmlist');(w||fr).scrollTop=sc}requestAnimationFrame(()=>gPlace(fr))}
   else if(old){if(!gMfOpen||!document.querySelector('.gfx'))old.remove();else gPlace(old)}}
 ['resize','scroll'].forEach(ev=>window.addEventListener(ev,e=>{const d=document.querySelector('body>.gmdp.gpt');if(d&&!(e.target&&e.target.nodeType===1&&d.contains(e.target)))gPlace(d)},true));
 function gFbtn(){const n=[gSel,gLog,gVt,gUf,gMun,gTar,gTk,gCn].filter(Boolean).length;return `<button type="button" class="btn gfb${gFOpen||n?' pri':''}" id="gfb" aria-expanded="${gFOpen}" title="Abrir os filtros">⚙ Filtros${n?` <em>${n}</em>`:''}</button>`}

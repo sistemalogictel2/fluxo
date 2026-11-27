@@ -1774,3 +1774,13 @@ main{scrollbar-gutter:stable;min-width:0}
 .mcs>h3{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:8px 14px;border:1px solid var(--line);border-radius:12px;background:var(--s2);font-size:14.5px;font-weight:800;color:var(--tx)}
 .mcs>h3::before{content:"";flex:none;width:4px;height:18px;border-radius:3px;background:var(--ac)}
 .gfx .gxs:nth-child(3) .gfl{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* v7.2: campo "Buscar…" da lista flutuante: opaco, fixo no topo e sem sobrepor itens */
+.gmdp.gpt .gms{position:sticky;top:0;z-index:3;display:block;width:100%;height:32px;margin:0 0 6px;padding:0 10px;box-sizing:border-box;background:var(--fk-dp)!important;color:var(--fk-tx);border:1px solid var(--fk-bd);border-radius:8px;box-shadow:0 -6px 0 var(--fk-dp),0 6px 0 var(--fk-dp)}
+.gmdp.gpt .gms::placeholder{color:var(--fk-mu);opacity:1}
+.gmdp.gpt .gms{top:4px;margin:0 0 6px;box-shadow:0 0 0 4px var(--fk-dp),0 7px 0 var(--fk-dp)}
+
+/* v7.3: com busca, a lista vira coluna: busca fixa no topo e só os itens rolam */
+.gmdp.gpt:has(>.gmlist){display:flex;flex-direction:column;overflow:hidden;padding:4px}
+.gmdp.gpt>.gms{position:static;flex:none;margin:0 0 6px;box-shadow:none;background:var(--fk-dp)!important}
+.gmdp.gpt>.gmlist{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
