@@ -315,7 +315,7 @@ function bind(){
   const xl=$('#gxl');if(xl)xl.onclick=gXlsx;const gi=$('#gimp'),gf=$('#gimpf');if(gi&&gf){gi.onclick=()=>gf.click();gf.onchange=()=>{const f=gf.files[0];gf.value='';if(f)gImport(f)}}
   
   document.querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gTab=b.dataset.gt;render()});
-  {const b=$('#gfb');if(b)b.onclick=()=>{gFOpen=!gFOpen;gMfOpen='';render()};['#gfk','#gfo'].forEach(q=>{const x=$(q);if(x)x.onclick=()=>{gFOpen=false;gMfOpen='';render()}});const cl=$('#gfc');if(cl)cl.onclick=()=>window.gClr();const fb=document.querySelector('.gfp-b');if(fb){fb.scrollTop=gFSc;fb.onscroll=()=>{gFSc=fb.scrollTop}}}
+  {const b=$('#gfb');if(b)b.onclick=()=>{gFOpen=!gFOpen;gMfOpen='';render()};['#gfk','#gfo'].forEach(q=>{const x=$(q);if(x)x.onclick=()=>{gFOpen=false;gMfOpen='';render()}});const cl=$('#gfc');if(cl)cl.onclick=()=>window.gClr();const fb=document.querySelector('.gfp-b');if(fb){fb.scrollTop=gFSc;fb.onscroll=()=>{gFSc=fb.scrollTop;gFloat()}}gFloat()}
   document.querySelectorAll('[data-hv]').forEach(b=>b.onclick=()=>{const[r,i]=b.dataset.hv.split('|'),rc=(S.imports||[]).find(x=>x.id===r),m=rc&&rc.ms[+i];if(!m)return;if(!S.tasks.some(t=>t.id===m.tid)){fxAsk({t:'Tarefa não encontrada',m:'Esta tarefa não existe mais.',ok:'OK',no:false});return}openView(m.tid,'res',m.cs.map(c=>c.id))});
   {const hr=$('#hrev');if(hr)hr.onclick=gRevert}
   document.querySelectorAll('[data-gmed]').forEach(b=>b.onclick=()=>{gSel=gToggle(gSel,b.dataset.gmed);render()});
@@ -1645,6 +1645,12 @@ function fxAsk(o){return new Promise(res=>{let r=false;
   if(i){i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();y.click()}};i.focus();i.select()}else y.focus()})}
 
 /* ---------- Filtros: botão + histórico de importações ---------- */
+/* Listas dos filtros: flutuam sobre o painel e abrem para cima quando não há espaço embaixo */
+function gFloat(){const p=document.querySelector('.gfp');if(!p||p.hidden)return;p.querySelectorAll('.gmdp').forEach(d=>{const a=(d.closest('.gfi')||d.parentElement).querySelector('.gmb')||d.previousElementSibling;if(!a)return;
+  d.style.cssText='position:fixed;left:0;top:0;right:auto;bottom:auto;width:auto;max-height:none;visibility:hidden';const o=d.getBoundingClientRect(),ar=a.getBoundingClientRect(),pr=p.getBoundingClientRect(),w=Math.max(ar.width,230),dn=pr.bottom-ar.bottom-10,up=ar.top-pr.top-70,full=d.scrollHeight+2,goUp=dn<Math.min(full,240)&&up>dn,mh=Math.max(120,Math.min(300,goUp?up:dn)),h=Math.min(full,mh);
+  const L=Math.max(pr.left+8,Math.min(ar.left,pr.right-w-8)),T=goUp?ar.top-4-h:ar.bottom+4;
+  d.style.cssText=`position:fixed;right:auto;bottom:auto;width:${w}px;max-height:${mh}px;left:${L-o.left}px;top:${T-o.top}px;visibility:visible`})}
+window.addEventListener('resize',gFloat);
 function gFbtn(){const n=[gSel,gLog,gVt,gUf,gMun,gTar,gTk,gCn].filter(Boolean).length;return `<button type="button" class="btn gfb${gFOpen||n?' pri':''}" id="gfb" aria-expanded="${gFOpen}" title="Abrir os filtros">⚙ Filtros${n?` <em>${n}</em>`:''}</button>`}
 function gHist(){
   const H=S.imports||[];

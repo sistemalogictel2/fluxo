@@ -1602,3 +1602,14 @@ main{scrollbar-gutter:stable;min-width:0}
 .gfp .gmdp{min-width:max(100%,230px);width:max-content;max-width:min(340px,90vw)}
 .gfp .gfl>:nth-child(even) .gmdp{left:auto;right:0}
 @media(max-width:560px){.gfp .gfl{grid-template-columns:1fr}.gfp .gfg:nth-child(1) .gfl>:first-child{grid-column:auto}}
+
+/* ===== v5.2: painel com altura do conteúdo (sem vazio embaixo) e listas flutuantes que viram para cima quando preciso ===== */
+.gcp.gsx>.gfp{inset:0 0 auto auto;height:auto;max-height:100%;overflow:visible}
+.gfp .dh{border-radius:18px 18px 0 0}
+.gfp .df{border-radius:0 0 18px 18px}
+.gfp .vb.gfp-b{flex:0 1 auto;min-height:0;padding:14px 18px;gap:10px}
+.gfp .vb.gfp-b::after{content:none;display:none}
+.gfp .gfg{padding:10px 14px 12px}
+.gfp .gfg h4{margin:0 0 8px}
+.gfp .gfl{gap:10px 14px}
+.gfp .gmdp{min-width:0;max-width:none;z-index:2000;margin:0;width:auto}
