@@ -1561,3 +1561,32 @@ main{scrollbar-gutter:stable;min-width:0}
 @media(max-width:900px){.gfp .vb.gfp-b{grid-template-columns:1fr}}
 
 .gfp .dh{position:relative}
+
+/* ===== v5: filtros em painel lateral (só sobre a área direita), glass profissional, listas flutuantes ===== */
+.gcp.gsx>.gfp{inset:0 0 0 auto;left:auto;width:clamp(380px,38%,500px);height:auto;border-radius:18px;border:1px solid #ffffffb3;background:linear-gradient(160deg,#ffffffa6 0%,#eaf4f6a6 55%,#d9efecb3 100%);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);box-shadow:0 24px 60px #0a102055,inset 0 1px 0 #ffffffd9;overflow:hidden}
+.gfp .dh{padding:14px 18px;gap:12px;background:#ffffff8c;border-bottom:1px solid #ffffffb3}
+.gfp .dh::before{width:40px;height:40px;border-radius:12px}
+.gfp .dh::after{left:26px;top:22px;width:24px;height:24px}
+.gfp .dh h2{font-size:18px;letter-spacing:-.01em}
+.gfp .dh .hint{font-size:12px;line-height:1.35}
+.gfp .dh>.btn{width:36px;height:36px;border-radius:10px;background:#ffffffd9;border:1px solid #ffffffb3}
+.gfp .vb.gfp-b{display:flex;flex-direction:column;gap:12px;padding:14px 18px 0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+.gfp .vb.gfp-b::after{content:"";flex:none;height:260px}
+.gfp .gfg{background:#ffffffb8;border:1px solid #ffffffcc;border-radius:14px;padding:12px 14px 14px;box-shadow:0 4px 14px #1e3a5f14,inset 0 1px 0 #fff}
+.gfp .gfg h4{margin:0 0 10px;font-size:13.5px}
+.gfp .gfl{gap:10px}
+.gfp .gfi{position:relative}
+.gfp .gmb,.gfp select,.gfp .gtar{height:40px;min-height:40px;border-radius:10px;font-size:14px;background:#ffffffeb!important;border:1px solid #cfdae2cc!important;box-shadow:0 1px 3px #1b22330f}
+/* lista flutuante: não empurra o conteúdo para baixo */
+.gfp .gmdp{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;width:auto;max-height:min(280px,40vh);margin:0;padding:6px;overflow:auto;background:#ffffffe6;-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border:1px solid #ffffffd9;border-radius:12px;box-shadow:0 16px 36px #0a102040,0 0 0 1px #cfdae2aa;scrollbar-width:thin}
+.gfp .gmdp .gmi{padding:6px 8px;font-size:13.5px}
+.gfp .df{padding:12px 18px;gap:10px;background:#ffffff99;border-top:1px solid #ffffffb3}
+.gfp .df .btn{height:40px;padding:0 18px;border-radius:10px;font-size:13.5px}
+.gfp .df #gfc::before,.gfp .df #gfo::before{width:17px;height:17px}
+:root[data-theme=dark] .gcp.gsx>.gfp{background:linear-gradient(160deg,#0d1730cc,#121c36bf 55%,#0b2a2acc);border-color:#3a4b6e99;box-shadow:0 24px 60px #000a,inset 0 1px 0 #ffffff14}
+:root[data-theme=dark] .gfp .dh,:root[data-theme=dark] .gfp .df{background:#141e38a6;border-color:#2b3a5899}
+:root[data-theme=dark] .gfp .gfg{background:#18223ab3;border-color:#2b3a5899}
+:root[data-theme=dark] .gfp .gmb,:root[data-theme=dark] .gfp select,:root[data-theme=dark] .gfp .gtar{background:#0f1626e6!important}
+:root[data-theme=dark] .gfp .gmdp{background:#0f1626ec;border-color:#3a4b6e;box-shadow:0 16px 36px #000a}
+@media(max-width:900px){.gcp.gsx>.gfp{width:min(420px,calc(100% - 16px))}.gfp .vb.gfp-b{display:flex}}
+@media(max-width:700px){.gcp.gsx>.gfp{position:fixed;inset:8px;width:auto}}
